@@ -3,6 +3,8 @@
 
 #include "EnemyCharacter.h"
 
+
+
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -15,7 +17,9 @@ AEnemyCharacter::AEnemyCharacter()
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	FVector Location = GetActorLocation();
+	PathfindingSubsystem = GetWorld()->GetSubsystem<UPathfindingSubsystem>();
+	CurrentPath = PathfindingSubsystem->GetRandomPath(Location);
 }
 
 // Called every frame

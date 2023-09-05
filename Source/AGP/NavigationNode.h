@@ -16,11 +16,18 @@ public:
 	ANavigationNode();
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
+	float GScore;
+	float HScore;
+	float FScore = 0;
+	UPROPERTY()
+	ANavigationNode* ParentNode;
+
+	TArray<ANavigationNode*> GetConnectedNodes();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	TArray<ANavigationNode*> ConnectedNodes;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* LocationComponent;

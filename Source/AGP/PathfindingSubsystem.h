@@ -18,7 +18,7 @@ class AGP_API UPathfindingSubsystem : public UWorldSubsystem
 
 public:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-	static TArray<FVector> GetRandomPath(FVector& StartLocation);
+	TArray<FVector> GetRandomPath(FVector& StartLocation);
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -26,4 +26,8 @@ protected:
 
 private:
 	void PopulateNodes();
+	ANavigationNode* GetRandomNode();
+	ANavigationNode* FindNearestNode(FVector& TargetLocation);
+	TArray<FVector> GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode);
+	TArray<FVector> ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode);
 };
