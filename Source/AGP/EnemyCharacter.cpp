@@ -26,6 +26,23 @@ void AEnemyCharacter::BeginPlay()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	FVector currentLocation = GetActorLocation();
+	if (CurrentPath.Num() > 0)
+	{
+		FVector nextLocation = CurrentPath[CurrentPath.Num() - 1];
+		// Calculate the direction from currentLocation to nextLocation
+		FVector Direction = (nextLocation - currentLocation).GetSafeNormal();
+		AddMovementInput(Direction, 1.0f);
+
+		float distance = FVector::Dist(currentLocation, nextLocation);
+		if (distance < 90.0f)
+		{
+			CurrentPath.Pop();
+		}
+	}
+	
+
+
 
 }
 
