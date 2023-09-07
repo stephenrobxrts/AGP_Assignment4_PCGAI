@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "PathfindingSubsystem.h"
 #include "EnemyCharacter.generated.h"
 
 UCLASS()
-class AGP_API AEnemyCharacter : public ACharacter
+class AGP_API AEnemyCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
