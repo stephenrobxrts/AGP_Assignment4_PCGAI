@@ -116,7 +116,7 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 			if (OpenSet[i]->GScore + OpenSet[i]->FScore <= MinFScore)
 			{
 				MinFScore = OpenSet[i]->GScore + OpenSet[i]->HScore;
-				CurrentNode = OpenSet[i]; //ERROR WITH SETTING CURRENT NODE?
+				CurrentNode = OpenSet[i]; 
 				break;
 			}
 		}

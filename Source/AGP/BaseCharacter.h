@@ -29,6 +29,18 @@ public:
 	void EquipWeapon(bool bEquipWeapon);
 
 protected:
+	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
+	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
+	// and define the type of weapon in a separate Weapon Actor class and store a pointer to this weapon.
+	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
+	bool bHasWeaponEquipped = false;
+	float TimeSinceLastShot = 0.0f;
+	float MinTimeBetweenShots = 0.2f;
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* BulletStartPosition;
+
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -40,11 +52,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon);
 
-	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
-	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
-	// and define the type of weapon in a separate Weapon Actor class and store a pointer to this weapon.
-	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
-	bool bHasWeaponEquipped = false;
+
+	bool Fire(const FVector& FireAtLocation);
+	
 
 public:	
 	// Called every frame
