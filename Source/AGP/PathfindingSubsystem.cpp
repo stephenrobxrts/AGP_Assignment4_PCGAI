@@ -15,7 +15,7 @@ void UPathfindingSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	
 }
 
-TArray<FVector> UPathfindingSubsystem::GetRandomPath(FVector& StartLocation)
+TArray<FVector> UPathfindingSubsystem::GetRandomPath(const FVector& StartLocation)
 {
 	ANavigationNode* StartNode = FindNearestNode(StartLocation);
 	ANavigationNode* EndNode = GetRandomNode();
@@ -27,6 +27,19 @@ TArray<FVector> UPathfindingSubsystem::GetRandomPath(FVector& StartLocation)
 		return TArray<FVector>();
 	}
 	
+}
+
+TArray<FVector> UPathfindingSubsystem::GetPath(const FVector& StartLocation, const FVector& TargetLocation)
+{
+	ANavigationNode* StartNode = FindNearestNode(StartLocation);
+	ANavigationNode* EndNode = FindNearestNode(TargetLocation);
+	if (StartNode && EndNode)
+	{
+		return GetPath(StartNode, EndNode);
+	}
+	else {
+		return TArray<FVector>();
+	}
 }
 
 void UPathfindingSubsystem::PopulateNodes()
@@ -62,7 +75,7 @@ ANavigationNode* UPathfindingSubsystem::GetRandomNode()
 	}
 }
 
-ANavigationNode* UPathfindingSubsystem::FindNearestNode(FVector& TargetLocation)
+ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLocation)
 {
 	//Loop through nodes, get node with minimum distance from target
 	float MinDistance = UE_MAX_FLT;
