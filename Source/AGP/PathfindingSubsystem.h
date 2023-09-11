@@ -21,6 +21,7 @@ public:
 	TArray<FVector> GetRandomPath(const FVector& StartLocation);
 
 	TArray<FVector> GetPath(const FVector& StartLocation, const FVector& TargetLocation);
+	TArray<FVector> GetPathAway(const FVector& StartLocation, const FVector& TargetLocation);
 	
 
 protected:
@@ -31,6 +32,9 @@ private:
 	void PopulateNodes();
 	ANavigationNode* GetRandomNode();
 	ANavigationNode* FindNearestNode(const FVector& TargetLocation);
+	ANavigationNode* FindFurthestNode(const FVector& TargetLocation);
 	TArray<FVector> GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode);
+	
+	
 	TArray<FVector> ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode);
 };

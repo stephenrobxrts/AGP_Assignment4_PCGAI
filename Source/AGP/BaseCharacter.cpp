@@ -81,9 +81,8 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 
 	TimeSinceLastShot = 0.0f;
 	return true;
-
-	
 }
+
 // Called to bind functionality to input
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

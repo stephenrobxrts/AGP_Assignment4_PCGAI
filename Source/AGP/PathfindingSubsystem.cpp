@@ -42,6 +42,19 @@ TArray<FVector> UPathfindingSubsystem::GetPath(const FVector& StartLocation, con
 	}
 }
 
+TArray<FVector> UPathfindingSubsystem::GetPathAway(const FVector& StartLocation, const FVector& TargetLocation)
+{
+	ANavigationNode* StartNode = FindNearestNode(StartLocation);
+	ANavigationNode* EndNode = FindFurthestNode(TargetLocation);
+	if (StartNode && EndNode)
+	{
+		return GetPath(StartNode, EndNode);
+	}
+	else {
+		return TArray<FVector>();
+	}
+}
+
 void UPathfindingSubsystem::PopulateNodes()
 {
 	//empty the node array
@@ -90,6 +103,23 @@ ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLoc
 		}
 	}
 	return NearestNode;
+}
+
+ANavigationNode* UPathfindingSubsystem::FindFurthestNode(const FVector& TargetLocation)
+{
+	//Loop through nodes, get node with minimum distance from target
+	float MaxDistance = 0.0f;
+	ANavigationNode* FurthestNode = nullptr;
+	for (int i = 0; i < Nodes.Num(); i++)
+	{
+		float Distance = FVector::Dist(TargetLocation, Nodes[i]->GetActorLocation());
+		if (Distance > MaxDistance)
+		{
+			MaxDistance = Distance;
+			FurthestNode = Nodes[i];
+		}
+	}
+	return FurthestNode;
 }
 
 TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode)

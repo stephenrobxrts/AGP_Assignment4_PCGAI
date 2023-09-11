@@ -20,6 +20,19 @@ void AEnemyCharacter::BeginPlay()
 	FVector Location = GetActorLocation();
 	PathfindingSubsystem = GetWorld()->GetSubsystem<UPathfindingSubsystem>();
 	CurrentPath = PathfindingSubsystem->GetRandomPath(Location);
+
+	//Get a reference to the player character
+	for (TActorIterator<APlayerCharacter> It(GetWorld()); It; ++It)
+	{
+		Player = *It;
+		if (Player)
+		{
+			//found player and player location
+			UE_LOG(LogTemp, Display, TEXT("Found player"));
+			break;
+		}
+		
+	}
 }
 
 void AEnemyCharacter::TickPatrol()
@@ -30,19 +43,36 @@ void AEnemyCharacter::TickPatrol()
 		CurrentPath = PathfindingSubsystem->GetRandomPath(Location);
 		MoveAlongPath();
 	}
-	else { MoveAlongPath();};
+	else
+	{
+		MoveAlongPath();
+	};
 }
 
 void AEnemyCharacter::TickEngage()
 {
 	if (CurrentPath.Num() <= 0)
 	{
-		CurrentPath = PathfindingSubsystem->GetRandomPath(GetActorLocation());
+		CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
+		Fire(Player->GetActorLocation());
 	}
+	else
+	{
+		MoveAlongPath();
+		Fire(Player->GetActorLocation());
+	};
 }
 
 void AEnemyCharacter::TickEvade()
 {
+	if (CurrentPath.Num() <= 0)
+	{
+		CurrentPath = PathfindingSubsystem->GetPathAway(GetActorLocation(), Player->GetActorLocation());
+	}
+	else
+	{
+		MoveAlongPath();
+	};
 }
 
 // Called every frame

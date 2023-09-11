@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
+#include "PlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "PathfindingSubsystem.h"
 #include "EnemyCharacter.generated.h"
@@ -36,6 +37,9 @@ protected:
 	UPathfindingSubsystem* PathfindingSubsystem;
 	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> CurrentPath;
+
+	UPROPERTY()
+	APlayerCharacter* Player;
 
 	UPROPERTY(EditAnywhere)
 	EEnemyState CurrentState = EEnemyState::Patrol;
