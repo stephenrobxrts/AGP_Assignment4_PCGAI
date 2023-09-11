@@ -15,6 +15,7 @@ APickupBase::APickupBase()
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pickup Mesh"));
 	SetRootComponent(PickupCollider);
 
+
 	PickupMesh->SetupAttachment(GetRootComponent());
 }
 

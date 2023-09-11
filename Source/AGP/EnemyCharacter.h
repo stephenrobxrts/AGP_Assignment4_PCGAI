@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
 #include "PlayerCharacter.h"
+#include "Perception/PawnSensingComponent.h"
 #include "GameFramework/Character.h"
 #include "PathfindingSubsystem.h"
 #include "EnemyCharacter.generated.h"
@@ -37,9 +38,13 @@ protected:
 	UPathfindingSubsystem* PathfindingSubsystem;
 	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> CurrentPath;
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensingComponent;
 
 	UPROPERTY()
 	APlayerCharacter* Player;
+	UPROPERTY()
+	APlayerCharacter* SensedCharacter = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	EEnemyState CurrentState = EEnemyState::Patrol;
@@ -49,6 +54,12 @@ protected:
 	void TickPatrol();
 	void TickEngage();
 	void TickEvade();
+
+	UFUNCTION()
+	virtual void OnSensedPawn(APawn* Pawn);
+
+	void UpdateSight();
+
 
 public:	
 	// Called every frame
