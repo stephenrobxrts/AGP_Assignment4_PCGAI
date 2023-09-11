@@ -80,7 +80,11 @@ void AEnemyCharacter::TickEvade()
 {
 	if (CurrentPath.Num() <= 0)
 	{
-		CurrentPath = PathfindingSubsystem->GetPathAway(GetActorLocation(), Player->GetActorLocation());
+		if (SensedCharacter)
+		{
+			CurrentPath = PathfindingSubsystem->GetPathAway(GetActorLocation(), SensedCharacter->GetActorLocation());
+		}
+		
 	}
 	else
 	{
@@ -128,12 +132,43 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	{
 	case EEnemyState::Patrol:
 		TickPatrol();
+		if (SensedCharacter)
+		{
+			CurrentPath.Empty();
+			if (HealthComponent->GetCurrentHealthPercentage() > 0.4f)
+			{
+				CurrentState = EEnemyState::Engage;
+			}
+			else
+			{
+				CurrentState = EEnemyState::Evade;
+			}
+			
+		}
 		break;
 	case EEnemyState::Engage:
 		TickEngage();
+		if (HealthComponent->GetCurrentHealthPercentage() < 0.4f)
+		{
+			CurrentPath.Empty();
+			CurrentState = EEnemyState::Evade;
+		}
+		if (!SensedCharacter)
+		{
+			CurrentState = EEnemyState::Patrol;
+		}
 		break;
 	case EEnemyState::Evade:
 		TickEvade();
+		if (HealthComponent->GetCurrentHealthPercentage() > 0.4f)
+		{
+			CurrentPath.Empty();
+			CurrentState = EEnemyState::Engage;
+		}
+		if (!SensedCharacter)
+		{
+			CurrentState = EEnemyState::Patrol;
+		}
 		break;
 	};
 }

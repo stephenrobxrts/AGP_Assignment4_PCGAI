@@ -43,7 +43,7 @@ protected:
 
 	UPROPERTY()
 	APlayerCharacter* Player;
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	APlayerCharacter* SensedCharacter = nullptr;
 
 	UPROPERTY(EditAnywhere)
