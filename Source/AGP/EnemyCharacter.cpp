@@ -22,10 +22,49 @@ void AEnemyCharacter::BeginPlay()
 	CurrentPath = PathfindingSubsystem->GetRandomPath(Location);
 }
 
+void AEnemyCharacter::TickPatrol()
+{
+	if (CurrentPath.Num() == 0)
+	{
+		FVector Location = GetActorLocation();
+		CurrentPath = PathfindingSubsystem->GetRandomPath(Location);
+		MoveAlongPath();
+	}
+	else { MoveAlongPath();};
+}
+
+void AEnemyCharacter::TickEngage()
+{
+	if (CurrentPath.Num() <= 0)
+	{
+		CurrentPath = PathfindingSubsystem->GetRandomPath(GetActorLocation());
+	}
+}
+
+void AEnemyCharacter::TickEvade()
+{
+}
+
 // Called every frame
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	switch (CurrentState)
+	{
+	case EEnemyState::Patrol:
+		TickPatrol();
+		break;
+	case EEnemyState::Engage:
+		TickEngage();
+		break;
+	case EEnemyState::Evade:
+		TickEvade();
+		break;
+	};
+}
+
+void AEnemyCharacter::MoveAlongPath()
+{
 	FVector currentLocation = GetActorLocation();
 	if (CurrentPath.Num() > 0)
 	{
@@ -40,11 +79,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentPath.Pop();
 		}
 	}
-	
-
-
-
 }
+
 
 // Called to bind functionality to input
 void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

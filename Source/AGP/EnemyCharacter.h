@@ -8,6 +8,17 @@
 #include "PathfindingSubsystem.h"
 #include "EnemyCharacter.generated.h"
 
+UENUM(BlueprintType) // Allows us to use this enum in blueprints.
+enum class EEnemyState : uint8 {
+
+	Patrol, // This essentially gets set to 0
+
+	Engage, // set to 1
+
+	Evade  // set to 2
+
+};
+
 UCLASS()
 class AGP_API AEnemyCharacter : public ABaseCharacter
 {
@@ -26,6 +37,15 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TArray<FVector> CurrentPath;
 
+	UPROPERTY(EditAnywhere)
+	EEnemyState CurrentState = EEnemyState::Patrol;
+
+	void MoveAlongPath();
+
+	void TickPatrol();
+	void TickEngage();
+	void TickEvade();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -34,3 +54,4 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };
+
