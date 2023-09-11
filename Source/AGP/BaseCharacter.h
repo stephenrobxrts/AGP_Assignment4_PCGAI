@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HealthComponent.h"
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
@@ -36,10 +37,13 @@ protected:
 	bool bHasWeaponEquipped = false;
 	float TimeSinceLastShot = 0.0f;
 	float MinTimeBetweenShots = 0.2f;
-
+	float WeaponDamage = 10.0f;
+	
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BulletStartPosition;
 
+	UPROPERTY(VisibleAnywhere)
+	UHealthComponent* HealthComponent;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

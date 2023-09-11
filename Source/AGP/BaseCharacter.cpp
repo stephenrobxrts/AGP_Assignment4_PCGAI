@@ -10,6 +10,7 @@ ABaseCharacter::ABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	BulletStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("BulletStartPosition"));
 	BulletStartPosition->SetupAttachment(GetRootComponent());
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +64,7 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 			// The hit result actor is of type ABaseCharacter
 			// Draw a green debug line
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Green, false, 1.0f, 0, 1.0f);
+			HitActor->GetComponentByClass<UHealthComponent>()->UHealthComponent::ApplyDamage(WeaponDamage);
 		}
 		else
 		{
