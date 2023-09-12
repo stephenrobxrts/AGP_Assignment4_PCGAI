@@ -175,16 +175,18 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 void AEnemyCharacter::MoveAlongPath()
 {
-	FVector currentLocation = GetActorLocation();
+	const FVector CurrentLocation = GetActorLocation();
 	if (CurrentPath.Num() > 0)
 	{
-		FVector nextLocation = CurrentPath[CurrentPath.Num() - 1];
+		const FVector NextLocation = CurrentPath[CurrentPath.Num() - 1];
 		// Calculate the direction from currentLocation to nextLocation
-		FVector Direction = (nextLocation - currentLocation).GetSafeNormal();
+		const FVector Direction = (NextLocation - CurrentLocation).GetSafeNormal();
 		AddMovementInput(Direction, 1.0f);
 
-		float distance = FVector::Dist(currentLocation, nextLocation);
-		if (distance < 90.0f)
+		FVector CurrentLocation2D = FVector(CurrentLocation.X, CurrentLocation.Y, 0);
+		FVector NextLocation2D = FVector(NextLocation.X, NextLocation.Y, 0);
+
+		if (const float Distance = FVector::Dist(CurrentLocation2D, NextLocation2D); Distance < 50.0f)
 		{
 			CurrentPath.Pop();
 		}

@@ -22,8 +22,6 @@ bool AProceduralLandscape::ShouldTickIfViewportsOnly() const
 void AProceduralLandscape::BeginPlay()
 {
 	Super::BeginPlay();
-	ClearLandscape();
-	GenerateLandscape();
 	
 }
 

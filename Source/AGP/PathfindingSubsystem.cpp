@@ -95,7 +95,8 @@ ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLoc
 	ANavigationNode* NearestNode = nullptr;
 	for (int i = 0; i < Nodes.Num(); i++)
 	{
-		float Distance = FVector::Dist(TargetLocation, Nodes[i]->GetActorLocation());
+		FVector NodeLocation = Nodes[i]->GetActorLocation();
+		float Distance = FVector::Dist(TargetLocation, NodeLocation);
 		if (Distance < MinDistance)
 		{
 			MinDistance = Distance;
