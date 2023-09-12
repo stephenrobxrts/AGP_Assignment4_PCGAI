@@ -22,6 +22,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* ProceduralMesh;
+	UPROPERTY()
+    TArray<FVector> Vertices;
+    UPROPERTY()
+    TArray<int32> Triangles;
+    UPROPERTY()
+    TArray<FVector2D> UVCoords;
+
+	void CreateSimplePlane();
+
 
 public:	
 	// Called every frame
