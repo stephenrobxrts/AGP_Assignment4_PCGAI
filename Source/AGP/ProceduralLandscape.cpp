@@ -22,6 +22,75 @@ bool AProceduralLandscape::ShouldTickIfViewportsOnly() const
 void AProceduralLandscape::BeginPlay()
 {
 	Super::BeginPlay();
+	ClearLandscape();
+	GenerateLandscape();
+	
+}
+
+void AProceduralLandscape::GenerateLandscape()
+{
+
+	
+	//Add the vertices, UV Coords and Tris to the arrays
+	for (int32 Y = 0; Y < Height; Y++)
+	{
+		for (int32 X = 0; X < Width; X++)
+		{
+			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, 0));
+			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
+		}
+	}
+
+	// Define the triangles
+	for (int32 Y = 0; Y < Height - 1; Y++)
+	{
+		for (int32 X = 0; X < Width - 1 ; X++)
+		{
+			// Define the indices of the four vertices of the current quad
+			int32 BottomRight = X + Y * Width;
+			int32 BottomLeft = (X + 1) + Y * Width;
+			int32 TopRight = X + (Y + 1) * Width;
+			int32 TopLeft = (X + 1) + (Y + 1) * Width;
+
+			// Define the two triangles for this quad
+			// Triangle 1: 
+			Triangles.Add(BottomRight);
+			Triangles.Add(TopRight);
+			Triangles.Add(BottomLeft);
+
+			// Triangle 2: 
+			Triangles.Add(BottomLeft);
+			Triangles.Add(TopRight);
+			Triangles.Add(TopLeft);
+		}
+	}
+
+	// Draw debug spheres at each vertex location with a radius of 50.0f
+	for (const FVector& Vertex : Vertices)
+	{
+		DrawDebugSphere(GetWorld(), Vertex, 50.0f, 12, FColor::Green, true, -1.0f, 0, 1.0f);
+	}
+
+	if (ProceduralMesh) 
+	{ 
+		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVCoords, 
+		   TArray<FColor>(), TArray<FProcMeshTangent>(), true); 
+	}
+
+	FString TrianglesString = "[";
+	for (int32 Index = 0; Index < Triangles.Num(); ++Index)
+	{
+		TrianglesString += FString::Printf(TEXT("%d"), Triangles[Index]);
+
+		if (Index < Triangles.Num() - 1)
+		{
+			TrianglesString += TEXT(", ");
+		}
+	}
+	TrianglesString += TEXT("]");
+
+	// Log the Triangles array as a formatted string
+	UE_LOG(LogTemp, Warning, TEXT("Triangles: %s"), *TrianglesString);
 	
 }
 
@@ -98,7 +167,7 @@ void AProceduralLandscape::Tick(float DeltaTime)
 	if (bShouldRegenerate)
 	{
 		ClearLandscape();
-		CreateSimplePlane();
+		GenerateLandscape();
 		bShouldRegenerate = false;
 	}
 }

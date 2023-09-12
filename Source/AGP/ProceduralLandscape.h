@@ -34,6 +34,14 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool bShouldRegenerate = false;
 
+	UPROPERTY(EditAnywhere)
+	int32 Width = 10;
+	UPROPERTY(EditAnywhere)
+	int32 Height = 10;
+	UPROPERTY(EditAnywhere)
+	float VertexSpacing = 100.0f;
+
+	void GenerateLandscape();
 	void CreateSimplePlane();
 	void ClearLandscape();
 
