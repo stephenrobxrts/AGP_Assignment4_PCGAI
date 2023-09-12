@@ -38,22 +38,54 @@ void AProceduralLandscape::GenerateLandscape()
 	{
 		for (int32 X = 0; X < Width; X++)
 		{
+			
 			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, FMath::PerlinNoise2D(FVector2d(X*PerlinRoughness + PerlinOffset, Y*PerlinRoughness + PerlinOffset)) * PerlinScale));
 			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
 		}
 	}
 
-	// Define the triangles
+	//Add NavNodes
+	for (FVector& Vertex : Vertices)
+	{
+		ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator);
+		if (NavNode)
+		{
+			Nodes.Add(NavNode);
+		}
+	}
+
+	// Define the triangles and NavNode Connections
 	for (int32 Y = 0; Y < Height - 1; Y++)
 	{
 		for (int32 X = 0; X < Width - 1 ; X++)
 		{
+
+
+			
 			// Define the indices of the four vertices of the current quad
 			int32 BottomRight = X + Y * Width;
 			int32 BottomLeft = (X + 1) + Y * Width;
 			int32 TopRight = X + (Y + 1) * Width;
 			int32 TopLeft = (X + 1) + (Y + 1) * Width;
+			
+			//Define the 4 NavNode vertices
+			ANavigationNode* BottomRightNode = Nodes[BottomRight];
+			ANavigationNode* BottomLeftNode = Nodes[BottomLeft];
+			ANavigationNode* TopRightNode = Nodes[TopRight];
+			ANavigationNode* TopLeftNode = Nodes[TopLeft];
 
+			TArray<ANavigationNode*> QuadNodes = { BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode };
+
+			for (ANavigationNode* Node : QuadNodes)
+			{
+				for (ANavigationNode* OtherNode : QuadNodes)
+				{
+					if (Node != OtherNode  && !Node->GetConnectedNodes().Contains(OtherNode))
+					{
+						Node->SetConnectedNodes(OtherNode);
+					}
+				}
+			}
 			// Define the two triangles for this quad
 			// Triangle 1: 
 			Triangles.Add(BottomRight);
@@ -67,18 +99,15 @@ void AProceduralLandscape::GenerateLandscape()
 		}
 	}
 
+
+
 	// Draw debug spheres at each vertex location with a radius of 50.0f
 	/*for (const FVector& Vertex : Vertices)
 	{
 		DrawDebugSphere(GetWorld(), Vertex, 50.0f, 12, FColor::Green, true, -1.0f, 0, 1.0f);
-	}*/
-
-	if (ProceduralMesh) 
-	{ 
-		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVCoords, 
-		   TArray<FColor>(), TArray<FProcMeshTangent>(), true); 
 	}
 
+	//Print triangles array as a formatted string
 	FString TrianglesString = "[";
 	for (int32 Index = 0; Index < Triangles.Num(); ++Index)
 	{
@@ -93,6 +122,14 @@ void AProceduralLandscape::GenerateLandscape()
 
 	// Log the Triangles array as a formatted string
 	UE_LOG(LogTemp, Warning, TEXT("Triangles: %s"), *TrianglesString);
+	*/
+    UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Vertices, Triangles, UVCoords, Normals, Tangents);
+	
+	if (ProceduralMesh) 
+	{ 
+		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, Normals, UVCoords, 
+		   TArray<FColor>(), Tangents, true); 
+	}
 	
 }
 
@@ -156,6 +193,13 @@ void AProceduralLandscape::ClearLandscape()
 	Vertices.Empty();
 	Triangles.Empty();
 	UVCoords.Empty();
+
+	//Destroy the nodes and clear the array
+	for (ANavigationNode* NavNode : Nodes)
+	{
+		NavNode->DestroyNode();
+	}
+	Nodes.Empty();
 	ProceduralMesh->ClearMeshSection(0);
 	UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
 	

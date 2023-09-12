@@ -24,6 +24,22 @@ TArray<ANavigationNode*> ANavigationNode::GetConnectedNodes()
 	return ConnectedNodes;
 }
 
+void ANavigationNode::SetConnectedNodes(ANavigationNode* NewConnectedNode)
+{
+	ConnectedNodes.Add(NewConnectedNode);
+}
+
+void ANavigationNode::DestroyNode()
+{
+	for (ANavigationNode* ConnectedNode : ConnectedNodes)
+	{
+		ConnectedNode->ConnectedNodes.Remove(this);
+	}
+
+	// Destroy this actor
+	Destroy();
+}
+
 // Called when the game starts or when spawned
 void ANavigationNode::BeginPlay()
 {

@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "KismetProceduralMeshLibrary.h"
+#include "NavigationNode.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralLandscape.generated.h"
 
@@ -30,6 +32,10 @@ protected:
     TArray<int32> Triangles;
     UPROPERTY()
     TArray<FVector2D> UVCoords;
+	UPROPERTY()
+	TArray<FVector> Normals;
+	UPROPERTY()
+	TArray<FProcMeshTangent> Tangents;
 
 	UPROPERTY(EditAnywhere)
 	bool bShouldRegenerate = false;
@@ -47,8 +53,11 @@ protected:
 	float PerlinRoughness = 0.0012f;
 	UPROPERTY(VisibleAnywhere)
 	float PerlinOffset;
-	
 
+	UPROPERTY(EditAnywhere)
+	TArray<ANavigationNode*> Nodes;
+
+	
 	void GenerateLandscape();
 	void CreateSimplePlane();
 	void ClearLandscape();

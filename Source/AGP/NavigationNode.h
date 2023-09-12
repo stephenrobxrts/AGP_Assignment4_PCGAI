@@ -23,6 +23,8 @@ public:
 	ANavigationNode* ParentNode;
 
 	TArray<ANavigationNode*> GetConnectedNodes();
+	void SetConnectedNodes(ANavigationNode* NewConnectedNode);
+	void DestroyNode();
 
 protected:
 	// Called when the game starts or when spawned
