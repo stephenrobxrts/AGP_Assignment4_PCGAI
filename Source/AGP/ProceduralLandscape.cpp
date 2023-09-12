@@ -13,11 +13,15 @@ AProceduralLandscape::AProceduralLandscape()
 	SetRootComponent(ProceduralMesh);
 }
 
+bool AProceduralLandscape::ShouldTickIfViewportsOnly() const
+{
+	return true;
+}
+
 // Called when the game starts or when spawned
 void AProceduralLandscape::BeginPlay()
 {
 	Super::BeginPlay();
-	CreateSimplePlane();
 	
 }
 
@@ -36,6 +40,12 @@ void AProceduralLandscape::CreateSimplePlane()
 	Vertices.Add(Vector2);
 	Vertices.Add(Vector3);
 	Vertices.Add(Vector4);
+
+	// Randomize Z-Height of each vertex
+	for (FVector& Vertex : Vertices)
+	{
+		Vertex.Z = FMath::RandRange(-500.0f, 500.0f);
+	}
 
 	// Add the specified integers to the Triangles array
 	Triangles.Add(0);
@@ -70,10 +80,26 @@ void AProceduralLandscape::CreateSimplePlane()
 	
 }
 
+void AProceduralLandscape::ClearLandscape()
+{
+	Vertices.Empty();
+	Triangles.Empty();
+	UVCoords.Empty();
+	ProceduralMesh->ClearMeshSection(0);
+	UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
+	
+}
+
 // Called every frame
 void AProceduralLandscape::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bShouldRegenerate)
+	{
+		ClearLandscape();
+		CreateSimplePlane();
+		bShouldRegenerate = false;
+	}
 }
 

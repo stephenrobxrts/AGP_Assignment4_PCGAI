@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ProceduralMeshComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralLandscape.generated.h"
 
@@ -15,6 +16,7 @@ class AGP_API AProceduralLandscape : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AProceduralLandscape();
+	virtual bool ShouldTickIfViewportsOnly() const override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,7 +31,11 @@ protected:
     UPROPERTY()
     TArray<FVector2D> UVCoords;
 
+	UPROPERTY(EditAnywhere)
+	bool bShouldRegenerate = false;
+
 	void CreateSimplePlane();
+	void ClearLandscape();
 
 
 public:	
