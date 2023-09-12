@@ -39,7 +39,15 @@ protected:
 	UPROPERTY(EditAnywhere)
 	int32 Height = 10;
 	UPROPERTY(EditAnywhere)
-	float VertexSpacing = 100.0f;
+	float VertexSpacing = 1000.0f;
+
+	UPROPERTY(EditAnywhere)
+	float PerlinScale = 1000.0f;
+	UPROPERTY(EditAnywhere)
+	float PerlinRoughness = 0.0012f;
+	UPROPERTY(VisibleAnywhere)
+	float PerlinOffset;
+	
 
 	void GenerateLandscape();
 	void CreateSimplePlane();

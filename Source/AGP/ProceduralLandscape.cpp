@@ -30,13 +30,15 @@ void AProceduralLandscape::BeginPlay()
 void AProceduralLandscape::GenerateLandscape()
 {
 
+	//Set Perlin Offset
+	PerlinOffset = FMath::RandRange(-1'000'000.0f, 1'000'000.0f);
 	
 	//Add the vertices, UV Coords and Tris to the arrays
 	for (int32 Y = 0; Y < Height; Y++)
 	{
 		for (int32 X = 0; X < Width; X++)
 		{
-			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, 0));
+			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, FMath::PerlinNoise2D(FVector2d(X*PerlinRoughness + PerlinOffset, Y*PerlinRoughness + PerlinOffset)) * PerlinScale));
 			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
 		}
 	}
@@ -66,10 +68,10 @@ void AProceduralLandscape::GenerateLandscape()
 	}
 
 	// Draw debug spheres at each vertex location with a radius of 50.0f
-	for (const FVector& Vertex : Vertices)
+	/*for (const FVector& Vertex : Vertices)
 	{
 		DrawDebugSphere(GetWorld(), Vertex, 50.0f, 12, FColor::Green, true, -1.0f, 0, 1.0f);
-	}
+	}*/
 
 	if (ProceduralMesh) 
 	{ 
