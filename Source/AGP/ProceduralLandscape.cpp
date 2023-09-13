@@ -1,5 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Pickups/PickupBase.h"
+#include "Pickups/WeaponPickup.h"
 
 #include "ProceduralLandscape.h"
 
@@ -57,9 +59,6 @@ void AProceduralLandscape::GenerateLandscape()
 	{
 		for (int32 X = 0; X < Width - 1 ; X++)
 		{
-
-
-			
 			// Define the indices of the four vertices of the current quad
 			int32 BottomRight = X + Y * Width;
 			int32 BottomLeft = (X + 1) + Y * Width;
@@ -203,6 +202,27 @@ void AProceduralLandscape::ClearLandscape()
 	
 }
 
+void AProceduralLandscape::SpawnPickups()
+{
+	//If a pickup type exists, spawn 5 at random nodes
+	if (PickupBlueprint)
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			for (int32 i = 0; i < 5; ++i)
+			{
+				int32 RandomIndex = FMath::RandRange(0, Nodes.Num() - 1);
+				ANavigationNode* RandomNode = Nodes[RandomIndex];
+				FVector RandomLocation = RandomNode->GetActorLocation();
+				World->SpawnActor<APickupBase>(PickupBlueprint, RandomLocation, FRotator::ZeroRotator);
+				//Add spawned actor to the array of pickups
+				//Pickups.Add(PickupBlueprint);
+			}
+		}
+	}
+}
+
 // Called every frame
 void AProceduralLandscape::Tick(float DeltaTime)
 {
@@ -212,6 +232,7 @@ void AProceduralLandscape::Tick(float DeltaTime)
 	{
 		ClearLandscape();
 		GenerateLandscape();
+		SpawnPickups();
 		bShouldRegenerate = false;
 	}
 }

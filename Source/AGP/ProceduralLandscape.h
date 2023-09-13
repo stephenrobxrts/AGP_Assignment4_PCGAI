@@ -10,6 +10,9 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralLandscape.generated.h"
 
+class APickupBase;
+class AWeaponPickup;
+
 UCLASS()
 class AGP_API AProceduralLandscape : public AActor
 {
@@ -24,6 +27,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
+	//Procedural Mesh Properties
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* ProceduralMesh;
 	UPROPERTY()
@@ -37,9 +42,9 @@ protected:
 	UPROPERTY()
 	TArray<FProcMeshTangent> Tangents;
 
+	//Mesh Generation Settings
 	UPROPERTY(EditAnywhere)
 	bool bShouldRegenerate = false;
-
 	UPROPERTY(EditAnywhere)
 	int32 Width = 10;
 	UPROPERTY(EditAnywhere)
@@ -47,6 +52,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float VertexSpacing = 1000.0f;
 
+	//Perlin Noise Settings
 	UPROPERTY(EditAnywhere)
 	float PerlinScale = 1000.0f;
 	UPROPERTY(EditAnywhere)
@@ -54,13 +60,21 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	float PerlinOffset;
 
+	//Navigation Nodes
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> Nodes;
+	//Spawnable Pickups - place blueprint in this slot
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWeaponPickup> PickupBlueprint;
+	UPROPERTY()
+	TArray<APickupBase*> Pickups;
+	
 
 	
 	void GenerateLandscape();
 	void CreateSimplePlane();
 	void ClearLandscape();
+	void SpawnPickups();
 
 
 public:	

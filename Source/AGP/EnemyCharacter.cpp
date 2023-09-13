@@ -64,7 +64,6 @@ void AEnemyCharacter::TickEngage()
 
 			Fire(SensedCharacter->GetActorLocation());
 		}
-		
 	}
 	else
 	{
@@ -84,7 +83,6 @@ void AEnemyCharacter::TickEvade()
 		{
 			CurrentPath = PathfindingSubsystem->GetPathAway(GetActorLocation(), SensedCharacter->GetActorLocation());
 		}
-		
 	}
 	else
 	{
