@@ -2,6 +2,7 @@
 
 
 #include "WeaponComponent.h"
+#include "BaseCharacter.h"
 
 
 // Sets default values for this component's properties
@@ -16,7 +17,47 @@ UWeaponComponent::UWeaponComponent()
 
 bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLocation)
 {
-	return false;
+	if (TimeSinceLastShot < WeaponStats.FireRate)
+	{
+		return false;
+	}
+	FHitResult HitResult;
+	const FVector StartLocation = BulletStart;
+
+	
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(GetOwner());
+	
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, FireAtLocation, ECollisionChannel::ECC_WorldStatic, QueryParams);\
+
+	UE_LOG(LogTemp, Display, TEXT("Fire!"));
+	AActor* HitActor = HitResult.GetActor();
+	if (HitActor)
+	{
+		if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(HitActor))
+		{
+			// The hit result actor is of type ABaseCharacter
+			// Draw a green debug line
+			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Green, false, 1.0f, 0, 1.0f);
+			HitActor->GetComponentByClass<UHealthComponent>()->UHealthComponent::ApplyDamage(WeaponStats.BaseDamage);
+		}
+		else
+		{
+			// The hit result actor is NOT of type ABaseCharacter
+			// Draw an orange debug line
+			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Orange, false, 1.0f, 0, 1.0f);
+		}
+	}
+	else
+	{
+		// The hit result actor is null
+		// Draw a red debug line
+		DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Red, false, 1.0f, 0, 1.0f);
+	}
+
+
+	TimeSinceLastShot = 0.0f;
+	return true;
 }
 
 
@@ -36,6 +77,7 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+
+	TimeSinceLastShot += DeltaTime;
 }
 

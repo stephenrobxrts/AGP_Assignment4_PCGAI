@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "HealthComponent.h"
+#include "WeaponComponent.h"
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
@@ -34,9 +35,8 @@ protected:
 	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
 	// and define the type of weapon in a separate Weapon Actor class and store a pointer to this weapon.
 	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
-	bool bHasWeaponEquipped = false;
-	float TimeSinceLastShot = 0.0f;
-	float MinTimeBetweenShots = 0.2f;
+
+
 	float WeaponDamage = 10.0f;
 	
 	UPROPERTY(VisibleAnywhere)
@@ -53,6 +53,9 @@ protected:
  * class to drive any graphical changes that are needed when equipping or un-equipping a weapon.
  * @param bEquipWeapon Whether a weapon is being equipped (true) or un-equipped (false).
  */
+	UPROPERTY()
+	UWeaponComponent* WeaponComponent = nullptr;
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon);
 
