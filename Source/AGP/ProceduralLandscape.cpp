@@ -2,7 +2,7 @@
 
 #include "Pickups/PickupBase.h"
 #include "Pickups/WeaponPickup.h"
-
+#include "EngineUtils.h"
 #include "ProceduralLandscape.h"
 
 // Sets default values
@@ -31,7 +31,7 @@ void AProceduralLandscape::GenerateLandscape()
 {
 
 	//Set Perlin Offset
-	PerlinOffset = FMath::RandRange(-1'000'000.0f, 1'000'000.0f);
+	PerlinOffset = FMath::RandRange(-1'000'0.0f, 1'000'0.0f);
 	
 	//Add the vertices, UV Coords and Tris to the arrays
 	for (int32 Y = 0; Y < Height; Y++)
@@ -191,6 +191,15 @@ void AProceduralLandscape::ClearLandscape()
 	Triangles.Empty();
 	UVCoords.Empty();
 
+	//Iterate through all APickupBase actors in the world and destroy them
+	for (TActorIterator<APickupBase> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
+			(*It)->Destroy();
+		}
+	}
+
 	//Destroy the nodes and clear the array
 	for (ANavigationNode* NavNode : Nodes)
 	{
@@ -215,9 +224,8 @@ void AProceduralLandscape::SpawnPickups()
 				int32 RandomIndex = FMath::RandRange(0, Nodes.Num() - 1);
 				ANavigationNode* RandomNode = Nodes[RandomIndex];
 				FVector RandomLocation = RandomNode->GetActorLocation();
-				World->SpawnActor<APickupBase>(PickupBlueprint, RandomLocation, FRotator::ZeroRotator);
-				//Add spawned actor to the array of pickups
-				//Pickups.Add(PickupBlueprint);
+				// Store a reference to the spawned pickup in the array
+                World->SpawnActor<APickupBase>(PickupBlueprint, RandomLocation, FRotator::ZeroRotator);
 			}
 		}
 	}
