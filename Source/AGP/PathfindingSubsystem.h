@@ -23,7 +23,7 @@ public:
 	TArray<FVector> GetPath(const FVector& StartLocation, const FVector& TargetLocation);
 	TArray<FVector> GetPathAway(const FVector& StartLocation, const FVector& TargetLocation);
 	
-
+	TArray<FVector> GetWaypointPositions();
 protected:
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> Nodes;

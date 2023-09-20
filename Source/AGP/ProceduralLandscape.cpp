@@ -191,6 +191,7 @@ void AProceduralLandscape::ClearLandscape()
 	Triangles.Empty();
 	UVCoords.Empty();
 
+	//ToDo - New Pickup implemented in PickupManager - Ensure no issues here
 	//Iterate through all APickupBase actors in the world and destroy them
 	for (TActorIterator<APickupBase> It(GetWorld()); It; ++It)
 	{
@@ -240,7 +241,7 @@ void AProceduralLandscape::Tick(float DeltaTime)
 	{
 		ClearLandscape();
 		GenerateLandscape();
-		SpawnPickups();
+		//SpawnPickups(); //Now implemented in PickupManagerSubsystem
 		bShouldRegenerate = false;
 	}
 }

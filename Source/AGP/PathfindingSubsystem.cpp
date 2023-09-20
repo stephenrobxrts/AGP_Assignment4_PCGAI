@@ -55,6 +55,17 @@ TArray<FVector> UPathfindingSubsystem::GetPathAway(const FVector& StartLocation,
 	}
 }
 
+TArray<FVector> UPathfindingSubsystem::GetWaypointPositions()
+{
+	//Return an array of all the nodes' locations
+	TArray<FVector> WaypointPositions;
+	for (int i = 0; i < Nodes.Num(); i++)
+	{
+		WaypointPositions.Add(Nodes[i]->GetActorLocation());
+	}
+	return WaypointPositions;
+}
+
 void UPathfindingSubsystem::PopulateNodes()
 {
 	//empty the node array
