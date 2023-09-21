@@ -17,9 +17,12 @@ UWeaponComponent::UWeaponComponent()
 
 bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLocation)
 {
-	if (TimeSinceLastShot < WeaponStats.FireRate)
+	if (TimeSinceLastShot < WeaponStats.FireRate || RoundsRemainingInMagazine <= 0)
 	{
+		//Show the rounds remaining
+		UE_LOG(LogTemp, Display, TEXT("Unable to Fire! %s"), *FString::FromInt(RoundsRemainingInMagazine));
 		return false;
+		
 	}
 	FHitResult HitResult;
 	const FVector StartLocation = BulletStart;
@@ -31,8 +34,7 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, FireAtLocation, ECollisionChannel::ECC_WorldStatic, QueryParams);\
 
 	UE_LOG(LogTemp, Display, TEXT("Fire!"));
-	AActor* HitActor = HitResult.GetActor();
-	if (HitActor)
+	if (AActor* HitActor = HitResult.GetActor())
 	{
 		if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(HitActor))
 		{
@@ -55,14 +57,28 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 		DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Red, false, 1.0f, 0, 1.0f);
 	}
 
-
+	RoundsRemainingInMagazine -= 1;
 	TimeSinceLastShot = 0.0f;
 	return true;
+}
+
+bool UWeaponComponent::Reload()
+{
+	//Can put in logic for when gun can't be reloaded here.
+	
+	RoundsRemainingInMagazine = WeaponStats.MagazineSize;
+	return true;
+}
+
+int32 UWeaponComponent::GetRoundsRemainingInMagazine() const
+{
+	return RoundsRemainingInMagazine;
 }
 
 void UWeaponComponent::ApplyWeaponStats(const FWeaponStats& NewWeaponStats)
 {
 	WeaponStats = NewWeaponStats;
+	RoundsRemainingInMagazine = WeaponStats.MagazineSize;
 }
 
 

@@ -73,6 +73,15 @@ void AEnemyCharacter::TickEngage()
 			Fire(SensedCharacter->GetActorLocation());
 		}
 	};
+
+	//if weapon is empty, reload
+	if (WeaponComponent)
+	{
+		if (WeaponComponent->GetRoundsRemainingInMagazine() <= 0)
+		{
+			WeaponComponent->Reload();
+		}
+	}
 }
 
 void AEnemyCharacter::TickEvade()

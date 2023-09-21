@@ -37,7 +37,9 @@ public:
 	UWeaponComponent();
 
 	bool Fire(const FVector& BulletStart, const FVector& FireAtLocation);
+	bool Reload();
 
+	int32 GetRoundsRemainingInMagazine() const;
 
 	void ApplyWeaponStats(const FWeaponStats& NewWeaponStats);
 
@@ -45,7 +47,9 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	FWeaponStats WeaponStats;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	int32 RoundsRemainingInMagazine;
 	float TimeSinceLastShot = 0.0f;
 	

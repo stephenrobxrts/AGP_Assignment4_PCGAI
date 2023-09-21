@@ -80,6 +80,18 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 	}
 }
 
+bool ABaseCharacter::Reload()
+{
+	if (!HasWeapon() || !WeaponComponent)
+	{
+		return false;
+	}
+	else
+	{
+		return WeaponComponent->Reload();
+	}
+}
+
 // Called to bind functionality to input
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

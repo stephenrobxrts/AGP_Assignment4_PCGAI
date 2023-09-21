@@ -63,6 +63,7 @@ protected:
 
 
 	bool Fire(const FVector& FireAtLocation);
+	bool Reload();
 	
 
 public:	

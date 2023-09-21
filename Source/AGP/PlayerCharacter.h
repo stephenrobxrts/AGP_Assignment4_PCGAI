@@ -38,6 +38,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UInputAction* FireAction;
 	UPROPERTY(EditDefaultsOnly)
+	UInputAction* ReloadAction;
+	UPROPERTY(EditDefaultsOnly)
 	UInputMappingContext* InputMappingContext;
 	
 	
@@ -59,5 +61,6 @@ private:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void FireWeapon(const FInputActionValue& Value);
+	void ReloadWeapon(const FInputActionValue& Value);
 
 };
