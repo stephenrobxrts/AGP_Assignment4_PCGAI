@@ -79,7 +79,7 @@ void AEnemyCharacter::TickEngage()
 	{
 		if (WeaponComponent->GetRoundsRemainingInMagazine() <= 0)
 		{
-			WeaponComponent->Reload();
+			Reload();
 		}
 	}
 }

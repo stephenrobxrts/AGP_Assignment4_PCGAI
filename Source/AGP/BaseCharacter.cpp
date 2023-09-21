@@ -72,6 +72,10 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
 	if (HasWeapon())
 	{
+		if (bIsReloading)
+		{
+			return false;
+		}
 		return WeaponComponent->Fire(BulletStartPosition->GetComponentLocation(), FireAtLocation);
 	}
 	else
@@ -82,15 +86,17 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 
 bool ABaseCharacter::Reload()
 {
-	if (!HasWeapon() || !WeaponComponent)
+	if (!HasWeapon() || !WeaponComponent || bIsReloading)
 	{
 		return false;
 	}
 	else
 	{
+		bIsReloading = true;
 		return WeaponComponent->Reload();
 	}
 }
+
 
 // Called to bind functionality to input
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -104,8 +110,16 @@ void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsReloading)
+	{
+		if (TimeSinceReload >= WeaponComponent->GetReloadTime())
+		{
+			bIsReloading = false;
+			TimeSinceReload = 0.0f;
+		}
+		TimeSinceReload += DeltaTime;
+	}
 	
-
 }
 
 

@@ -22,8 +22,14 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 		//Show the rounds remaining
 		UE_LOG(LogTemp, Display, TEXT("Unable to Fire! %s"), *FString::FromInt(RoundsRemainingInMagazine));
 		return false;
-		
 	}
+
+	if (bIsReloading)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Unable to Fire! Reloading!"));
+		return false;
+	}
+	
 	FHitResult HitResult;
 	const FVector StartLocation = BulletStart;
 
@@ -65,7 +71,7 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 bool UWeaponComponent::Reload()
 {
 	//Can put in logic for when gun can't be reloaded here.
-	
+	TimeSinceReload = 0.0f;
 	RoundsRemainingInMagazine = WeaponStats.MagazineSize;
 	return true;
 }
@@ -73,6 +79,11 @@ bool UWeaponComponent::Reload()
 int32 UWeaponComponent::GetRoundsRemainingInMagazine() const
 {
 	return RoundsRemainingInMagazine;
+}
+
+float UWeaponComponent::GetReloadTime() const
+{
+	return WeaponStats.ReloadTime;
 }
 
 void UWeaponComponent::ApplyWeaponStats(const FWeaponStats& NewWeaponStats)
@@ -97,8 +108,11 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                      FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-
+    if (bIsReloading)
+    {
+    	TimeSinceReload += DeltaTime;
+    }
+	
 	TimeSinceLastShot += DeltaTime;
 }
 

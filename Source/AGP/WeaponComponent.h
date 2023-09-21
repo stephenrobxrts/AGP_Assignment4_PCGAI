@@ -24,6 +24,7 @@ public:
 	 float FireRate = 0.2f;
 	 float BaseDamage = 10.0f;
 	 int32 MagazineSize = 5;
+	float ReloadTime = 1.0f;
 };
 
 
@@ -40,6 +41,7 @@ public:
 	bool Reload();
 
 	int32 GetRoundsRemainingInMagazine() const;
+	float GetReloadTime() const;
 
 	void ApplyWeaponStats(const FWeaponStats& NewWeaponStats);
 
@@ -52,6 +54,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	int32 RoundsRemainingInMagazine;
 	float TimeSinceLastShot = 0.0f;
+	float TimeSinceReload = 0.0f;
+	bool bIsReloading = false;
 	
 
 public:

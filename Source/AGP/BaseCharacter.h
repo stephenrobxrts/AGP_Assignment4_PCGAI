@@ -58,13 +58,11 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void ChangeWeaponMaterial(EWeaponRarity WeaponRarity);
-
 
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();
-	
+	bool bIsReloading;
+	float TimeSinceReload;
 
 public:	
 	// Called every frame
