@@ -33,17 +33,17 @@ void AWeaponPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	// exist inside the scope of the if statement.
 	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(OtherActor))
 	{
-		if (!BaseCharacter->HasWeapon())
-		{
-			BaseCharacter->EquipWeapon(true);
-			this->Destroy();
-		}
+		/*if (!BaseCharacter->HasWeapon())
+		{	}*/
+		BaseCharacter->EquipWeapon(true, WeaponStats, WeaponRarity);
+		this->Destroy();
+	
 	}
 }
 
 void AWeaponPickup::RollRarity()
 {
-	int32 RarityRoll = FMath::RandRange(0, 100);
+	int32 RarityRoll = FMath::RandRange(1, 100);
 	if (RarityRoll <= 50)
 	{
 		WeaponRarity = EWeaponRarity::Common;

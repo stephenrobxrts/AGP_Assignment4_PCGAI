@@ -3,6 +3,8 @@
 
 #include "BaseCharacter.h"
 
+#include "Pickups/WeaponPickup.h"
+
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 {
@@ -32,14 +34,23 @@ bool ABaseCharacter::HasWeapon()
 	}
 }
 
-void ABaseCharacter::EquipWeapon(bool bEquipWeapon)
+void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity)
 {
-	EquipWeaponGraphical(bEquipWeapon);
+	//Picking up Weapon - create weapon component and apply stats, materials
 	if (bEquipWeapon && !HasWeapon())
     {
      WeaponComponent = NewObject<UWeaponComponent>(this);
      WeaponComponent->RegisterComponent();
+		WeaponComponent->ApplyWeaponStats(WeaponStats);
+		EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
     }
+	//Changing Weapon - change stats and material 
+	else if (bEquipWeapon && HasWeapon())
+	{
+		WeaponComponent->ApplyWeaponStats(WeaponStats);
+		EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
+	}
+	//Dropping Weapon
     else if (!bEquipWeapon && HasWeapon())
     {
      WeaponComponent->UnregisterComponent();

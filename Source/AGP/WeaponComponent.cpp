@@ -60,6 +60,11 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 	return true;
 }
 
+void UWeaponComponent::ApplyWeaponStats(const FWeaponStats& NewWeaponStats)
+{
+	WeaponStats = NewWeaponStats;
+}
+
 
 // Called when the game starts
 void UWeaponComponent::BeginPlay()

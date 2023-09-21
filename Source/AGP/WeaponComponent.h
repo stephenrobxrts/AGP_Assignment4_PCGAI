@@ -38,6 +38,9 @@ public:
 
 	bool Fire(const FVector& BulletStart, const FVector& FireAtLocation);
 
+
+	void ApplyWeaponStats(const FWeaponStats& NewWeaponStats);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -45,6 +48,7 @@ protected:
 	FWeaponStats WeaponStats;
 	int32 RoundsRemainingInMagazine;
 	float TimeSinceLastShot = 0.0f;
+	
 
 public:
 	// Called every frame

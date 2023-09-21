@@ -27,17 +27,16 @@ public:
 	/**
 	 * @brief Will either equip or un-equip a weapon on this player.
 	 * @param bEquipWeapon Whether to equip (true) or un-equip (false)
+	 * @param WeaponStats The stats of the weapon to equip
+	 * @param WeaponRarity The rarity of the weapon to equip
 	 */
-	void EquipWeapon(bool bEquipWeapon);
+	void EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity);
 
 protected:
 	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
 	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
 	// and define the type of weapon in a separate Weapon Actor class and store a pointer to this weapon.
 	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
-
-
-	float WeaponDamage = 10.0f;
 	
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BulletStartPosition;
@@ -57,7 +56,10 @@ protected:
 	UWeaponComponent* WeaponComponent = nullptr;
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	void EquipWeaponGraphical(bool bEquipWeapon);
+	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChangeWeaponMaterial(EWeaponRarity WeaponRarity);
 
 
 	bool Fire(const FVector& FireAtLocation);

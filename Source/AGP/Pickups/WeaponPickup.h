@@ -62,16 +62,10 @@ protected:
 	TEnumAsByte<EWeaponRarity> IWeaponRarity;
 
 	// Arrays to store stat ranges for each weapon tier
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
+	
 	FWeaponStatArray AccuracyArray;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	FWeaponStatArray FireRateArray;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	FWeaponStatArray BaseDamageArray;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	FWeaponStatArray MagazineSizeArray;	
 	
 
