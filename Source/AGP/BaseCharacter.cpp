@@ -86,15 +86,16 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 
 bool ABaseCharacter::Reload()
 {
-	if (!HasWeapon() || !WeaponComponent || bIsReloading)
+	if (!HasWeapon()  || bIsReloading)
 	{
 		return false;
 	}
-	else
-	{
-		bIsReloading = true;
-		return WeaponComponent->Reload();
-	}
+	
+	UE_LOG(LogTemp, Display, TEXT("Player is reloading: %s , ReloadTime: %f"), *GetName(),
+	       WeaponComponent->GetReloadTime());
+	bIsReloading = true;
+	return WeaponComponent->Reload();
+
 }
 
 

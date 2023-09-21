@@ -19,8 +19,7 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 {
 	if (TimeSinceLastShot < WeaponStats.FireRate || RoundsRemainingInMagazine <= 0)
 	{
-		//Show the rounds remaining
-		UE_LOG(LogTemp, Display, TEXT("Unable to Fire! %s"), *FString::FromInt(RoundsRemainingInMagazine));
+		
 		return false;
 	}
 
@@ -32,12 +31,19 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 	
 	FHitResult HitResult;
 	const FVector StartLocation = BulletStart;
+	const FVector FireDirection = (FireAtLocation - StartLocation).GetSafeNormal(); // Calculate the initial firing direction
 
+	// Calculate a random deviation within the accuracy cone
+	const float HalfConeAngle = FMath::DegreesToRadians(90.0f * (1.0f - WeaponStats.Accuracy)); // Adjust the 90.0f value as needed
+	const FVector RandomDeviation = FMath::VRandCone(FireDirection, HalfConeAngle);
+	float MaxRange = 10000.0f;
+
+	const FVector EndLocation = StartLocation + (RandomDeviation * MaxRange);
 	
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwner());
 	
-	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, FireAtLocation, ECollisionChannel::ECC_WorldStatic, QueryParams);\
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_WorldStatic, QueryParams);\
 
 	UE_LOG(LogTemp, Display, TEXT("Fire!"));
 	if (AActor* HitActor = HitResult.GetActor())
@@ -60,7 +66,7 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 	{
 		// The hit result actor is null
 		// Draw a red debug line
-		DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Red, false, 1.0f, 0, 1.0f);
+		DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 1.0f, 0, 1.0f);
 	}
 
 	RoundsRemainingInMagazine -= 1;

@@ -18,13 +18,18 @@ struct FWeaponStats
 {
 	 GENERATED_BODY()
 public:
-	 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	 EWeaponType WeaponType = EWeaponType::Rifle;
-	 float Accuracy = 1.0f;
-	 float FireRate = 0.2f;
-	 float BaseDamage = 10.0f;
-	 int32 MagazineSize = 5;
-	float ReloadTime = 1.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
+	 float Accuracy = 1.0f; //Accuracy of the weapon 0.0 has a 90degree cone of fire. 1.0 has a 0 degree cone of fire.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
+	 float FireRate = 0.2f; //Time between shots in seconds
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
+	 float BaseDamage = 10.0f; //Base damage of the weapon
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
+	 int32 MagazineSize = 5; //Number of rounds in a magazine
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
+	float ReloadTime = 1.0f; //Time to reload the weapon in seconds
 };
 
 
@@ -51,6 +56,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	FWeaponStats WeaponStats;
+
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Stats")
 	int32 RoundsRemainingInMagazine;
 	float TimeSinceLastShot = 0.0f;

@@ -87,8 +87,6 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 
 void APlayerCharacter::ReloadWeapon(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Display, TEXT("Player has reloaded weapon"));
 	Reload();
-	
 }
 

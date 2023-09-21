@@ -52,7 +52,7 @@ protected:
  * class to drive any graphical changes that are needed when equipping or un-equipping a weapon.
  * @param bEquipWeapon Whether a weapon is being equipped (true) or un-equipped (false).
  */
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	UWeaponComponent* WeaponComponent = nullptr;
 	
 	UFUNCTION(BlueprintImplementableEvent)

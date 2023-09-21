@@ -13,6 +13,7 @@ AWeaponPickup::AWeaponPickup()
 	FireRateArray = {{0.05f, 0.2f}, {0.2f, 1.0f}};
 	BaseDamageArray = {{5.0f, 15.0f}, {15.0f, 30.0f}};
 	MagazineSizeArray = {{1, 19}, {20, 100}};
+	ReloadTimeArray = {{1.0f, 4.0f}, {0.1f, 1.0f}};
 }
 
 void AWeaponPickup::BeginPlay()
@@ -69,43 +70,44 @@ void AWeaponPickup::GenerateWeaponPickup()
 	
 	//Set Default ranges
 	//If legendary all good, if not all bad (adjust for master, rare)
-	FWeaponStatRange AccuracyRange = WeaponRarity == EWeaponRarity::Legendary ? AccuracyArray.GoodStats : AccuracyArray.BadStats;
-	FWeaponStatRange FireRateRange = WeaponRarity == EWeaponRarity::Legendary ? FireRateArray.GoodStats : FireRateArray.BadStats;
-	FWeaponStatRange BaseDamageRange = WeaponRarity == EWeaponRarity::Legendary ? BaseDamageArray.GoodStats : BaseDamageArray.BadStats;
-	FWeaponStatRange MagazineSizeRange = WeaponRarity == EWeaponRarity::Legendary ? MagazineSizeArray.GoodStats : MagazineSizeArray.BadStats;
+	FWeaponStatRange AccuracyRange = AccuracyArray.BadStats;
+	FWeaponStatRange FireRateRange = FireRateArray.BadStats;
+	FWeaponStatRange BaseDamageRange = BaseDamageArray.BadStats;
+	FWeaponStatRange MagazineSizeRange = MagazineSizeArray.BadStats;
+	FWeaponStatRange ReloadTimeRange = ReloadTimeArray.BadStats;
+	int32 NumGoodStats = 0;
 
 	//Stat arrays hold good and bad stat ranges
-	TArray<FWeaponStatArray> StatArrays = {AccuracyArray, FireRateArray, BaseDamageArray, MagazineSizeArray};
+	TArray<FWeaponStatArray*> StatArrays = {&AccuracyArray, &FireRateArray, &BaseDamageArray, &MagazineSizeArray, &ReloadTimeArray};
 	//Chosen stat ranges will be either the good or bad stat ranges
-	TArray<FWeaponStatRange> ChosenStatRanges = {AccuracyRange, FireRateRange, BaseDamageRange, MagazineSizeRange};
+	TArray<FWeaponStatRange> ChosenStatRanges = {AccuracyRange, FireRateRange, BaseDamageRange, MagazineSizeRange, ReloadTimeRange};
 
-	
-	//Adjust for master, rare
-	if (WeaponRarity == EWeaponRarity::Master)
+	//Number of good stats is 0 if common, 2 if rare, 3 if master, 4 if legendary
+	//Determine number of GoodStats - common is already done
+	if (WeaponRarity != EWeaponRarity::Common)
 	{
-		int32 BadStatRoll = FMath::RandRange(0, 3);
-		for (int32 i = 0; i < 4; i++)
+		NumGoodStats =  static_cast<int32>(WeaponRarity) + 1;
+
+		TArray<int32> StatRolls;
+		//Roll for each stat
+		for (int32 i = 0; i < NumGoodStats; i++)
 		{
-			ChosenStatRanges[i] = i == BadStatRoll ? StatArrays[i].BadStats : StatArrays[i].GoodStats;
+			StatRolls.Add(FMath::RandRange(0, NumGoodStats - 1));
+		}
+
+		//Set the good stat ranges
+		for (int32 i = 0 ; i < StatRolls.Num() ; i++)
+		{
+            ChosenStatRanges[StatRolls[i]] = StatArrays[StatRolls[i]]->GoodStats;
 		}
 	}
-	else if (WeaponRarity == EWeaponRarity::Rare)
-	{
-		int32 BadStatRoll1 = FMath::RandRange(0, 3);
-		int32 BadStatRoll2;
-		do {
-			BadStatRoll2 = FMath::RandRange(0, 3);
-		} while (BadStatRoll2 == BadStatRoll1);
 
-		for (int32 i = 0; i < 4; i++)
-		{
-			ChosenStatRanges[i] = (i == BadStatRoll1 || i == BadStatRoll2) ? StatArrays[i].BadStats : StatArrays[i].GoodStats;
-		}
-	}
+
 
 	//From the chosen stat ranges, set the weapon stats by randomizing within the range
 	WeaponStats.Accuracy = FMath::RandRange(AccuracyRange.Min, AccuracyRange.Max);
 	WeaponStats.FireRate = FMath::RandRange(FireRateRange.Min, FireRateRange.Max);
 	WeaponStats.BaseDamage = FMath::RandRange(BaseDamageRange.Min, BaseDamageRange.Max);
 	WeaponStats.MagazineSize = static_cast<int32>(FMath::RandRange(MagazineSizeRange.Min, MagazineSizeRange.Max));
+	WeaponStats.ReloadTime = FMath::RandRange(ReloadTimeRange.Min, ReloadTimeRange.Max);
 }

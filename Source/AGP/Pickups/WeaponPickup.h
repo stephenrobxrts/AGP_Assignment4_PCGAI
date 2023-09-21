@@ -66,8 +66,8 @@ protected:
 	FWeaponStatArray AccuracyArray;
 	FWeaponStatArray FireRateArray;
 	FWeaponStatArray BaseDamageArray;
-	FWeaponStatArray MagazineSizeArray;	
-	
+	FWeaponStatArray MagazineSizeArray;
+	FWeaponStatArray ReloadTimeArray;
 
 private:
 	
