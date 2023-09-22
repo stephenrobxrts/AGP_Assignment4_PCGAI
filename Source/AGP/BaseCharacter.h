@@ -38,7 +38,7 @@ protected:
 	// and define the type of weapon in a separate Weapon Actor class and store a pointer to this weapon.
 	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	USceneComponent* BulletStartPosition;
 
 	UPROPERTY(VisibleAnywhere)
