@@ -21,7 +21,6 @@ void UPickupRotatorComponent::BeginPlay()
 
 	FVector ActorLocation = GetOwner()->GetActorLocation();
 	UE_LOG(LogTemp, Warning, TEXT("Current Location: %s"), *ActorLocation.ToString());
-	
 }
 
 void UPickupRotatorComponent::TickRotateObject(const float& DeltaTime)
@@ -33,10 +32,10 @@ void UPickupRotatorComponent::TickRotateObject(const float& DeltaTime)
 
 
 // Called every frame
-void UPickupRotatorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UPickupRotatorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                            FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	TickRotateObject(DeltaTime);
 }
-

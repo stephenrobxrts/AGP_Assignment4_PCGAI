@@ -6,12 +6,10 @@
 // Sets default values
 ANavigationNode::ANavigationNode()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	;
 	LocationComponent = CreateDefaultSubobject<USceneComponent>(TEXT("LocationComponent"));
 	SetRootComponent(LocationComponent);
-	
 }
 
 bool ANavigationNode::ShouldTickIfViewportsOnly() const
@@ -44,7 +42,6 @@ void ANavigationNode::DestroyNode()
 void ANavigationNode::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -82,6 +79,4 @@ bool ANavigationNode::CheckReciprocalConnection(ANavigationNode* NodeA, ANavigat
 		return true;
 	}
 	return false;
-
 }
-

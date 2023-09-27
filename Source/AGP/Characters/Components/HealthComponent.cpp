@@ -20,7 +20,6 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 
@@ -31,7 +30,8 @@ void UHealthComponent::OnDeath()
 }
 
 // Called every frame
-void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                     FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -79,4 +79,3 @@ void UHealthComponent::ApplyHealing(float HealingAmount)
 		CurrentHealth = MaxHealth;
 	}
 }
-

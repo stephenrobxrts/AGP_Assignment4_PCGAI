@@ -6,7 +6,7 @@
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "KismetProceduralMeshLibrary.h"
-#include "NavigationNode.h"
+#include "../Pathfinding/NavigationNode.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralLandscape.generated.h"
 
@@ -17,8 +17,8 @@ UCLASS()
 class AGP_API AProceduralLandscape : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AProceduralLandscape();
 	virtual bool ShouldTickIfViewportsOnly() const override;
@@ -32,11 +32,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* ProceduralMesh;
 	UPROPERTY()
-    TArray<FVector> Vertices;
-    UPROPERTY()
-    TArray<int32> Triangles;
-    UPROPERTY()
-    TArray<FVector2D> UVCoords;
+	TArray<FVector> Vertices;
+	UPROPERTY()
+	TArray<int32> Triangles;
+	UPROPERTY()
+	TArray<FVector2D> UVCoords;
 	UPROPERTY()
 	TArray<FVector> Normals;
 	UPROPERTY()
@@ -68,17 +68,14 @@ protected:
 	TSubclassOf<class AWeaponPickup> PickupBlueprint;
 	UPROPERTY()
 	TArray<APickupBase*> Pickups;
-	
 
-	
+
 	void GenerateLandscape();
 	void CreateSimplePlane();
 	void ClearLandscape();
 	void SpawnPickups();
 
-
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };

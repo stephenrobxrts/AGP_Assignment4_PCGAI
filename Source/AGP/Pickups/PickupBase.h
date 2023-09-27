@@ -16,8 +16,8 @@ UCLASS()
 class AGP_API APickupBase : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	APickupBase();
 
@@ -30,12 +30,12 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* PickupCollider;
 
-    UFUNCTION()
+	UFUNCTION()
 	virtual void OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	                             UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
+	                             const FHitResult& SweepResult);
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };

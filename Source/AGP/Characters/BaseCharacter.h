@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HealthComponent.h"
-#include "WeaponComponent.h"
+#include "Components/HealthComponent.h"
+#include "Components/WeaponComponent.h"
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
@@ -23,7 +23,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	bool HasWeapon();
-	
+
 	/**
 	 * @brief Will either equip or un-equip a weapon on this player.
 	 * @param bEquipWeapon Whether to equip (true) or un-equip (false)
@@ -37,13 +37,13 @@ protected:
 	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
 	// and define the type of weapon in a separate Weapon Actor class and store a pointer to this weapon.
 	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
-	
+
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BulletStartPosition;
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent* HealthComponent;
-	
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -54,7 +54,7 @@ protected:
  */
 	UPROPERTY(VisibleAnywhere)
 	UWeaponComponent* WeaponComponent = nullptr;
-	
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
 
@@ -64,11 +64,10 @@ protected:
 	bool bIsReloading;
 	float TimeSinceReload;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

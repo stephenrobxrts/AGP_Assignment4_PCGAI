@@ -22,8 +22,6 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
-	
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,26 +39,18 @@ protected:
 	UInputAction* ReloadAction;
 	UPROPERTY(EditDefaultsOnly)
 	UInputMappingContext* InputMappingContext;
-	
-	
+
+
 	UPROPERTY(EditDefaultsOnly)
 	float LookSensitivity = 0.5f;
 
-
-
-	
-	
-
 public:
-	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
 private:
-	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void FireWeapon(const FInputActionValue& Value);
 	void ReloadWeapon(const FInputActionValue& Value);
-
 };

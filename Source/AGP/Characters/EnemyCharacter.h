@@ -7,18 +7,19 @@
 #include "PlayerCharacter.h"
 #include "Perception/PawnSensingComponent.h"
 #include "GameFramework/Character.h"
-#include "PathfindingSubsystem.h"
+#include "../Pathfinding/Subsystems/PathfindingSubsystem.h"
 #include "EnemyCharacter.generated.h"
 
 UENUM(BlueprintType) // Allows us to use this enum in blueprints.
-enum class EEnemyState : uint8 {
+enum class EEnemyState : uint8
+{
+	Patrol,
+	// This essentially gets set to 0
 
-	Patrol, // This essentially gets set to 0
+	Engage,
+	// set to 1
 
-	Engage, // set to 1
-
-	Evade  // set to 2
-
+	Evade // set to 2
 };
 
 UCLASS()
@@ -60,13 +61,10 @@ protected:
 
 	void UpdateSight();
 
-
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };
-

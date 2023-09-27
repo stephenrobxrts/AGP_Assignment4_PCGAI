@@ -1,10 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "AGPGameInstance.h"
-#include "PathfindingSubsystem.h"
 #include "PickupManagerSubsystem.h"
 
+#include "AGP/Pathfinding/Subsystems/PathfindingSubsystem.h"
+#include "AGP/AGPGameInstance.h"
 
 
 void UPickupManagerSubsystem::PopulateSpawnLocations()
@@ -13,7 +12,7 @@ void UPickupManagerSubsystem::PopulateSpawnLocations()
 	PossibleSpawnLocations.Empty();
 
 	//set PossibleSpawnLocations to the return value of the Pathfinding 
-    //Subsystem’s GetWaypointPositions function.
+	//Subsystem’s GetWaypointPositions function.
 	PossibleSpawnLocations = GetWorld()->GetSubsystem<UPathfindingSubsystem>()->GetWaypointPositions();
 }
 
@@ -28,20 +27,21 @@ void UPickupManagerSubsystem::SpawnWeaponPickup()
 	//Otherwise, get a reference to the AGPGameInstance and spawn a weapon 
 	//pickup at a random location in PossibleSpawnLocations.
 	if (const UAGPGameInstance* GameInstance =
-	 GetWorld()->GetGameInstance<UAGPGameInstance>())
+		GetWorld()->GetGameInstance<UAGPGameInstance>())
 	{
 		//Get a random location from PossibleSpawnLocations
 		FVector SpawnPosition =
-		PossibleSpawnLocations[FMath::RandRange(0, PossibleSpawnLocations.Num() - 1)];
+			PossibleSpawnLocations[FMath::RandRange(0, PossibleSpawnLocations.Num() - 1)];
 		// Add 50 to the height(??)
 		SpawnPosition.Z += 50.0f;
 
 		//Spawn a weapon pickup at the location
 		UClass* WeaponPickupClass = GameInstance->GetWeaponPickupClass();
-		
-		AWeaponPickup* Pickup = GetWorld()->SpawnActor<AWeaponPickup>(WeaponPickupClass,SpawnPosition,FRotator::ZeroRotator);
+
+		AWeaponPickup* Pickup = GetWorld()->SpawnActor<AWeaponPickup>(WeaponPickupClass, SpawnPosition,
+		                                                              FRotator::ZeroRotator);
 		UE_LOG(LogTemp, Display, TEXT("Weapon Pickup Spawned"))
-    }
+	}
 }
 
 void UPickupManagerSubsystem::Tick(float DeltaTime)
@@ -60,5 +60,4 @@ void UPickupManagerSubsystem::Tick(float DeltaTime)
 		SpawnWeaponPickup();
 		TimeSinceLastSpawn = 0.0f;
 	}
-	
 }

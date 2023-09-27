@@ -26,12 +26,13 @@ void UPickupBounceComponent::BeginPlay()
 void UPickupBounceComponent::TickBounceObject(float DeltaTime)
 {
 	FVector CurrentPosition = GetOwner()->GetActorLocation();
-	float NewZ = CurrentPosition.Z + (bIsMovingUp ? DeltaTime * BounceSpeed: -DeltaTime * BounceSpeed);
+	float NewZ = CurrentPosition.Z + (bIsMovingUp ? DeltaTime * BounceSpeed : -DeltaTime * BounceSpeed);
 	if (bIsMovingUp && NewZ > StartingPosition.Z + BounceExtent)
 	{
 		bIsMovingUp = false;
 		NewZ = StartingPosition.Z + BounceExtent;
-	} else if (!bIsMovingUp && NewZ < StartingPosition.Z - BounceExtent)
+	}
+	else if (!bIsMovingUp && NewZ < StartingPosition.Z - BounceExtent)
 	{
 		bIsMovingUp = true;
 		NewZ = StartingPosition.Z - BounceExtent;
@@ -42,10 +43,10 @@ void UPickupBounceComponent::TickBounceObject(float DeltaTime)
 
 
 // Called every frame
-void UPickupBounceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UPickupBounceComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                           FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	TickBounceObject(DeltaTime);
 }
-

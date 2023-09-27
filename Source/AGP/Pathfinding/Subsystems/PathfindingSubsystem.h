@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "NavigationNode.h"
+#include "../NavigationNode.h"
 #include "EngineUtils.h"
 #include "PathfindingSubsystem.generated.h"
 
@@ -22,8 +22,9 @@ public:
 
 	TArray<FVector> GetPath(const FVector& StartLocation, const FVector& TargetLocation);
 	TArray<FVector> GetPathAway(const FVector& StartLocation, const FVector& TargetLocation);
-	
+
 	TArray<FVector> GetWaypointPositions();
+
 protected:
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> Nodes;
@@ -34,7 +35,7 @@ private:
 	ANavigationNode* FindNearestNode(const FVector& TargetLocation);
 	ANavigationNode* FindFurthestNode(const FVector& TargetLocation);
 	TArray<FVector> GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode);
-	
-	
+
+
 	TArray<FVector> ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode);
 };

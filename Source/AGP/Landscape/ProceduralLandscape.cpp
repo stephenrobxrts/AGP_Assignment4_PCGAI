@@ -1,17 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Pickups/PickupBase.h"
-#include "Pickups/WeaponPickup.h"
-#include "EngineUtils.h"
 #include "ProceduralLandscape.h"
+#include "../Pickups/PickupBase.h"
+#include "../Pickups/WeaponPickup.h"
+#include "EngineUtils.h"
+
 
 // Sets default values
 AProceduralLandscape::AProceduralLandscape()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural Mesh")); 
+	ProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural Mesh"));
 	SetRootComponent(ProceduralMesh);
 }
 
@@ -24,22 +25,21 @@ bool AProceduralLandscape::ShouldTickIfViewportsOnly() const
 void AProceduralLandscape::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AProceduralLandscape::GenerateLandscape()
 {
-
 	//Set Perlin Offset
 	PerlinOffset = FMath::RandRange(-1'000'0.0f, 1'000'0.0f);
-	
+
 	//Add the vertices, UV Coords and Tris to the arrays
 	for (int32 Y = 0; Y < Height; Y++)
 	{
 		for (int32 X = 0; X < Width; X++)
 		{
-			
-			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, FMath::PerlinNoise2D(FVector2d(X*PerlinRoughness + PerlinOffset, Y*PerlinRoughness + PerlinOffset)) * PerlinScale));
+			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing,
+			                     FMath::PerlinNoise2D(FVector2d(X * PerlinRoughness + PerlinOffset,
+			                                                    Y * PerlinRoughness + PerlinOffset)) * PerlinScale));
 			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
 		}
 	}
@@ -47,37 +47,38 @@ void AProceduralLandscape::GenerateLandscape()
 	//Add NavNodes
 	for (FVector& Vertex : Vertices)
 	{
-		ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator);
-		if (NavNode)
+		if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
+			ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator))
 		{
 			Nodes.Add(NavNode);
+			NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 		}
 	}
 
 	// Define the triangles and NavNode Connections
 	for (int32 Y = 0; Y < Height - 1; Y++)
 	{
-		for (int32 X = 0; X < Width - 1 ; X++)
+		for (int32 X = 0; X < Width - 1; X++)
 		{
 			// Define the indices of the four vertices of the current quad
 			int32 BottomRight = X + Y * Width;
 			int32 BottomLeft = (X + 1) + Y * Width;
 			int32 TopRight = X + (Y + 1) * Width;
 			int32 TopLeft = (X + 1) + (Y + 1) * Width;
-			
+
 			//Define the 4 NavNode vertices
 			ANavigationNode* BottomRightNode = Nodes[BottomRight];
 			ANavigationNode* BottomLeftNode = Nodes[BottomLeft];
 			ANavigationNode* TopRightNode = Nodes[TopRight];
 			ANavigationNode* TopLeftNode = Nodes[TopLeft];
 
-			TArray<ANavigationNode*> QuadNodes = { BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode };
+			TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
 
 			for (ANavigationNode* Node : QuadNodes)
 			{
 				for (ANavigationNode* OtherNode : QuadNodes)
 				{
-					if (Node != OtherNode  && !Node->GetConnectedNodes().Contains(OtherNode))
+					if (Node != OtherNode && !Node->GetConnectedNodes().Contains(OtherNode))
 					{
 						Node->SetConnectedNodes(OtherNode);
 					}
@@ -95,7 +96,6 @@ void AProceduralLandscape::GenerateLandscape()
 			Triangles.Add(TopLeft);
 		}
 	}
-
 
 
 	// Draw debug spheres at each vertex location with a radius of 50.0f
@@ -120,14 +120,13 @@ void AProceduralLandscape::GenerateLandscape()
 	// Log the Triangles array as a formatted string
 	UE_LOG(LogTemp, Warning, TEXT("Triangles: %s"), *TrianglesString);
 	*/
-    UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Vertices, Triangles, UVCoords, Normals, Tangents);
-	
-	if (ProceduralMesh) 
-	{ 
-		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, Normals, UVCoords, 
-		   TArray<FColor>(), Tangents, true); 
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Vertices, Triangles, UVCoords, Normals, Tangents);
+
+	if (ProceduralMesh)
+	{
+		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, Normals, UVCoords,
+		                                  TArray<FColor>(), Tangents, true);
 	}
-	
 }
 
 void AProceduralLandscape::CreateSimplePlane()
@@ -177,12 +176,11 @@ void AProceduralLandscape::CreateSimplePlane()
 		DrawDebugSphere(GetWorld(), Vertex, 50.0f, 12, FColor::Green, true, -1.0f, 0, 1.0f);
 	}
 
-	if (ProceduralMesh) 
-	{ 
-		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVCoords, 
-		   TArray<FColor>(), TArray<FProcMeshTangent>(), true); 
+	if (ProceduralMesh)
+	{
+		ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVCoords,
+		                                  TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 	}
-	
 }
 
 void AProceduralLandscape::ClearLandscape()
@@ -209,7 +207,6 @@ void AProceduralLandscape::ClearLandscape()
 	Nodes.Empty();
 	ProceduralMesh->ClearMeshSection(0);
 	UKismetSystemLibrary::FlushPersistentDebugLines(GetWorld());
-	
 }
 
 void AProceduralLandscape::SpawnPickups()
@@ -226,7 +223,7 @@ void AProceduralLandscape::SpawnPickups()
 				ANavigationNode* RandomNode = Nodes[RandomIndex];
 				FVector RandomLocation = RandomNode->GetActorLocation();
 				// Store a reference to the spawned pickup in the array
-                World->SpawnActor<APickupBase>(PickupBlueprint, RandomLocation, FRotator::ZeroRotator);
+				World->SpawnActor<APickupBase>(PickupBlueprint, RandomLocation, FRotator::ZeroRotator);
 			}
 		}
 	}
@@ -245,4 +242,3 @@ void AProceduralLandscape::Tick(float DeltaTime)
 		bShouldRegenerate = false;
 	}
 }
-

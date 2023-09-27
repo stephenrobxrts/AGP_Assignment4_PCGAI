@@ -7,12 +7,12 @@
 #include "HealthComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AGP_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
@@ -28,9 +28,10 @@ protected:
 
 	void OnDeath();
 
-public:	
+public:
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	bool IsDead();
 	float GetCurrentHealth();
@@ -38,6 +39,4 @@ public:
 
 	void ApplyDamage(float DamageAmount);
 	void ApplyHealing(float HealingAmount);
-	
-	
 };

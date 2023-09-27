@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "Pickups/WeaponPickup.h"
 #include "PickupManagerSubsystem.generated.h"
 
 /**
@@ -31,11 +30,8 @@ protected:
 private:
 	void PopulateSpawnLocations();
 	void SpawnWeaponPickup();
-	
 
-
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
 };

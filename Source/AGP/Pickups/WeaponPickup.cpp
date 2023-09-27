@@ -2,8 +2,7 @@
 
 
 #include "WeaponPickup.h"
-
-#include "AGP/PlayerCharacter.h"
+#include "AGP/Characters/PlayerCharacter.h"
 #include "Chaos/Utilities.h"
 
 AWeaponPickup::AWeaponPickup()
@@ -24,7 +23,8 @@ void AWeaponPickup::BeginPlay()
 }
 
 void AWeaponPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                    UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                    UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
+                                    const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Display, TEXT("Overlap event occurred on WeaponPickup"))
 
@@ -38,7 +38,6 @@ void AWeaponPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		{	}*/
 		BaseCharacter->EquipWeapon(true, WeaponStats, WeaponRarity);
 		this->Destroy();
-	
 	}
 }
 
@@ -67,7 +66,7 @@ void AWeaponPickup::GenerateWeaponPickup()
 {
 	//Modifies WeaponRarity Enum
 	RollRarity();
-	
+
 	//Set Default ranges
 	//If legendary all good, if not all bad (adjust for master, rare)
 	FWeaponStatRange AccuracyRange = AccuracyArray.BadStats;
@@ -78,31 +77,31 @@ void AWeaponPickup::GenerateWeaponPickup()
 	int32 NumGoodStats = 0;
 
 	//Stat arrays hold good and bad stat ranges
-	TArray<FWeaponStatArray*> StatArrays = {&AccuracyArray, &FireRateArray, &BaseDamageArray, &MagazineSizeArray, &ReloadTimeArray};
+	TArray<FWeaponStatArray*> StatArrays = {
+		&AccuracyArray, &FireRateArray, &BaseDamageArray, &MagazineSizeArray, &ReloadTimeArray
+	};
 	//Chosen stat ranges will be either the good or bad stat ranges
-	TArray<FWeaponStatRange> ChosenStatRanges = {AccuracyRange, FireRateRange, BaseDamageRange, MagazineSizeRange, ReloadTimeRange};
+	TArray<FWeaponStatRange> ChosenStatRanges = {
+		AccuracyRange, FireRateRange, BaseDamageRange, MagazineSizeRange, ReloadTimeRange
+	};
 
 	//Number of good stats is 0 if common, 2 if rare, 3 if master, 4 if legendary
 	//Determine number of GoodStats - common is already done
 	if (WeaponRarity != EWeaponRarity::Common)
 	{
-		NumGoodStats =  static_cast<int32>(WeaponRarity) + 1;
-
+		NumGoodStats = static_cast<int32>(WeaponRarity) + 1;
 		TArray<int32> StatRolls;
 		//Roll for each stat
 		for (int32 i = 0; i < NumGoodStats; i++)
 		{
 			StatRolls.Add(FMath::RandRange(0, NumGoodStats - 1));
 		}
-
 		//Set the good stat ranges
-		for (int32 i = 0 ; i < StatRolls.Num() ; i++)
+		for (int32 i = 0; i < StatRolls.Num(); i++)
 		{
-            ChosenStatRanges[StatRolls[i]] = StatArrays[StatRolls[i]]->GoodStats;
+			ChosenStatRanges[StatRolls[i]] = StatArrays[StatRolls[i]]->GoodStats;
 		}
 	}
-
-
 
 	//From the chosen stat ranges, set the weapon stats by randomizing within the range
 	WeaponStats.Accuracy = FMath::RandRange(AccuracyRange.Min, AccuracyRange.Max);

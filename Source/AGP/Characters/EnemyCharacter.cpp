@@ -4,14 +4,12 @@
 #include "EnemyCharacter.h"
 
 
-
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComponent"));
-
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +49,7 @@ void AEnemyCharacter::TickPatrol()
 	else
 	{
 		MoveAlongPath();
-	};
+	}
 }
 
 void AEnemyCharacter::TickEngage()
@@ -72,7 +70,7 @@ void AEnemyCharacter::TickEngage()
 		{
 			Fire(SensedCharacter->GetActorLocation());
 		}
-	};
+	}
 
 	//if weapon is empty, reload
 	if (WeaponComponent)
@@ -96,7 +94,7 @@ void AEnemyCharacter::TickEvade()
 	else
 	{
 		MoveAlongPath();
-	};
+	}
 }
 
 void AEnemyCharacter::OnSensedPawn(APawn* Pawn)
@@ -125,7 +123,6 @@ void AEnemyCharacter::UpdateSight()
 	{
 		UE_LOG(LogTemp, Display, TEXT("Lost Player"));
 		SensedCharacter = nullptr;
-		
 	}
 }
 
@@ -150,7 +147,6 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			{
 				CurrentState = EEnemyState::Evade;
 			}
-			
 		}
 		break;
 	case EEnemyState::Engage:
@@ -177,7 +173,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentState = EEnemyState::Patrol;
 		}
 		break;
-	};
+	}
 }
 
 void AEnemyCharacter::MoveAlongPath()
@@ -205,6 +201,4 @@ void AEnemyCharacter::MoveAlongPath()
 void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
-

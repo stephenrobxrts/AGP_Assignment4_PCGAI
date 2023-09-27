@@ -2,7 +2,7 @@
 
 
 #include "WeaponComponent.h"
-#include "BaseCharacter.h"
+#include "../BaseCharacter.h"
 
 
 // Sets default values for this component's properties
@@ -19,7 +19,6 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 {
 	if (TimeSinceLastShot < WeaponStats.FireRate || RoundsRemainingInMagazine <= 0)
 	{
-		
 		return false;
 	}
 
@@ -28,22 +27,24 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 		UE_LOG(LogTemp, Display, TEXT("Unable to Fire! Reloading!"));
 		return false;
 	}
-	
+
 	FHitResult HitResult;
 	const FVector StartLocation = BulletStart;
-	const FVector FireDirection = (FireAtLocation - StartLocation).GetSafeNormal(); // Calculate the initial firing direction
+	const FVector FireDirection = (FireAtLocation - StartLocation).GetSafeNormal();
+	// Calculate the initial firing direction
 
 	// Calculate a random deviation within the accuracy cone
-	const float HalfConeAngle = FMath::DegreesToRadians(90.0f * (1.0f - WeaponStats.Accuracy)); // Adjust the 90.0f value as needed
+	const float HalfConeAngle = FMath::DegreesToRadians(90.0f * (1.0f - WeaponStats.Accuracy));
+	// Adjust the 90.0f value as needed
 	const FVector RandomDeviation = FMath::VRandCone(FireDirection, HalfConeAngle);
 	float MaxRange = 10000.0f;
 
 	const FVector EndLocation = StartLocation + (RandomDeviation * MaxRange);
-	
+
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwner());
-	
-	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_WorldStatic, QueryParams);\
+
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_WorldStatic, QueryParams);
 
 	UE_LOG(LogTemp, Display, TEXT("Fire!"));
 	if (AActor* HitActor = HitResult.GetActor())
@@ -53,7 +54,7 @@ bool UWeaponComponent::Fire(const FVector& BulletStart, const FVector& FireAtLoc
 			// The hit result actor is of type ABaseCharacter
 			// Draw a green debug line
 			DrawDebugLine(GetWorld(), StartLocation, HitResult.ImpactPoint, FColor::Green, false, 1.0f, 0, 1.0f);
-			HitActor->GetComponentByClass<UHealthComponent>()->UHealthComponent::ApplyDamage(WeaponStats.BaseDamage);
+			HitActor->GetComponentByClass<UHealthComponent>()->ApplyDamage(WeaponStats.BaseDamage);
 		}
 		else
 		{
@@ -105,7 +106,6 @@ void UWeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 
@@ -114,11 +114,10 @@ void UWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                      FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-    if (bIsReloading)
-    {
-    	TimeSinceReload += DeltaTime;
-    }
-	
+	if (bIsReloading)
+	{
+		TimeSinceReload += DeltaTime;
+	}
+
 	TimeSinceLastShot += DeltaTime;
 }
-

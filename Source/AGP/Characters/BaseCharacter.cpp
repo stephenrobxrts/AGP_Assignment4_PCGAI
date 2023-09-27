@@ -3,12 +3,12 @@
 
 #include "BaseCharacter.h"
 
-#include "Pickups/WeaponPickup.h"
+#include "../Pickups/WeaponPickup.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	BulletStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("BulletStartPosition"));
 	BulletStartPosition->SetupAttachment(GetRootComponent());
@@ -19,7 +19,6 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 bool ABaseCharacter::HasWeapon()
@@ -28,22 +27,19 @@ bool ABaseCharacter::HasWeapon()
 	{
 		return true;
 	}
-	else
-	{
-		return false;	
-	}
+	return false;
 }
 
 void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity)
 {
 	//Picking up Weapon - create weapon component and apply stats, materials
 	if (bEquipWeapon && !HasWeapon())
-    {
-     WeaponComponent = NewObject<UWeaponComponent>(this);
-     WeaponComponent->RegisterComponent();
+	{
+		WeaponComponent = NewObject<UWeaponComponent>(this);
+		WeaponComponent->RegisterComponent();
 		WeaponComponent->ApplyWeaponStats(WeaponStats);
 		EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
-    }
+	}
 	//Changing Weapon - change stats and material 
 	else if (bEquipWeapon && HasWeapon())
 	{
@@ -51,11 +47,11 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 		EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
 	}
 	//Dropping Weapon
-    else if (!bEquipWeapon && HasWeapon())
-    {
-     WeaponComponent->UnregisterComponent();
-     WeaponComponent = nullptr;
-    }
+	else if (!bEquipWeapon && HasWeapon())
+	{
+		WeaponComponent->UnregisterComponent();
+		WeaponComponent = nullptr;
+	}
 
 	if (bEquipWeapon)
 	{
@@ -65,7 +61,6 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 	{
 		UE_LOG(LogTemp, Display, TEXT("Player has unequipped weapon"))
 	}
-	
 }
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
@@ -78,24 +73,20 @@ bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 		}
 		return WeaponComponent->Fire(BulletStartPosition->GetComponentLocation(), FireAtLocation);
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 bool ABaseCharacter::Reload()
 {
-	if (!HasWeapon()  || bIsReloading)
+	if (!HasWeapon() || bIsReloading)
 	{
 		return false;
 	}
-	
+
 	UE_LOG(LogTemp, Display, TEXT("Player is reloading: %s , ReloadTime: %f"), *GetName(),
 	       WeaponComponent->GetReloadTime());
 	bIsReloading = true;
 	return WeaponComponent->Reload();
-
 }
 
 
@@ -103,7 +94,6 @@ bool ABaseCharacter::Reload()
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 // Called every frame
@@ -120,8 +110,4 @@ void ABaseCharacter::Tick(float DeltaTime)
 		}
 		TimeSinceReload += DeltaTime;
 	}
-	
 }
-
-
-

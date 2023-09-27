@@ -1,0 +1,24 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c0588503_002D454d_002D4612_002Db0ea_002D0e2ad6eb6274/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Or&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:AGP.Build.cs&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:AGPGameInstance.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:AGPGameInstance.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:AGPGameModeBase.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:AGPGameModeBase.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:HealthComponent.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:HealthComponent.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:NavigationNode.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:NavigationNode.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PathfindingSubsystem.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PathfindingSubsystem.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PickupBounceComponent.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PickupBounceComponent.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PickupManagerSubsystem.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PickupManagerSubsystem.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PickupRotatorComponent.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:PickupRotatorComponent.h&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:ProceduralLandscape.cpp&lt;/ProjectFile&gt;&#xD;
+    &lt;ProjectFile&gt;92B9C3FD-27C3-331E-8513-4EB00FC173C7/dl:Source:..?..?Source/d:AGP/f:ProceduralLandscape.h&lt;/ProjectFile&gt;&#xD;
+  &lt;/Or&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

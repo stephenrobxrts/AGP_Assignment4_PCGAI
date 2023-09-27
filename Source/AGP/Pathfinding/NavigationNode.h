@@ -10,8 +10,8 @@ UCLASS()
 class AGP_API ANavigationNode : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ANavigationNode();
 	virtual bool ShouldTickIfViewportsOnly() const override;
@@ -34,10 +34,15 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* LocationComponent;
 
+	/**
+	 * @brief Checks if a reciprocal connection exists between two nodes (A,B)
+	 * @param NodeA 
+	 * @param NodeB 
+	 * @return A bool indicating whether reciprocal connection exists between the two nodes
+	 */
 	bool CheckReciprocalConnection(ANavigationNode* NodeA, ANavigationNode* NodeB);
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };

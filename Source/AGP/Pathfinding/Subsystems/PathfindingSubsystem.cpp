@@ -4,15 +4,12 @@
 #include "PathfindingSubsystem.h"
 
 
-
 void UPathfindingSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
 	UE_LOG(LogTemp, Warning, TEXT("World Begin Play"))
 	PopulateNodes();
-	
-	
 }
 
 TArray<FVector> UPathfindingSubsystem::GetRandomPath(const FVector& StartLocation)
@@ -23,10 +20,7 @@ TArray<FVector> UPathfindingSubsystem::GetRandomPath(const FVector& StartLocatio
 	{
 		return GetPath(StartNode, EndNode);
 	}
-	else {
-		return TArray<FVector>();
-	}
-	
+	return TArray<FVector>();
 }
 
 TArray<FVector> UPathfindingSubsystem::GetPath(const FVector& StartLocation, const FVector& TargetLocation)
@@ -37,9 +31,7 @@ TArray<FVector> UPathfindingSubsystem::GetPath(const FVector& StartLocation, con
 	{
 		return GetPath(StartNode, EndNode);
 	}
-	else {
-		return TArray<FVector>();
-	}
+	return TArray<FVector>();
 }
 
 TArray<FVector> UPathfindingSubsystem::GetPathAway(const FVector& StartLocation, const FVector& TargetLocation)
@@ -50,9 +42,7 @@ TArray<FVector> UPathfindingSubsystem::GetPathAway(const FVector& StartLocation,
 	{
 		return GetPath(StartNode, EndNode);
 	}
-	else {
-		return TArray<FVector>();
-	}
+	return TArray<FVector>();
 }
 
 TArray<FVector> UPathfindingSubsystem::GetWaypointPositions()
@@ -84,7 +74,6 @@ void UPathfindingSubsystem::PopulateNodes()
 		UE_LOG(LogTemp, Warning, TEXT("Node: %s"), *Nodes[i]->GetActorLocation().ToString());
 		///Debug
 	}
-		
 }
 
 ANavigationNode* UPathfindingSubsystem::GetRandomNode()
@@ -94,9 +83,7 @@ ANavigationNode* UPathfindingSubsystem::GetRandomNode()
 		int RandomIndex = FMath::RandRange(0, Nodes.Num() - 1);
 		return Nodes[RandomIndex];
 	}
-	else {
-		return nullptr;
-	}
+	return nullptr;
 }
 
 ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLocation)
@@ -136,14 +123,13 @@ ANavigationNode* UPathfindingSubsystem::FindFurthestNode(const FVector& TargetLo
 
 TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode)
 {
-
 	//Use A* to find path
 	TArray<FVector> Path;
 	TArray<ANavigationNode*> OpenSet;
 	OpenSet.Add(StartNode);
 
 	// Set all Gscores to infinity and the HScores to correct heuristic
-	for (int i = 0; i < Nodes.Num() ; i++)
+	for (int i = 0; i < Nodes.Num(); i++)
 	{
 		Nodes[i]->GScore = UE_MAX_FLT - 1;
 		Nodes[i]->HScore = FVector::Dist(Nodes[i]->GetActorLocation(), EndNode->GetActorLocation());
@@ -171,7 +157,7 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 			if (OpenSet[i]->GScore + OpenSet[i]->FScore <= MinFScore)
 			{
 				MinFScore = OpenSet[i]->GScore + OpenSet[i]->HScore;
-				CurrentNode = OpenSet[i]; 
+				CurrentNode = OpenSet[i];
 				break;
 			}
 		}
@@ -188,7 +174,8 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 		for (int i = 0; i < CurrentNode->GetConnectedNodes().Num(); i++)
 		{
 			ANavigationNode* ConnectedNode = CurrentNode->GetConnectedNodes()[i];
-			float TentativeGScore = CurrentNode->GScore + FVector::Dist(CurrentNode->GetActorLocation(), ConnectedNode->GetActorLocation());
+			float TentativeGScore = CurrentNode->GScore + FVector::Dist(CurrentNode->GetActorLocation(),
+			                                                            ConnectedNode->GetActorLocation());
 			//if tentative GScore is less than connectedNode GScore, set connectedNode GScore to tentative GScore and set connectedNode parent to current node
 			if (TentativeGScore < ConnectedNode->GScore)
 			{
@@ -203,11 +190,9 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 				}
 			}
 		}
-		
 	}
 	//If it leaves this loop it has not found a valid path
 	return Path;
-	
 }
 
 TArray<FVector> UPathfindingSubsystem::ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode)
@@ -223,5 +208,4 @@ TArray<FVector> UPathfindingSubsystem::ReconstructPath(const ANavigationNode* St
 	}
 
 	return Path;
-	
 }
