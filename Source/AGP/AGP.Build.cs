@@ -10,7 +10,7 @@ public class AGP : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
-		PrivateDependencyModuleNames.AddRange(new[] { "EnhancedInput", "AIModule", "ProceduralMeshComponent" });
+		PrivateDependencyModuleNames.AddRange(new[] { "EnhancedInput", "AIModule", "ProceduralMeshComponent", "UnrealEd" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

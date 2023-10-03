@@ -22,6 +22,8 @@ public:
 	UPROPERTY()
 	ANavigationNode* ParentNode;
 
+	void DebugSetVisibility(const bool bNewVisibility);
+
 	TArray<ANavigationNode*> GetConnectedNodes();
 	void SetConnectedNodes(ANavigationNode* NewConnectedNode);
 	void DestroyNode();
@@ -33,6 +35,9 @@ protected:
 	TArray<ANavigationNode*> ConnectedNodes;
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* LocationComponent;
+
+	UPROPERTY(EditAnywhere)
+	bool bDebugVisible = false;
 
 	/**
 	 * @brief Checks if a reciprocal connection exists between two nodes (A,B)

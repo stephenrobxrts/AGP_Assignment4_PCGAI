@@ -70,6 +70,13 @@ protected:
 	TArray<APickupBase*> Pickups;
 
 
+	//Debugging
+	UPROPERTY(EditAnywhere)
+	bool bDebugShowNavNodes = true;
+	UPROPERTY(EditAnywhere)
+	bool bDebugNeedsUpdate = false;
+	void DebugShowNavNodes();
+	
 	void GenerateLandscape();
 	void CreateSimplePlane();
 	void ClearLandscape();

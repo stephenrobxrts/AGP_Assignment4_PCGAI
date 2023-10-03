@@ -2,7 +2,8 @@
 
 
 #include "PlayerCharacter.h"
-
+#include "Engine/LocalPlayer.h"
+#include "GameFramework/PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"

@@ -27,6 +27,16 @@ void AProceduralLandscape::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AProceduralLandscape::DebugShowNavNodes()
+{
+	//Call the DebugShowNavNodes function on each NavNode
+	for (ANavigationNode* Node : Nodes)
+	{
+		Node->DebugSetVisibility(bDebugShowNavNodes);
+	}
+	
+}
+
 void AProceduralLandscape::GenerateLandscape()
 {
 	//Set Perlin Offset
@@ -188,8 +198,7 @@ void AProceduralLandscape::ClearLandscape()
 	Vertices.Empty();
 	Triangles.Empty();
 	UVCoords.Empty();
-
-	//ToDo - New Pickup implemented in PickupManager - Ensure no issues here
+	
 	//Iterate through all APickupBase actors in the world and destroy them
 	for (TActorIterator<APickupBase> It(GetWorld()); It; ++It)
 	{
@@ -233,12 +242,17 @@ void AProceduralLandscape::SpawnPickups()
 void AProceduralLandscape::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	if (bShouldRegenerate)
 	{
 		ClearLandscape();
 		GenerateLandscape();
 		//SpawnPickups(); //Now implemented in PickupManagerSubsystem
 		bShouldRegenerate = false;
+	}
+	if (bDebugNeedsUpdate)
+	{
+		DebugShowNavNodes();
+		bDebugNeedsUpdate = false;
 	}
 }
