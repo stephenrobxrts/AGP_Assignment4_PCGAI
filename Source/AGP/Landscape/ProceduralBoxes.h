@@ -8,7 +8,19 @@
 #include "ProceduralBoxes.generated.h"
 
 /**
- * @brief Struct stores both the good(min/max) and bad(min/max) stat ranges for a weapon.
+ * @brief Box type enum
+ */
+UENUM(BlueprintType) 
+enum class EBoxType : uint8
+{
+	Start,
+	Normal,
+	End
+};
+
+
+/**
+ * @brief Level box struct contains Position, Size, Type (Start, Normal, End)
  */
 USTRUCT(BlueprintType)
 struct FLevelBox
@@ -18,6 +30,7 @@ struct FLevelBox
 public:
 	FVector Position;
 	FVector Size;
+	EBoxType Type;
 };
 
 USTRUCT(BlueprintType)
@@ -41,8 +54,12 @@ struct FTunnel
 	GENERATED_BODY()
 	
 public:
-	FLevelBox* StartBox;
-	FLevelBox* EndBox;
+	const FLevelBox* StartBox;
+	const FLevelBox* EndBox;
+	FVector Position;
+	FVector Size;
+	FQuat Rotation = FQuat::Identity;
+	
 };
 
 
@@ -63,14 +80,17 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
+	bool bShouldRegenerate = false;
+	
+	UPROPERTY(EditAnywhere)
 		TArray<FLevelBox> Boxes;
 	UPROPERTY(EditAnywhere)
 		TArray<FTunnel> Tunnels;
 
 	UPROPERTY(VisibleAnywhere)
-		TArray<FBoxNode> Path1;
+		TArray<FLevelBox> Path1;
 	UPROPERTY(VisibleAnywhere)
-		TArray<FBoxNode> Path2;
+		TArray<FLevelBox> Path2;
 	
 
 
@@ -81,28 +101,32 @@ protected:
 	UPROPERTY(EditAnywhere)
 		float HeightDifference = 400.0f;
 	UPROPERTY(EditAnywhere)
+		float MaxConnectionDistance = 2000.0f;
+	UPROPERTY(EditAnywhere)
 		FVector MinSize = FVector(300.0f, 300.0f, 200.0f);
 	UPROPERTY(EditAnywhere)
 		FVector MaxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	
 
-	TArray<FLevelBox> GenerateRandomBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
+	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
+	bool PositionValidForSecondPath(const FLevelBox& NewBox, const TArray<FLevelBox>& FirstPathBoxes);
 
-	void PopulateConnectedNodes(TArray<FBoxNode>& AllNodes, float MaxConnectionDistance);
-	bool CanConnect(FLevelBox* BoxA, FLevelBox* BoxB, float MaxConnectionDistance);
+	void PopulateConnectedNodes(TArray<FBoxNode>& AllNodes);
+	bool CanConnect(FLevelBox* BoxA, FLevelBox* BoxB);
 	TArray<FVector> GetPath(FBoxNode* StartNode, FBoxNode* EndNode, const TSet<FBoxNode*>& AvoidNodes);
 	
 	TArray<FTunnel> GenerateTunnels(TArray<FLevelBox> InputBoxes);
 	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& EndBox);
 
+	void DebugBox(FLevelBox& inputBox, FColor Color);
 
 	TArray<TArray<bool>> ConnectionMatrix;
 	int CountConnections(int BoxIndex, const TArray<TArray<bool>>& Connections);
-	bool AreBoxesIntersecting(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
 
 	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
 };

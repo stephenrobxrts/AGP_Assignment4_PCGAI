@@ -23,21 +23,12 @@ bool AProceduralBoxes::ShouldTickIfViewportsOnly() const
 void AProceduralBoxes::BeginPlay()
 {
 	Super::BeginPlay();
-	Boxes = GenerateRandomBoxes(NumBoxes, MinSize, MaxSize);
-	Tunnels = GenerateTunnels(Boxes);
+	//Boxes = GenerateGuaranteedPathBoxes(NumBoxes, MinSize, MaxSize);
+	//Tunnels = GenerateTunnels(Boxes);
 
-	for (const FLevelBox& box : Boxes)
-	{
-		// Box center
-		FVector center = box.Position;
 
-		// Half of the box size in each dimension
-		FVector halfSize = box.Size * 0.5f;
-
-		// Draw the box for 10 seconds with a thickness of 2 units
-		DrawDebugBox(GetWorld(), center, halfSize, FColor::Red, false, 10.0f, 0, 2.0f);
-	}
 }
+
 
 int AProceduralBoxes::CountConnections(int BoxIndex, const TArray<TArray<bool>>& Connections)
 {
@@ -52,40 +43,97 @@ int AProceduralBoxes::CountConnections(int BoxIndex, const TArray<TArray<bool>>&
 	return Count;
 }
 
-TArray<FLevelBox> AProceduralBoxes::GenerateRandomBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize)
+TArray<FLevelBox> AProceduralBoxes::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
+                                                                FVector BoxMaxSize)
 {
 	FVector Start = FVector(0, 0, 0);
 	FVector End = FVector(LevelSize, LevelSize, FMath::RandRange(-HeightDifference, HeightDifference));
 	TArray<FLevelBox> boxes;
-	for (int i = 0; i < NumBoxesToGenerate; i++)
+
+	FLevelBox StartBox;
+	StartBox.Position = Start;
+	StartBox.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X), FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+	                        FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
+	StartBox.Type = EBoxType::Start;
+	boxes.Add(StartBox);
+
+	FVector LastPosition = Start;
+
+	for (int i = 1; i < NumBoxesToGenerate - 1; i++)
 	{
 		FLevelBox box;
-		box.Position.SetComponentForAxis(EAxis::X, FMath::RandRange(0, 10000));
-		box.Position.SetComponentForAxis(EAxis::Y, FMath::RandRange(0, 10000));
-		box.Size = FVector(
+
+		// Get a direction biased towards the destination
+		FVector BiasedDirection = (End - LastPosition).GetSafeNormal();
+
+		// Randomize within a hemisphere towards the destination
+		FVector RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(30.f));
+
+		FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
+			0.5f * MaxConnectionDistance, MaxConnectionDistance);
+		box.Position = newPosition;
+		box.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X), FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+		                   FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
+		box.Type = EBoxType::Normal;
+		boxes.Add(box);
+		Path1.Add(box);
+		CreateTunnel(boxes[i - 1], box);
+		LastPosition = newPosition;
+	}
+
+	FLevelBox& EndBox = boxes.Last();
+	EndBox.Size = FVector
+	(
+		FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
+		FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+		FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)
+	);
+	EndBox.Type = EBoxType::End;
+
+	LastPosition = Start;
+	//Generate Second Path
+	for (int i = 1; i < NumBoxesToGenerate - 1; i++)
+	{
+		FLevelBox box;
+
+		// Get a direction biased towards the destination
+		FVector BiasedDirection = (EndBox.Position - LastPosition).GetSafeNormal();
+		
+		// Randomize within a hemisphere towards the destination
+		FVector RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(30.f));
+		FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
+			0.5f * MaxConnectionDistance, MaxConnectionDistance);
+		box.Size = FVector
+		(
 			FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
-			FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z),
-			FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y)
+			FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+			FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)
 		);
 
-		// Check for intersections with other boxes
-		bool hasIntersection = false;
-		for (const FLevelBox& existingBox : boxes)
+		box.Position = newPosition; // <-- Move this here
+
+		while (!PositionValidForSecondPath(box, Path1))
 		{
-			if (AreBoxesIntersecting(box, existingBox))
-			{
-				hasIntersection = true;
-				break;
-			}
+			RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(30.f));
+			newPosition = LastPosition + RandomDirection * FMath::RandRange(
+				0.5f * MaxConnectionDistance, MaxConnectionDistance);
+			box.Position = newPosition; // <-- This is necessary to update the box's position
 		}
 
-		if (!hasIntersection)
+		box.Type = EBoxType::Normal;
+		boxes.Add(box);
+		Path2.Add(box);
+		FLevelBox LastBox;
+		if (i == 1)
 		{
-			//Log the box
-			UE_LOG(LogTemp, Warning, TEXT("Box %d: Position: %s, Size: %s"), i, *box.Position.ToString(),
-			       *box.Size.ToString());
-			boxes.Add(box);
+			LastBox = StartBox;
 		}
+		else
+		{
+			LastBox = boxes[Path1.Num() + i - 1];
+		}
+		CreateTunnel(LastBox, box);
+		LastPosition = newPosition;
 	}
 	return boxes;
 }
@@ -140,23 +188,28 @@ TArray<FTunnel> AProceduralBoxes::GenerateTunnels(TArray<FLevelBox> InputBoxes)
 
 void AProceduralBoxes::CreateTunnel(const FLevelBox& StartBox, const FLevelBox& EndBox)
 {
+	FTunnel Tunnel;
+	Tunnel.StartBox = &StartBox;
+	Tunnel.EndBox = &EndBox;
+	
 	FVector Start = StartBox.Position;
 	FVector End = EndBox.Position;
-	FVector MidPoint = (Start + End) / 2;
+	Tunnel.Position = (Start + End) / 2;
 	FVector Direction = (End - Start).GetSafeNormal();
-	FVector TunnelDimensions(50, 50, (End - Start).Size());
-	FQuat TunnelRotation = FQuat::FindBetweenNormals(FVector::UpVector, Direction);
+	Tunnel.Size = FVector(50, 50, (End - Start).Size());
+	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Direction);
 
-	DrawDebugBox(GetWorld(), MidPoint, TunnelDimensions / 2, TunnelRotation, FColor::Green, false, 10.0f, 0, 2.0f);
+	Tunnels.Add(Tunnel);
 }
 
-void AProceduralBoxes::PopulateConnectedNodes(TArray<FBoxNode>& AllNodes, float MaxConnectionDistance)
+
+void AProceduralBoxes::PopulateConnectedNodes(TArray<FBoxNode>& AllNodes)
 {
-	for(FBoxNode& NodeA : AllNodes)
+	for (FBoxNode& NodeA : AllNodes)
 	{
-		for(FBoxNode& NodeB : AllNodes)
+		for (FBoxNode& NodeB : AllNodes)
 		{
-			if(&NodeA != &NodeB && CanConnect(NodeA.Box, NodeB.Box, MaxConnectionDistance))
+			if (&NodeA != &NodeB && CanConnect(NodeA.Box, NodeB.Box))
 			{
 				NodeA.ConnectedNodes.Add(&NodeB);
 			}
@@ -164,7 +217,7 @@ void AProceduralBoxes::PopulateConnectedNodes(TArray<FBoxNode>& AllNodes, float 
 	}
 }
 
-bool AProceduralBoxes::CanConnect(FLevelBox* BoxA, FLevelBox* BoxB, float MaxConnectionDistance)
+bool AProceduralBoxes::CanConnect(FLevelBox* BoxA, FLevelBox* BoxB)
 {
 	FVector CenterA = BoxA->Position;
 	FVector CenterB = BoxB->Position;
@@ -174,7 +227,7 @@ bool AProceduralBoxes::CanConnect(FLevelBox* BoxA, FLevelBox* BoxB, float MaxCon
 	return Distance <= MaxConnectionDistance;
 }
 
-bool AProceduralBoxes::AreBoxesIntersecting(const FLevelBox& BoxA, const FLevelBox& BoxB)
+bool AProceduralBoxes::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
 	// Check for gap along X axis
 	if (BoxA.Position.X + BoxA.Size.X < BoxB.Position.X ||
@@ -201,8 +254,73 @@ bool AProceduralBoxes::AreBoxesIntersecting(const FLevelBox& BoxA, const FLevelB
 	return true;
 }
 
+bool AProceduralBoxes::PositionValidForSecondPath(const FLevelBox& NewBox, const TArray<FLevelBox>& FirstPathBoxes)
+{
+	for (const FLevelBox& Box : FirstPathBoxes)
+	{
+		if (BoxesIntersect(Box, NewBox))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 // Called every frame
 void AProceduralBoxes::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (bShouldRegenerate)
+	{
+		Boxes.Empty();
+		Tunnels.Empty();
+		Path1.Empty();
+		Path2.Empty();
+		
+		Boxes = GenerateGuaranteedPathBoxes(NumBoxes, MinSize, MaxSize);
+		//SpawnPickups(); //Now implemented in PickupManagerSubsystem
+		bShouldRegenerate = false;
+
+	}
+
+	//Debug to visualize boxes
+	if (!Boxes.IsEmpty())
+	{
+		for (const FLevelBox& box : Boxes)
+		{
+			// Box center
+			FVector center = box.Position;
+
+			// Half of the box size in each dimension
+			FVector halfSize = box.Size * 0.5f;
+
+			FColor color = FColor::Red;
+			switch (box.Type)
+			{
+			case EBoxType::Start:
+				color = FColor::Blue;
+				break;
+			case EBoxType::End:
+				color = FColor::Yellow;
+				break;
+			default:
+				color = FColor::Red;
+				break;
+			}
+			// Draw the box every frame
+			DrawDebugBox(GetWorld(), center, halfSize, color, false, -1, 0, 2.0f);
+		}
+		if (!Tunnels.IsEmpty())
+		{
+			for (const FTunnel& tunnel : Tunnels)
+			{
+				FVector center = tunnel.Position;
+				FVector halfSize = tunnel.Size * 0.5f;
+				FColor color = FColor::Green;
+
+				DrawDebugBox(GetWorld(), tunnel.Position, tunnel.Size / 2, tunnel.Rotation, FColor::Green, false, -1.0, 0, 10.0f);
+			}
+		}
+
+	}
 }
