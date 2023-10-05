@@ -19,11 +19,20 @@ public:
 	// Sets default values for this actor's properties
 	AMarchingChunkTerrain();
 	virtual bool ShouldTickIfViewportsOnly() const override;
+	UPROPERTY(VisibleAnywhere, Category="Inputs")
 	int LevelSize = 1000;
-	int ChunkVoxelDensity = 32;
+	int ChunkVoxelDensity = 8;
+	UPROPERTY(VisibleAnywhere, Category="Settings")
 	int ChunkSize = 1000;
 
+	UPROPERTY(EditAnywhere)
+	bool bUpdateMesh = false;
+
 	FVector Position = FVector::ZeroVector;
+
+	FVector CornerPosition = FVector (Position.X + ChunkSize/2.0,
+									  Position.Y + ChunkSize/2.0,
+									  Position.Z);
 	bool bInterpolate = true;
 
 	//For noise
@@ -58,7 +67,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 private:
-	TArray<float> Voxels;
+	UPROPERTY(VisibleAnywhere)
+		TArray<float> Voxels;
 	int TriangleOrder[3] = {0, 1, 2};
 
 	void March(int X, int Y, int Z, const float Cube[8]);

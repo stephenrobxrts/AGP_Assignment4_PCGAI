@@ -137,7 +137,7 @@ void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox
 	FVector End = EndBox.Position;
 	Tunnel.Position = (Start + End) / 2;
 	FVector Direction = (End - Start).GetSafeNormal();
-	Tunnel.Size = FVector(50, 50, (End - Start).Size());
+	Tunnel.Size = FVector(200, 200, (End - Start).Size());
 	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Direction);
 
 	Tunnels.Add(Tunnel);
@@ -181,6 +181,7 @@ void AProceduralCaveGen::GenerateMesh()
 	chunk->Boxes = Boxes;
 	chunk->Tunnels = Tunnels;
 	chunk->LevelSize = static_cast<int>(LevelSize);
+	chunk->bUpdateMesh = bUpdateMesh;
 	
 	UGameplayStatics::FinishSpawningActor(chunk, FTransform());
 

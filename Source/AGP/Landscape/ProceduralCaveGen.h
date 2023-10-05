@@ -65,7 +65,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 		bool bShouldRegenerate = true;
 	UPROPERTY(EditAnywhere)
-		bool bUpdateMesh = false;
+		bool bUpdateMesh = true;
 
 	UPROPERTY(EditAnywhere)
 		int NumBoxesPerPath = 10;
