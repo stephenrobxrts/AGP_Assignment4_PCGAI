@@ -63,9 +63,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	bool bShouldRegenerate = false;
+		bool bShouldRegenerate = true;
 	UPROPERTY(EditAnywhere)
-	bool bUpdateMesh = false;
+		bool bUpdateMesh = false;
 
 	UPROPERTY(EditAnywhere)
 		int NumBoxesPerPath = 10;
@@ -82,17 +82,20 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AMarchingChunkTerrain> Marcher;
+
+	//ToDo: This will be converted to an Array of chunks
+	//Testing with one chunk for now
 	AMarchingChunkTerrain* MarcherInstance;
 	
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FLevelBox> Boxes;
+		TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FTunnel> Tunnels;
+		TArray<FTunnel> Tunnels;
 
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FLevelBox> Path1;
+		TArray<FLevelBox> Path1;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FLevelBox> Path2;
+		TArray<FLevelBox> Path2;
 	
 
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);

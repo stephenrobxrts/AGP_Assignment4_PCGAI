@@ -31,6 +31,7 @@ void AProceduralCaveGen::BeginPlay()
 	//Tunnels = GenerateTunnels(Boxes);
 }
 
+//ToDo: Tidy up second path by generalizing the function
 TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
                                                                   FVector BoxMaxSize)
 {
@@ -179,6 +180,7 @@ void AProceduralCaveGen::GenerateMesh()
 
 	chunk->Boxes = Boxes;
 	chunk->Tunnels = Tunnels;
+	chunk->LevelSize = static_cast<int>(LevelSize);
 	
 	UGameplayStatics::FinishSpawningActor(chunk, FTransform());
 

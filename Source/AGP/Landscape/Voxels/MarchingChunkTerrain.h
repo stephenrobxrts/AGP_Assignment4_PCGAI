@@ -18,8 +18,12 @@ class AGP_API AMarchingChunkTerrain : public AActor
 public:
 	// Sets default values for this actor's properties
 	AMarchingChunkTerrain();
+	virtual bool ShouldTickIfViewportsOnly() const override;
+	int LevelSize = 1000;
+	int ChunkVoxelDensity = 32;
+	int ChunkSize = 1000;
 
-	int ChunkSize = 32;
+	FVector Position = FVector::ZeroVector;
 	bool bInterpolate = true;
 
 	//For noise
@@ -32,13 +36,17 @@ public:
 	//Boxes and tunnels
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
 		TArray<FLevelBox> Boxes;
-	UPROPERTY(EditDefaultsOnly, Category="Inputs")
+	UPROPERTY(VisibleAnywhere, Category="Inputs")
 		TArray<FTunnel> Tunnels;
+
+	bool DebugChunk = true;
+	bool DebugVoxels = true;	
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void Setup();
+	
+	void CreateVoxels();
 
 	//Mesh
 	TObjectPtr<UProceduralMeshComponent> Mesh;
