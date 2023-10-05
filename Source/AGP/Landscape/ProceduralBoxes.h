@@ -7,14 +7,53 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralBoxes.generated.h"
 
+/**
+ * @brief Struct stores both the good(min/max) and bad(min/max) stat ranges for a weapon.
+ */
+USTRUCT(BlueprintType)
+struct FLevelBox
+{
+	GENERATED_BODY()
+	
+public:
+	FVector Position;
+	FVector Size;
+};
+
+USTRUCT(BlueprintType)
+struct FBoxNode
+{
+	GENERATED_BODY()
+	
+public:
+	FLevelBox* Box;
+	FBoxNode* Parent;
+	float GScore;
+	float HScore;
+	float FScore;
+
+	TArray<FBoxNode*> ConnectedNodes; // This will have immediate neighboring boxes
+};
+
+USTRUCT(BlueprintType)
+struct FTunnel
+{
+	GENERATED_BODY()
+	
+public:
+	FLevelBox* StartBox;
+	FLevelBox* EndBox;
+};
+
+
 UCLASS()
 class AGP_API AProceduralBoxes : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AProceduralBoxes();
+	// Sets default values for this actor's properties
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
 	
@@ -23,34 +62,45 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//Mesh Generation Settings
 	UPROPERTY(EditAnywhere)
-	bool bShouldRegenerate = false;
+		TArray<FLevelBox> Boxes;
 	UPROPERTY(EditAnywhere)
-	int32 Width = 10;
-	UPROPERTY(EditAnywhere)
-	int32 Height = 10;
-	UPROPERTY(EditAnywhere)
-	int32 Depth = 10;
-	UPROPERTY(EditAnywhere)
-	float VertexSpacing = 1000.0f;
+		TArray<FTunnel> Tunnels;
 
-	//Navigation Nodes
-	UPROPERTY(EditAnywhere)
-	TArray<ANavigationNode*> Nodes;
-
-
-	//Debugging
-	UPROPERTY(EditAnywhere)
-	bool bDebugShowNavNodes = true;
-	UPROPERTY(EditAnywhere)
-	bool bDebugNeedsUpdate = false;
-	void DebugShowNavNodes();
+	UPROPERTY(VisibleAnywhere)
+		TArray<FBoxNode> Path1;
+	UPROPERTY(VisibleAnywhere)
+		TArray<FBoxNode> Path2;
 	
-	void GenerateLandscape();
-	void CreateSimpleBox();
-	void ClearLandscape();
 
+
+	UPROPERTY(EditAnywhere)
+		int NumBoxes = 10;
+	UPROPERTY(EditAnywhere)
+		float LevelSize = 10000.0f;
+	UPROPERTY(EditAnywhere)
+		float HeightDifference = 400.0f;
+	UPROPERTY(EditAnywhere)
+		FVector MinSize = FVector(300.0f, 300.0f, 200.0f);
+	UPROPERTY(EditAnywhere)
+		FVector MaxSize = FVector(1000.0f, 1000.0f, 600.0f);
+	
+
+	TArray<FLevelBox> GenerateRandomBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
+
+	void PopulateConnectedNodes(TArray<FBoxNode>& AllNodes, float MaxConnectionDistance);
+	bool CanConnect(FLevelBox* BoxA, FLevelBox* BoxB, float MaxConnectionDistance);
+	TArray<FVector> GetPath(FBoxNode* StartNode, FBoxNode* EndNode, const TSet<FBoxNode*>& AvoidNodes);
+	
+	TArray<FTunnel> GenerateTunnels(TArray<FLevelBox> InputBoxes);
+	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& EndBox);
+
+
+	TArray<TArray<bool>> ConnectionMatrix;
+	int CountConnections(int BoxIndex, const TArray<TArray<bool>>& Connections);
+	bool AreBoxesIntersecting(const FLevelBox& BoxA, const FLevelBox& BoxB);
+
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
