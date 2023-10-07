@@ -137,8 +137,8 @@ void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox
 	FVector End = EndBox.Position;
 	Tunnel.Position = (Start + End) / 2;
 	FVector Direction = (End - Start).GetSafeNormal();
-	Tunnel.Size = FVector(200, 200, (End - Start).Size());
-	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Direction);
+	Tunnel.Size = FVector((End - Start).Size(), 200, 200);
+	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::ForwardVector, Direction);
 
 	Tunnels.Add(Tunnel);
 }
@@ -212,12 +212,12 @@ void AProceduralCaveGen::GenerateMesh()
 	}
 	else
 	{
-		//ToDo:  Optimize by checking if chunks intersect with any boxes or tunnels
+		
 		for (int x = -1 ; x <= LevelSize/ChunkSize ; x++)
 		{
 			for (int y = -1 ; y <= LevelSize/ChunkSize ; y++)
 			{
-				for (int z = -3*HeightDifference/ChunkSize ; z <= 3 * HeightDifference/ChunkSize ; z++)
+				for (int z = -6*HeightDifference/ChunkSize ; z <= 6 * HeightDifference/ChunkSize ; z++)
 				{
 					FVector ChunkPosition = FVector(x * ChunkSize + ChunkSize/2, y * ChunkSize + ChunkSize/2, z * ChunkSize + ChunkSize/2);
 					//Check if chunk intersects with any boxes - if not, skip it
