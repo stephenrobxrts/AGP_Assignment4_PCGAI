@@ -53,17 +53,19 @@ public:
 
 	//Boxes and tunnels
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
-	TArray<FLevelBox> Boxes;
+		TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
-	TArray<FTunnel> Tunnels;
+		TArray<FTunnel> Tunnels;
 	void ClearMesh();
 	
 	//Debugging
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool DebugChunk = true;
+		bool DebugChunk = true;
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool DebugVoxels = true;
-
+		bool DebugVoxels = true;
+	UPROPERTY(EditAnywhere, Category="Settings")
+		bool DebugInverted = false;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

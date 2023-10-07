@@ -3,10 +3,8 @@
 
 #include "ProceduralCaveGen.h"
 
-#include "ContentStreaming.h"
-#include "EngineUtils.h"
-#include "Components/BoxComponent.h"
-#include "Builders/CubeBuilder.h"
+
+#include "Algo/RandomShuffle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 
@@ -31,46 +29,76 @@ void AProceduralCaveGen::BeginPlay()
 	//Tunnels = GenerateTunnels(Boxes);
 }
 
-//ToDo: Tidy up second path by generalizing the function
+//ToDo: Tidy up second path by generalizing the function with for loop
 TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
                                                                   FVector BoxMaxSize)
 {
+	//Start and End Locations
 	FVector Start = FVector(GetActorLocation());
 	FVector End = FVector(LevelSize, LevelSize, FMath::RandRange(-HeightDifference, HeightDifference));
 	TArray<FLevelBox> boxes;
 
+	//Start Box
 	FLevelBox StartBox;
 	StartBox.Position = Start;
-	StartBox.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X), FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-	                        FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
+	StartBox.Size = FVector
+	(
+		FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
+		FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+        FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
 	StartBox.Type = EBoxType::Start;
 	boxes.Add(StartBox);
+	
 
+	//Find paths up to number of paths
 	FVector LastPosition = Start;
-
-	for (int i = 1; i < NumBoxesToGenerate - 1; i++)
+	for (int i = 0 ; i < NumPaths ; i++)
 	{
-		FLevelBox box;
+		FInnerArray Path;
+		Paths.Add(Path);
+		LastPosition = Start;
+		for (int j = 0 ; j < NumBoxesPerPath ; ++j)
+		{
+			FLevelBox box;
 
-		// Get a direction biased towards the destination
-		FVector BiasedDirection = (End - LastPosition).GetSafeNormal();
+			// Get a direction biased towards the destination
+			FVector BiasedDirection = (End - LastPosition).GetSafeNormal();
 
-		// Randomize within a hemisphere towards the destination
-		FVector RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(30.f));
+			// Randomize within a hemisphere towards the destination
+			FVector RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(30.f));
 
-		FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
-			0.5f * MaxConnectionDistance, MaxConnectionDistance);
-		box.Position = newPosition;
-		box.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X), FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-		                   FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
-		box.Type = EBoxType::Normal;
-		boxes.Add(box);
-		Path1.Add(box);
-		CreateTunnel(boxes[i - 1], box);
-		LastPosition = newPosition;
+			// Constrain the vertical movement
+			float MaxVerticalOffset = 200.0f;  // Set this to the max vertical difference you want between rooms
+			float verticalComponent = FMath::Clamp(RandomDirection.Z, -MaxVerticalOffset, MaxVerticalOffset);
+			RandomDirection.Z = verticalComponent;
+
+			FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
+				0.5f * MaxConnectionDistance, MaxConnectionDistance);
+			box.Position = newPosition;
+			box.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X), FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+							   FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
+			box.Type = EBoxType::Normal;
+
+			
+			//If box doesn't collide with any other boxes, add it to the list
+			if (BoxPositionValid(box, boxes))
+			{
+				FLevelBox lastBox;
+				j == 0 ? lastBox = StartBox : lastBox = boxes[j - 1];
+				boxes.Add(box);
+				Paths[i].Path.Add(box);
+				CreateTunnel(lastBox, box);
+				LastPosition = newPosition;
+			}
+			else
+			{
+				j--;
+			}
+		}
 	}
 
-	FLevelBox& EndBox = boxes.Last();
+	//End Box
+	FLevelBox EndBox{End, FVector(0, 0, 0), EBoxType::End};
 	EndBox.Size = FVector
 	(
 		FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
@@ -78,63 +106,39 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 		FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)
 	);
 	EndBox.Type = EBoxType::End;
+	boxes.Add(EndBox);
 
-	LastPosition = Start;
-	//Generate Second Path
-	for (int i = 1; i < NumBoxesToGenerate - 1; i++)
-	{
-		FLevelBox box;
-
-		// Get a direction biased towards the destination
-		FVector BiasedDirection = (EndBox.Position - LastPosition).GetSafeNormal();
-
-		// Randomize within a hemisphere towards the destination
-		FVector RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(30.f));
-		FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
-			0.5f * MaxConnectionDistance, MaxConnectionDistance);
-		box.Size = FVector
-		(
-			FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
-			FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-			FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)
-		);
-
-		box.Position = newPosition;
-
-		while (!PositionValidForSecondPath(box, Path1))
-		{
-			RandomDirection = FMath::VRandCone(BiasedDirection, FMath::DegreesToRadians(80.f));
-			newPosition = LastPosition + RandomDirection * FMath::RandRange(
-				0.5f * MaxConnectionDistance, MaxConnectionDistance);
-			box.Position = newPosition; // <-- This is necessary to update the box's position
-		}
-
-		box.Type = EBoxType::Normal;
-		boxes.Add(box);
-		Path2.Add(box);
-		FLevelBox LastBox;
-		if (i == 1)
-		{
-			LastBox = StartBox;
-		}
-		else
-		{
-			LastBox = boxes[Path1.Num() + i - 1];
-		}
-		CreateTunnel(LastBox, box);
-		LastPosition = newPosition;
-	}
+	
 	return boxes;
 }
 
-void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox& EndBox)
+void AProceduralCaveGen::GenerateInterconnects()
+{
+	//ToDo: Randomly choose interconnects
+	const int numInterconnects = Paths[0].Path.Num()/2;
+	TArray<int> InterconnectIndices;
+	for (int i = 0; i < Paths[0].Path.Num(); i++)
+	{
+		InterconnectIndices.Add(i);
+	}
+	Algo::RandomShuffle(InterconnectIndices);
+	//std::shuffle(InterconnectIndices.begin(), InterconnectIndices.end());
+	for (int i = 0 ; i < numInterconnects; i++)
+	{
+		FLevelBox& BoxA = Paths[0].Path[InterconnectIndices[i]];
+		FLevelBox& BoxB = Paths[1].Path[InterconnectIndices[i]];
+		CreateTunnel(BoxA, BoxB);
+	}
+}
+
+void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox)
 {
 	FTunnel Tunnel;
 	Tunnel.StartBox = &StartBox;
-	Tunnel.EndBox = &EndBox;
+	Tunnel.EndBox = &TargetBox;
 
 	FVector Start = StartBox.Position;
-	FVector End = EndBox.Position;
+	FVector End = TargetBox.Position;
 	Tunnel.Position = (Start + End) / 2;
 	FVector Direction = (End - Start).GetSafeNormal();
 	Tunnel.Size = FVector((End - Start).Size(), 200, 200);
@@ -200,6 +204,7 @@ void AProceduralCaveGen::GenerateMesh()
 					Chunk->bUpdateMesh = bUpdateMesh;
 					Chunk->DebugChunk = DebugChunk;
 					Chunk->DebugVoxels = DebugVoxels;
+					Chunk->DebugInverted = DebugInvertSolids;
 						
 					UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
 
@@ -212,7 +217,6 @@ void AProceduralCaveGen::GenerateMesh()
 	}
 	else
 	{
-		
 		for (int x = -1 ; x <= LevelSize/ChunkSize ; x++)
 		{
 			for (int y = -1 ; y <= LevelSize/ChunkSize ; y++)
@@ -258,9 +262,9 @@ void AProceduralCaveGen::GenerateMesh()
 
 }
 
-bool AProceduralCaveGen::PositionValidForSecondPath(const FLevelBox& NewBox, const TArray<FLevelBox>& FirstPathBoxes)
+bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& AllBoxes)
 {
-	for (const FLevelBox& Box : FirstPathBoxes)
+	for (const FLevelBox& Box : AllBoxes)
 	{
 		if (BoxesIntersect(Box, NewBox))
 		{
@@ -279,8 +283,16 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 	{
 		Boxes.Empty();
 		Tunnels.Empty();
-		Path1.Empty();
-		Path2.Empty();
+		if (!Paths.IsEmpty())
+		{
+			for (FInnerArray& Path : Paths)
+			{
+
+				Path.Path.Empty();
+
+				
+			}
+		}
 		//If the marched terrain chunk has been spawned, destroy it
 		if (!Chunks.IsEmpty())
 		{
@@ -295,7 +307,10 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 			Chunks.Empty();
 		}
 
+		//If level has only just been initialized iterate through marching chunks and destroy them
+
 		Boxes = GenerateGuaranteedPathBoxes(NumBoxesPerPath, MinSize, MaxSize);
+		GenerateInterconnects();
 
 		GenerateMesh();
 		//SpawnPickups(); //Now implemented in PickupManagerSubsystem

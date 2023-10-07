@@ -45,6 +45,14 @@ public:
 	FQuat Rotation = FQuat::Identity;
 };
 
+USTRUCT()
+struct FInnerArray
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	TArray<FLevelBox> Path;
+};
+
 
 UCLASS()
 class AGP_API AProceduralCaveGen : public AActor
@@ -66,6 +74,8 @@ protected:
 		bool bUpdateMesh = true;
 
 	UPROPERTY(EditAnywhere)
+		int NumPaths = 2;
+	UPROPERTY(EditAnywhere)
 		int NumBoxesPerPath = 10;
 	UPROPERTY(EditAnywhere)
 		float LevelSize = 10000.0f;
@@ -81,9 +91,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<class AMarchingChunkTerrain> Marcher;
 
-	//ToDo: This will be converted to an Array of chunks
-	//Testing with one chunk for now
-		TArray<AMarchingChunkTerrain*> Chunks; 
+
+	TArray<AMarchingChunkTerrain*> Chunks; 
 	UPROPERTY(EditInstanceOnly, Category="Chunk")
 		TObjectPtr<UMaterialInterface> Material;
 
@@ -97,24 +106,26 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 		TArray<FTunnel> Tunnels;
 
-	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FLevelBox> Path1;
-	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FLevelBox> Path2;
 
+	UPROPERTY(VisibleAnywhere, Category="Level Layout")
+		TArray<FInnerArray> Paths;
+	
 
 	UPROPERTY(EditAnywhere, Category="Chunk")
-	int ChunkSize = 1000;
+		int ChunkSize = 1024; 
 	UPROPERTY(EditAnywhere, Category="Chunk")
-	int VoxelDensity = 32;
+		int VoxelDensity = 32;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-	bool DebugChunk = true;
+		bool DebugChunk = true;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-	bool DebugVoxels = false;
+		bool DebugVoxels = false;
+	UPROPERTY(EditAnywhere, Category="Chunk")
+		bool DebugInvertSolids = true;
 
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
-	bool PositionValidForSecondPath(const FLevelBox& NewBox, const TArray<FLevelBox>& FirstPathBoxes);
-	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& EndBox);
+	void GenerateInterconnects();
+	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
+	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
 	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
 
 	void GenerateMesh();
