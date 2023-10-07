@@ -21,18 +21,27 @@ public:
 	virtual bool ShouldTickIfViewportsOnly() const override;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
 	int LevelSize = 1000;
-	int ChunkVoxelDensity = 8;
+	UPROPERTY(VisibleAnywhere, Category="Inputs")
+	FVector ChunkPosition = FVector::ZeroVector;
+	UPROPERTY(VisibleAnywhere, Category="Settings")
+	int VoxelsPerSide = 8;
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	int ChunkSize = 1000;
+	UPROPERTY(EditAnywhere, Category="Settings")
+	double ChunkRatio = ChunkSize/VoxelsPerSide;
+	
 
-	UPROPERTY(EditAnywhere)
+	TObjectPtr<UMaterialInterface> Material;
+	
+
+	UPROPERTY(EditAnywhere, Category="Settings")
 	bool bUpdateMesh = false;
 
 	FVector Position = FVector::ZeroVector;
 
-	FVector CornerPosition = FVector (Position.X + ChunkSize/2.0,
-									  Position.Y + ChunkSize/2.0,
-									  Position.Z);
+	FVector CornerPosition = FVector(+ChunkSize / 2.0,
+	                                 +ChunkSize / 2.0,
+	                                 +ChunkSize / 2.0);
 	bool bInterpolate = true;
 
 	//For noise
@@ -40,43 +49,50 @@ public:
 
 	//Marching Cube specific
 	UPROPERTY(EditDefaultsOnly, Category="Marching Cubes")
-		float SurfaceLevel = 0.0f;
+	float SurfaceLevel = 0.0f;
 
 	//Boxes and tunnels
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
-		TArray<FLevelBox> Boxes;
+	TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
-		TArray<FTunnel> Tunnels;
-
-	bool DebugChunk = true;
-	bool DebugVoxels = true;	
+	TArray<FTunnel> Tunnels;
+	void ClearMesh();
 	
+	//Debugging
+	UPROPERTY(EditAnywhere, Category="Settings")
+	bool DebugChunk = true;
+	UPROPERTY(EditAnywhere, Category="Settings")
+	bool DebugVoxels = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 	void CreateVoxels();
+	void GenerateHeightMap();
+	void GenerateMesh();
 
 	//Mesh
 	TObjectPtr<UProceduralMeshComponent> Mesh;
 	FChunkMeshData MeshData;
 	int VertexCount = 0;
-	
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+
 private:
 	UPROPERTY(VisibleAnywhere)
-		TArray<float> Voxels;
+	TArray<float> Voxels;
 	int TriangleOrder[3] = {0, 1, 2};
 
 	void March(int X, int Y, int Z, const float Cube[8]);
 	int GetVoxelIndex(int X, int Y, int Z) const;
 
 	void ApplyMesh() const;
-	void ClearMesh();
-	void GenerateHeightMap();
+	
+
+	float GetInterpolationOffset(float V1, float V2) const;
 
 	//////////////////////////////////////////////////////////////
 	/// Adapted from Sebastian Lague's Marching Cubes tutorial ///
@@ -90,7 +106,7 @@ private:
 		{0, 1}, {1, 2}, {2, 3}, {3, 0},
 		{4, 5}, {5, 6}, {6, 7}, {7, 4},
 		{0, 4}, {1, 5}, {2, 6}, {3, 7}
-	};         
+	};
 
 	const float EdgeDirection[12][3] = {
 		{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, -1.0f, 0.0f},
@@ -375,6 +391,4 @@ private:
 		{0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 	};
-
-
 };

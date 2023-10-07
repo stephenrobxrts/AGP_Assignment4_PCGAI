@@ -35,7 +35,7 @@ void AProceduralCaveGen::BeginPlay()
 TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
                                                                   FVector BoxMaxSize)
 {
-	FVector Start = FVector(0, 0, 0);
+	FVector Start = FVector(GetActorLocation());
 	FVector End = FVector(LevelSize, LevelSize, FMath::RandRange(-HeightDifference, HeightDifference));
 	TArray<FLevelBox> boxes;
 
@@ -172,20 +172,90 @@ bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& 
 
 void AProceduralCaveGen::GenerateMesh()
 {
-	const auto chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>(
-		AMarchingChunkTerrain::StaticClass(),
-		FTransform(),
-		this
-		);
+	//For loop for X/Y/Z chunks within levelSize
 
-	chunk->Boxes = Boxes;
-	chunk->Tunnels = Tunnels;
-	chunk->LevelSize = static_cast<int>(LevelSize);
-	chunk->bUpdateMesh = bUpdateMesh;
+	if (bDebugOnly1Chunk)
+	{
+		for (int i = 0 ; i < 1; i++)
+		{
+			FVector ChunkPosition = FVector( ChunkSize/2, i*ChunkSize + ChunkSize/2, ChunkSize/2);
+			FLevelBox ChunkBox{ChunkPosition, FVector(ChunkSize*2, ChunkSize*2, ChunkSize*2), EBoxType::Normal};
+			for (FLevelBox box : Boxes)
+			{
+				if (BoxesIntersect(ChunkBox, box))
+				{
+					const auto Chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>
+					(
+						AMarchingChunkTerrain::StaticClass(),
+						FTransform(), //Replace this with a transform that places the chunk in the correct location
+						this
+					);
+					Chunk->ChunkPosition = ChunkPosition;
+					Chunk->ChunkSize = ChunkSize;
+					Chunk->VoxelsPerSide = VoxelDensity;
+					Chunk->Boxes = Boxes;
+					Chunk->Tunnels = Tunnels;
+					Chunk->Material = Material;
+					Chunk->LevelSize = static_cast<int>(LevelSize);
+					Chunk->bUpdateMesh = bUpdateMesh;
+					Chunk->DebugChunk = DebugChunk;
+					Chunk->DebugVoxels = DebugVoxels;
+						
+					UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
+
+					Chunks.Add(Chunk);
+					break;
+				}
+			}
+		}
+		
+	}
+	else
+	{
+		//ToDo:  Optimize by checking if chunks intersect with any boxes or tunnels
+		for (int x = -1 ; x <= LevelSize/ChunkSize ; x++)
+		{
+			for (int y = -1 ; y <= LevelSize/ChunkSize ; y++)
+			{
+				for (int z = -3*HeightDifference/ChunkSize ; z <= 3 * HeightDifference/ChunkSize ; z++)
+				{
+					FVector ChunkPosition = FVector(x * ChunkSize + ChunkSize/2, y * ChunkSize + ChunkSize/2, z * ChunkSize + ChunkSize/2);
+					//Check if chunk intersects with any boxes - if not, skip it
+					//ChunkSize is doubled to be safe
+					FLevelBox ChunkBox{ChunkPosition, FVector(ChunkSize*2, ChunkSize*2, ChunkSize*2), EBoxType::Normal};
+					for (FLevelBox box : Boxes)
+					{
+						if (BoxesIntersect(ChunkBox, box))
+						{
+							const auto Chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>
+							(
+								AMarchingChunkTerrain::StaticClass(),
+								FTransform(), //Replace this with a transform that places the chunk in the correct location
+								this
+							);
+							Chunk->ChunkPosition = ChunkPosition;
+							Chunk->ChunkSize = ChunkSize;
+							Chunk->VoxelsPerSide = VoxelDensity;
+							Chunk->Boxes = Boxes;
+							Chunk->Tunnels = Tunnels;
+							Chunk->Material = Material;
+							Chunk->LevelSize = static_cast<int>(LevelSize);
+							Chunk->bUpdateMesh = bUpdateMesh;
+							Chunk->DebugChunk = DebugChunk;
+							Chunk->DebugVoxels = DebugVoxels;
+						
+							UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
+
+							Chunks.Add(Chunk);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 	
-	UGameplayStatics::FinishSpawningActor(chunk, FTransform());
 
-	MarcherInstance = chunk;
 }
 
 bool AProceduralCaveGen::PositionValidForSecondPath(const FLevelBox& NewBox, const TArray<FLevelBox>& FirstPathBoxes)
@@ -201,7 +271,6 @@ bool AProceduralCaveGen::PositionValidForSecondPath(const FLevelBox& NewBox, con
 }
 
 
-
 // Called every frame
 void AProceduralCaveGen::Tick(float DeltaTime)
 {
@@ -213,9 +282,17 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		Path1.Empty();
 		Path2.Empty();
 		//If the marched terrain chunk has been spawned, destroy it
-		if (MarcherInstance != nullptr)
+		if (!Chunks.IsEmpty())
 		{
-			MarcherInstance->Destroy();
+			for (AMarchingChunkTerrain* Chunk : Chunks)
+			{
+				if (Chunk)
+				{
+					Chunk->ClearMesh();
+					Chunk->Destroy();
+				}
+			}
+			Chunks.Empty();
 		}
 
 		Boxes = GenerateGuaranteedPathBoxes(NumBoxesPerPath, MinSize, MaxSize);
@@ -226,7 +303,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 	}
 
 	//Debug to visualize boxes
-	if (!Boxes.IsEmpty())
+	if (!Boxes.IsEmpty() && bDebugView)
 	{
 		for (const FLevelBox& box : Boxes)
 		{
@@ -234,7 +311,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 			FVector center = box.Position;
 
 			// Half of the box size in each dimension
-			FVector halfSize = box.Size * 0.5f;
+			FVector halfSize = box.Size * 0.5;
 
 			FColor color = FColor::Red;
 			switch (box.Type)

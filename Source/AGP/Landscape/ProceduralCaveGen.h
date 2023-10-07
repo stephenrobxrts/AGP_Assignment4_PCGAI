@@ -10,7 +10,7 @@
 /**
  * @brief Box type enum
  */
-UENUM(BlueprintType) 
+UENUM(BlueprintType)
 enum class EBoxType : uint8
 {
 	Start,
@@ -25,7 +25,7 @@ USTRUCT(BlueprintType)
 struct FLevelBox
 {
 	GENERATED_BODY()
-	
+
 public:
 	FVector Position;
 	FVector Size;
@@ -36,7 +36,7 @@ USTRUCT(BlueprintType)
 struct FTunnel
 {
 	GENERATED_BODY()
-	
+
 public:
 	const FLevelBox* StartBox;
 	const FLevelBox* EndBox;
@@ -55,8 +55,6 @@ public:
 	AProceduralCaveGen();
 	// Sets default values for this actor's properties
 	virtual bool ShouldTickIfViewportsOnly() const override;
-
-	
 
 protected:
 	// Called when the game starts or when spawned
@@ -85,18 +83,34 @@ protected:
 
 	//ToDo: This will be converted to an Array of chunks
 	//Testing with one chunk for now
-	AMarchingChunkTerrain* MarcherInstance;
-	
+		TArray<AMarchingChunkTerrain*> Chunks; 
+	UPROPERTY(EditInstanceOnly, Category="Chunk")
+		TObjectPtr<UMaterialInterface> Material;
+
+	//Debug
+	UPROPERTY(EditAnywhere)
+		bool bDebugView = true;
+	UPROPERTY(EditAnywhere)
+		bool bDebugOnly1Chunk = true;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 		TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 		TArray<FTunnel> Tunnels;
 
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-		TArray<FLevelBox> Path1;
+	TArray<FLevelBox> Path1;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-		TArray<FLevelBox> Path2;
-	
+	TArray<FLevelBox> Path2;
+
+
+	UPROPERTY(EditAnywhere, Category="Chunk")
+	int ChunkSize = 1000;
+	UPROPERTY(EditAnywhere, Category="Chunk")
+	int VoxelDensity = 32;
+	UPROPERTY(EditAnywhere, Category="Chunk")
+	bool DebugChunk = true;
+	UPROPERTY(EditAnywhere, Category="Chunk")
+	bool DebugVoxels = false;
 
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
 	bool PositionValidForSecondPath(const FLevelBox& NewBox, const TArray<FLevelBox>& FirstPathBoxes);
@@ -105,9 +119,7 @@ protected:
 
 	void GenerateMesh();
 
-	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 };
