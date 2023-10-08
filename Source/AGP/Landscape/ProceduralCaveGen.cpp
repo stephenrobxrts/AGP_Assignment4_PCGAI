@@ -57,7 +57,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 		FInnerArray Path;
 		Paths.Add(Path);
 		LastPosition = Start;
-		for (int j = 0 ; j < NumBoxesPerPath ; ++j)
+		for (int j = 0 ; j < NumBoxesPerPath ; j++)
 		{
 			FLevelBox box;
 
@@ -84,7 +84,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			if (BoxPositionValid(box, boxes))
 			{
 				FLevelBox lastBox;
-				j == 0 ? lastBox = StartBox : lastBox = boxes[j - 1];
+				j == 0 ? lastBox = StartBox : lastBox = Paths[i].Path[j - 1];
 				boxes.Add(box);
 				Paths[i].Path.Add(box);
 				CreateTunnel(lastBox, box);
@@ -164,11 +164,11 @@ bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& 
 	}
 
 	// Check for gap along Z axis
-	if (BoxA.Position.Z + BoxA.Size.Z < BoxB.Position.Z ||
+	/*if (BoxA.Position.Z + BoxA.Size.Z < BoxB.Position.Z ||
 		BoxB.Position.Z + BoxB.Size.Z < BoxA.Position.Z)
 	{
 		return false;
-	}
+	}*/
 
 	// If there's no gap along any axis, then the boxes intersect
 	return true;
@@ -273,7 +273,6 @@ bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<
 	}
 	return true;
 }
-
 
 // Called every frame
 void AProceduralCaveGen::Tick(float DeltaTime)
