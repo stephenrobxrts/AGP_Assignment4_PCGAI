@@ -7,7 +7,9 @@
 #include "VoxelUtils/ChunkMeshData.h"
 #include "ProceduralMeshComponent.h"
 #include "../ProceduralCaveGen.h"
+#include "./VoxelUtils/FastNoiseLite.h"
 #include "MarchingChunkTerrain.generated.h"
+
 
 
 UCLASS()
@@ -28,11 +30,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	int ChunkSize = 1000;
 	UPROPERTY(EditAnywhere, Category="Settings")
-	double ChunkRatio = ChunkSize/VoxelsPerSide;
-	
+	double ChunkRatio = ChunkSize / VoxelsPerSide;
 
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UMaterialInterface> Material;
-	
+
 
 	UPROPERTY(EditAnywhere, Category="Settings")
 	bool bUpdateMesh = false;
@@ -48,24 +50,27 @@ public:
 	float Frequency;
 
 	//Marching Cube specific
+	FastNoiseLite* Noise;
 	UPROPERTY(EditDefaultsOnly, Category="Marching Cubes")
-	float SurfaceLevel = 0.0f;
+	float SurfaceLevel = 0.5f;
 
 	//Boxes and tunnels
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
-		TArray<FLevelBox> Boxes;
+	TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
-		TArray<FTunnel> Tunnels;
+	TArray<FTunnel> Tunnels;
 	void ClearMesh();
-	
+
 	//Debugging
 	UPROPERTY(EditAnywhere, Category="Settings")
-		bool DebugChunk = true;
+	bool DebugChunk = true;
 	UPROPERTY(EditAnywhere, Category="Settings")
-		bool DebugVoxels = true;
-	UPROPERTY(EditAnywhere, Category="Settings")
-		bool DebugInverted = false;
+	bool DebugVoxels = true;
+	void ShowDebug();
 	
+	UPROPERTY(EditAnywhere, Category="Settings")
+	bool bDebugInvertSolids = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -77,6 +82,11 @@ protected:
 	//Mesh
 	TObjectPtr<UProceduralMeshComponent> Mesh;
 	FChunkMeshData MeshData;
+	TArray<FVector2D> UVCoords;
+	UPROPERTY()
+	TArray<FVector> Normals;
+	UPROPERTY()
+	TArray<FProcMeshTangent> Tangents;
 	int VertexCount = 0;
 
 public:
@@ -92,7 +102,7 @@ private:
 	int GetVoxelIndex(int X, int Y, int Z) const;
 
 	void ApplyMesh() const;
-	
+
 
 	float GetInterpolationOffset(float V1, float V2) const;
 

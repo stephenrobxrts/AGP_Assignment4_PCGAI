@@ -13,7 +13,7 @@ public:
 	TArray<int> Triangles;
 	TArray<FVector> Normals;
 	TArray<FColor> Colors;
-	TArray<FVector2D> UV0;
+	TArray<FVector2D> UVs;
 
 	void Clear();
 };
@@ -24,5 +24,5 @@ inline void FChunkMeshData::Clear()
 	Triangles.Empty();
 	Normals.Empty();
 	Colors.Empty();
-	UV0.Empty();
+	UVs.Empty();
 }

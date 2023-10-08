@@ -50,6 +50,7 @@ void AProceduralLandscape::GenerateLandscape()
 			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing,
 			                     FMath::PerlinNoise2D(FVector2d(X * PerlinRoughness + PerlinOffset,
 			                                                    Y * PerlinRoughness + PerlinOffset)) * PerlinScale));
+	
 			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
 		}
 	}

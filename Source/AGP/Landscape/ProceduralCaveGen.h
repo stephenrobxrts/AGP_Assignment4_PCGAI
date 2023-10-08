@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "../Pathfinding/NavigationNode.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerStart.h"
 #include "ProceduralCaveGen.generated.h"
 
 /**
@@ -30,6 +31,10 @@ public:
 	FVector Position;
 	FVector Size;
 	EBoxType Type;
+	/*UPROPERTY()
+	ANavigationNode* RoomNode;
+	UPROPERTY()
+	TArray<ANavigationNode*> NavNodes;*/
 };
 
 USTRUCT(BlueprintType)
@@ -69,64 +74,71 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-		bool bShouldRegenerate = true;
+	bool bShouldRegenerate = true;
 	UPROPERTY(EditAnywhere)
-		bool bUpdateMesh = true;
+	bool bUpdateMesh = true;
 
 	UPROPERTY(EditAnywhere)
-		int NumPaths = 2;
+	int NumPaths = 2;
 	UPROPERTY(EditAnywhere)
-		int NumBoxesPerPath = 10;
+	int NumBoxesPerPath = 10;
 	UPROPERTY(EditAnywhere)
-		float LevelSize = 10000.0f;
+	float LevelSize = 10000.0f;
 	UPROPERTY(EditAnywhere)
-		float HeightDifference = 400.0f;
+	float HeightDifference = 400.0f;
 	UPROPERTY(EditAnywhere)
-		float MaxConnectionDistance = 2000.0f;
+	float MaxConnectionDistance = 2000.0f;
 	UPROPERTY(EditAnywhere)
-		FVector MinSize = FVector(300.0f, 300.0f, 200.0f);
+	FVector MinSize = FVector(300.0f, 300.0f, 200.0f);
 	UPROPERTY(EditAnywhere)
-		FVector MaxSize = FVector(1000.0f, 1000.0f, 600.0f);
-
+	FVector MaxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<class AMarchingChunkTerrain> Marcher;
-
-
-	TArray<AMarchingChunkTerrain*> Chunks; 
+	float Connectedness = 0.7f;
+	
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AMarchingChunkTerrain> Marcher;
+	TArray<AMarchingChunkTerrain*> Chunks;
 	UPROPERTY(EditInstanceOnly, Category="Chunk")
-		TObjectPtr<UMaterialInterface> Material;
+	TObjectPtr<UMaterialInterface> Material;
 
 	//Debug
 	UPROPERTY(EditAnywhere)
-		bool bDebugView = true;
+	bool bDebugView = true;
 	UPROPERTY(EditAnywhere)
-		bool bDebugOnly1Chunk = true;
+	bool bDebugOnly1Chunk = true;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-		TArray<FLevelBox> Boxes;
+	TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-		TArray<FTunnel> Tunnels;
-
-
-	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-		TArray<FInnerArray> Paths;
+	TArray<FTunnel> Tunnels;
 	
+	UPROPERTY(VisibleAnywhere, Category="Level Layout")
+	TArray<FInnerArray> Paths;
 
+	//NavNodes
+	/*TArray<ANavigationNode*> RoomNodes;
+	TArray<ANavigationNode*> NavNodes;*/
+
+	//Chunks
 	UPROPERTY(EditAnywhere, Category="Chunk")
-		int ChunkSize = 1024; 
+	int ChunkSize = 1024;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-		int VoxelDensity = 32;
+	int VoxelDensity = 32;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-		bool DebugChunk = true;
+	bool DebugChunk = true;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-		bool DebugVoxels = false;
+	bool DebugVoxels = false;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-		bool DebugInvertSolids = true;
+	bool bDebugInvertSolids = true;
 
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
 	void GenerateInterconnects();
 	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
 	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	void ClearMap();
+	void DebugShow();
+	void AddPlayerStartAtLocation(const FVector& Location); 
 
 	void GenerateMesh();
 

@@ -1,9 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MarchingChunkTerrain.h"
-
-#include "GenericPlatform/GenericPlatformChunkInstall.h"
+#include "./VoxelUtils/FastNoiseLite.h"
 
 
 // Sets default values
@@ -14,7 +12,7 @@ AMarchingChunkTerrain::AMarchingChunkTerrain()
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
 
 	// Mesh Settings
-	Mesh->SetCastShadow(true);
+	Mesh->SetCastShadow(false);
 
 	// Set Mesh as root
 	SetRootComponent(Mesh);
@@ -25,33 +23,8 @@ bool AMarchingChunkTerrain::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
-// Called when the game starts or when spawned
-void AMarchingChunkTerrain::BeginPlay()
+void AMarchingChunkTerrain::ShowDebug()
 {
-	Super::BeginPlay();
-}
-
-void AMarchingChunkTerrain::CreateVoxels()
-{
-	Voxels.SetNum((VoxelsPerSide + 1) * (VoxelsPerSide + 1) * (VoxelsPerSide + 1));
-}
-
-// Called every frame
-void AMarchingChunkTerrain::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bUpdateMesh)
-	{
-		ChunkRatio = ChunkSize/VoxelsPerSide;
-		CreateVoxels();
-		GenerateHeightMap();
-
-		GenerateMesh();
-		ApplyMesh();
-		SetActorLocation(ChunkPosition);
-		bUpdateMesh = false;
-	}
 	if (DebugChunk)
 	{
 		FVector halfSize = FVector(ChunkSize / 2.0, ChunkSize / 2.0, ChunkSize / 2.0);
@@ -70,7 +43,7 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 				{
 					if (Voxels[GetVoxelIndex(x, y, z)] == 1 || Voxels[GetVoxelIndex(x, y, z)] == 0)
 					{
-						voxelPosition = FVector(x*ChunkRatio, y*ChunkRatio, z*ChunkRatio) + ChunkPosition;
+						voxelPosition = FVector(x * ChunkRatio, y * ChunkRatio, z * ChunkRatio) + ChunkPosition;
 						DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, FColor::White, false, -1, 0, 2.0f);
 					}
 				}
@@ -79,14 +52,48 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 	}
 }
 
+// Called when the game starts or when spawned
+void AMarchingChunkTerrain::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AMarchingChunkTerrain::CreateVoxels()
+{
+	Voxels.SetNum((VoxelsPerSide + 1) * (VoxelsPerSide + 1) * (VoxelsPerSide + 1));
+
+}
+
+// Called every frame
+void AMarchingChunkTerrain::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bUpdateMesh)
+	{
+		int SurfaceLevelMultiplier = bDebugInvertSolids ? 0 : 1;
+		SurfaceLevel = 0.5 * SurfaceLevelMultiplier;
+		ChunkRatio = ChunkSize / VoxelsPerSide;
+		CreateVoxels();
+		GenerateHeightMap();
+
+		GenerateMesh();
+		ApplyMesh();
+		SetActorLocation(ChunkPosition);
+		bUpdateMesh = false;
+	}
+	ShowDebug();
+}
+
 void AMarchingChunkTerrain::ClearMesh()
 {
-	Mesh->ClearAllMeshSections();
+	if (Mesh->GetNumSections() > 0)
+	{
+		Mesh->ClearAllMeshSections();
+	}
 	VertexCount = 0;
 	MeshData.Clear();
 }
-
-
 
 bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation)
 {
@@ -105,14 +112,14 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 	FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
 
 	// Voxel count, 64Wide, 64Long, 64High
-	for (int x = 0; x <= VoxelsPerSide ; ++x)
+	for (int x = 0; x <= VoxelsPerSide; ++x)
 	{
-		for (int y = 0; y <= VoxelsPerSide ; ++y)
+		for (int y = 0; y <= VoxelsPerSide; ++y)
 		{
-			for (int z = 0; z <= VoxelsPerSide ; ++z)
+			for (int z = 0; z <= VoxelsPerSide; ++z)
 			{
-				voxelPosition = FVector(ChunkRatio*x + ChunkPosition.X, ChunkRatio*y + ChunkPosition.Y,
-				                        ChunkRatio*z + ChunkPosition.Z);
+				voxelPosition = FVector(ChunkRatio * x + ChunkPosition.X, ChunkRatio * y + ChunkPosition.Y,
+				                        ChunkRatio * z + ChunkPosition.Z);
 
 				bool voxelInside = false;
 				for (FLevelBox Box : Boxes)
@@ -132,12 +139,12 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 						if (IsPointInsideBox(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation))
 						{
 							Voxels[GetVoxelIndex(x, y, z)] = 1.0f;
-							break; 
+							break;
 						}
 					}
 				}
-
-				//Voxels[GetVoxelIndex(x,y,z)] = Noise->GetNoise(x + Position.X, y + Position.Y, z + Position.Z);	
+				
+				//Voxels[GetVoxelIndex(x,y,z)] *= FMath::PerlinNoise3D(voxelPosition);
 			}
 		}
 	}
@@ -169,7 +176,7 @@ void AMarchingChunkTerrain::GenerateMesh()
 	{
 		for (int Y = 0; Y < VoxelsPerSide; ++Y)
 		{
-			for (int Z = 0; Z < VoxelsPerSide ; ++Z)
+			for (int Z = 0; Z < VoxelsPerSide; ++Z)
 			{
 				for (int i = 0; i < 8; ++i)
 				{
@@ -185,8 +192,47 @@ void AMarchingChunkTerrain::GenerateMesh()
 	}
 }
 
-//ToDo: Cube values are correct but X/Y/Z need scaling applied
-//Note: Not the same scaling as voxel positions??? Not sure why
+enum class PredominantOrientation
+{
+	XY,
+	XZ,
+	YZ
+};
+
+PredominantOrientation GetPredominantOrientation(const FVector& Normal)
+{
+	FVector AbsNormal = FVector(FMath::Abs(Normal.X), FMath::Abs(Normal.Y), FMath::Abs(Normal.Z));
+	if (AbsNormal.X > AbsNormal.Y && AbsNormal.X > AbsNormal.Z)
+	{
+		return PredominantOrientation::YZ;
+	}
+	else if (AbsNormal.Y > AbsNormal.X && AbsNormal.Y > AbsNormal.Z)
+	{
+		return PredominantOrientation::XZ;
+	}
+	else
+	{
+		return PredominantOrientation::XY;
+	}
+}
+
+FVector2D ComputeUV(const FVector& Vertex, PredominantOrientation Orientation)
+{
+	// Scale and offset values can be adjusted as needed
+	float ScaleFactor = 0.01f; // Adjust to achieve desired texture tiling
+	switch (Orientation)
+	{
+	case PredominantOrientation::XY:
+		return FVector2D(Vertex.X * ScaleFactor, Vertex.Y * ScaleFactor);
+	case PredominantOrientation::XZ:
+		return FVector2D(Vertex.X * ScaleFactor, Vertex.Z * ScaleFactor);
+	case PredominantOrientation::YZ:
+		return FVector2D(Vertex.Y * ScaleFactor, Vertex.Z * ScaleFactor);
+	default:
+		return FVector2D(0, 0);
+	}
+}
+
 void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 {
 	int VertexMask = 0;
@@ -232,8 +278,16 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 		auto V1 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 0]] * ChunkRatio;
 		auto V2 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 1]] * ChunkRatio;
 		auto V3 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 2]] * ChunkRatio;
-
+		
+		
 		auto Normal = FVector::CrossProduct(V2 - V1, V3 - V1);
+
+		PredominantOrientation Orientation = GetPredominantOrientation(Normal);
+		
+		//Compute UVs
+		auto UV1 = ComputeUV(V1, Orientation);
+		auto UV2 = ComputeUV(V2, Orientation);
+		auto UV3 = ComputeUV(V3, Orientation);
 		auto Color = FColor::MakeRandomColor();
 
 		Normal.Normalize();
@@ -258,23 +312,31 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 			Color
 		});
 
+		MeshData.UVs.Append({
+			UV1,
+			UV2,
+			UV3
+		});
+
 		VertexCount += 3;
 	}
+	
 }
 
 void AMarchingChunkTerrain::ApplyMesh() const
 {
-	Mesh->SetMaterial(0, Material);
+	
 	Mesh->CreateMeshSection(
 		0,
 		MeshData.Vertices,
 		MeshData.Triangles,
 		MeshData.Normals,
-		MeshData.UV0,
+		MeshData.UVs,
 		MeshData.Colors,
-		TArray<FProcMeshTangent>(),
+		Tangents,
 		true
 	);
+	Mesh->SetMaterial(0, Material);
 }
 
 float AMarchingChunkTerrain::GetInterpolationOffset(float V1, float V2) const
@@ -287,4 +349,3 @@ int AMarchingChunkTerrain::GetVoxelIndex(int X, int Y, int Z) const
 {
 	return Z * (VoxelsPerSide + 1) * (VoxelsPerSide + 1) + Y * (VoxelsPerSide + 1) + X;
 }
-
