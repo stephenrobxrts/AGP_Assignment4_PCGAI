@@ -30,6 +30,23 @@ void AProceduralCaveGen::BeginPlay()
 	//Tunnels = GenerateTunnels(Boxes);
 }
 
+
+float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
+{
+	float deltaY = BoxB.Position.Z - BoxA.Position.Z;
+
+	// Compute horizontal distance
+	float deltaX = FVector(BoxA.Position.X - BoxB.Position.X, BoxA.Position.Y - BoxB.Position.Y, 0).Size();
+
+	// Check for a very small deltaX to avoid division by zero
+	if (FMath::Abs(deltaX) < KINDA_SMALL_NUMBER)
+	{
+		return MAX_FLT; // return a large number to indicate a very steep gradient
+	}
+
+	return deltaY / deltaX;
+}
+
 //ToDo: Tidy up second path by generalizing the function with for loop
 TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
                                                                   FVector BoxMaxSize)
@@ -83,13 +100,14 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			                   FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
 			                   FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
 			box.Type = EBoxType::Normal;
-
+			
+			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
 
 			//If box doesn't collide with any other boxes, add it to the list
 			//Or Gradient is too steep
-			if (BoxPositionValid(box, boxes))
+			if (BoxPositionValid(box, boxes) && FMath::Abs(CalculateGradient(box, lastBox)) <= 0.3)
 			{
-				FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
+				
 				boxes.Add(box);
 				
 				Paths[i].Path.Add(box);
@@ -123,22 +141,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 
 
 	return boxes;
-}
-
-float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
-{
-	float deltaY = BoxB.Position.Z - BoxA.Position.Z;
-
-	// Compute horizontal distance
-	float deltaX = FVector(BoxA.Position.X - BoxB.Position.X, BoxA.Position.Y - BoxB.Position.Y, 0).Size();
-
-	// Check for a very small deltaX to avoid division by zero
-	if (FMath::Abs(deltaX) < KINDA_SMALL_NUMBER)
-	{
-		return MAX_FLT; // return a large number to indicate a very steep gradient
-	}
-
-	return deltaY / deltaX;
 }
 
 void AProceduralCaveGen::GenerateInterconnects()

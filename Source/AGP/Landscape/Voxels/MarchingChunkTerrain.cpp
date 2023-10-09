@@ -146,10 +146,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				for (FTunnel Tunnel : Tunnels)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation);
-					if (FMath::Abs(TempSDF) < FMath::Abs(TunnelSDF))
-					{
-						TunnelSDF=TempSDF;
-					}
+					TunnelSDF = std::min(TunnelSDF, TempSDF);
 				}
 
 				//If the voxel is outside the box, take the min of Box,Tunnel
