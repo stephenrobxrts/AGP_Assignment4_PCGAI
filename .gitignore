@@ -72,3 +72,10 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Content/Materials/CaveFloor.uasset
+Content/Materials/UnbuiltTextures/CaveFloor/cavefloor1_Ambient_Occlusion.uasset
+Content/Materials/UnbuiltTextures/CaveFloor/cavefloor1_Base_Color.uasset
+Content/Materials/UnbuiltTextures/CaveFloor/cavefloor1_Height.uasset
+Content/Materials/UnbuiltTextures/CaveFloor/cavefloor1_Metallic.uasset
+Content/Materials/UnbuiltTextures/CaveFloor/cavefloor1_Normal.uasset
+Content/Materials/UnbuiltTextures/CaveFloor/cavefloor1_Roughness.uasset
