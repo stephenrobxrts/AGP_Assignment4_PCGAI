@@ -103,16 +103,42 @@ Level is given a size
 
 ### AI
 
+
+#### Modify Classes
+Duplicate ProceduralMap
+
+Create class that is like ABasePickup.h 
+	But it contains a room mesh
+
+Place your rooms
+
+In the ProceduralMap thing 
+	Iterate through all nodes 
+	If node inside room -> Node belongs to room
+	If node not in any rooms -> Delete node
+
+Hallways
+	Stretched rooms that collide with another room
+
+ANavigationNode
+AEnemyCharacter
+
 * [ ] Rooms
 	* [ ] RoomNode (points to connected Rooms)
 	* [ ] NavNodes (Some navnodes are "doorway nodes" and point to another room)
 * [ ] AI Hearing (head to doorway of rooms if heard elsewhere -> *investigate*)
 	* [ ] Which Room sound was heard from
 	* [ ] Which Path is player 
-	* [ ] 
+	* [ ] ++Predict movement of player towards goal?
+* [ ] AI State
+	* [ ] Investigate
+	* [ ] Ambush
+* [ ] Attempt to jump if blocked by geometry
+	* [ ] If progress towards goal not going up, try jump
+	* [ ] Try crouch
+	* [ ] ++ Break node->node connection and pathfind again
 * [ ] Handle player behaviour
 * [ ] Basic Sounds for testing
-* [ ] Predict movement of player towards goal?
 
 ```C++
 
@@ -143,10 +169,6 @@ public:
 
 }
 
-
-
-
-
 class ANavigationNode{
 
 public: 
@@ -160,3 +182,7 @@ public:
 ```
 ## A4 Plan
 
+* Sam to make the Navigation Nodes spawn properly and link properly
+* Integrate the AI changes
+* Networking start
+* 
