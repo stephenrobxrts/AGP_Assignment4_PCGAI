@@ -20,6 +20,7 @@ Get into the cave system, find switch(es), escape
 	* Marching Squares Cave System
 		* Blocked out rooms with pcg terrain
 		* Inner room details? 
+	* **++Hidey Holes** 
 * PCG Pathfinding
 	* Node differentiation by doorway/terrain/InCanve(x)
 	* Jump Point Search (instead of A*)
@@ -102,6 +103,60 @@ Level is given a size
 
 ### AI
 
+* [ ] Rooms
+	* [ ] RoomNode (points to connected Rooms)
+	* [ ] NavNodes (Some navnodes are "doorway nodes" and point to another room)
+* [ ] AI Hearing (head to doorway of rooms if heard elsewhere -> *investigate*)
+	* [ ] Which Room sound was heard from
+	* [ ] Which Path is player 
+	* [ ] 
+* [ ] Handle player behaviour
+* [ ] Basic Sounds for testing
+* [ ] Predict movement of player towards goal?
 
+```C++
+
+USTRUCT(BlueprintType)  
+struct FRoom 
+{  
+	GENERATED_BODY()  
+	  
+public:  
+	FVector Position;  
+	FVector Size;  
+	EBoxType Type;  
+	FQuat Rotation = FQuat::Identity;  
+	Array<ANavigationNode*> Nodes;
+	ANavigationNode* RoomNode
+};
+
+class Map{
+
+public: 
+
+	Array<ANavigationNode*> RoomNodes;
+	void MakeMap(){
+		CreateRoom()
+		CreateRoom()
+		JoinRooms()		
+	}
+
+}
+
+
+
+
+
+class ANavigationNode{
+
+public: 
+	ConnectedRoom = nullPtr;
+	
+	setConnectedRoom(Room* Room)
+
+}
+
+
+```
 ## A4 Plan
 
