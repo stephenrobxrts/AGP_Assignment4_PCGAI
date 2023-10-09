@@ -8,7 +8,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 #include "EngineUtils.h"
+#include "Components/PointLightComponent.h"
 #include "Engine/PointLight.h"
+#include "Engine/DirectionalLight.h"
 
 // Sets default values
 AProceduralCaveGen::AProceduralCaveGen()
@@ -68,7 +70,36 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 		EBoxType::Start
 	};
 	boxes.Add(StartBox);
-	CreateBox(StartBox.Position, StartBox.Size, StartBox.Type);
+	CreateBox(StartBox);
+	
+	//Get Direction of sunlight. Point box towards sun
+	FVector SunDirection = FVector::ZeroVector;
+	ADirectionalLight* Sun;
+	for (TActorIterator<ADirectionalLight> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (*ActorItr)
+		{
+			Sun = *ActorItr;
+			SunDirection = -Sun->GetActorRotation().Vector();
+			UE_LOG(LogTemp, Warning, TEXT("Sun Direction is %s"), *SunDirection.ToString());
+			//FVector SunDirection = GetSunDirection();
+			FLevelBox Entrance{Start+SunDirection*ChunkSize*2,
+				FVector(
+					StartBox.Size.X/4,
+					StartBox.Size.Y/4,
+					StartBox.Size.Z/4),
+					EBoxType::Normal, SunDirection.ToOrientationQuat() };
+			boxes.Add(Entrance);
+
+			CreateTunnel(StartBox, Entrance);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No Sun Found"));
+		}
+	}
+	
+
 
 
 	//Find paths up to number of paths
@@ -109,6 +140,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			{
 				
 				boxes.Add(box);
+				CreateBox(box);
 				
 				Paths[i].Path.Add(box);
 				CreateTunnel(lastBox, box);
@@ -130,6 +162,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 		FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)
 	);
 	EndBox.Type = EBoxType::End;
+	CreateBox(EndBox);
 	boxes.Add(EndBox);
 
 	//Join Paths to end box
@@ -170,12 +203,14 @@ void AProceduralCaveGen::GenerateInterconnects()
 	
 }
 
-void AProceduralCaveGen::CreateBox(const FVector& Position, const FVector& Size, EBoxType Type)
+void AProceduralCaveGen::CreateBox(const FLevelBox& Box)
 {
 	if (UWorld* World = GetWorld())
 	{
-		APointLight* Light = World->SpawnActor<APointLight>(Position, FRotator::ZeroRotator);
-		Light->SetBrightness(5000.0f);
+		APointLight* Light = World->SpawnActor<APointLight>(Box.Position, FRotator::ZeroRotator);
+		Light->SetBrightness(10000.0f);
+		Light->PointLightComponent->bUseTemperature = 1.0;
+		Light->PointLightComponent->SetTemperature(2500);
 	}
 }
 
@@ -188,8 +223,8 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 	Offset.Z = (Direction.Z > 0) ? Box.Size.Z / 2 : (Direction.Z < 0) ? -Box.Size.Z / 2 : 0;
 
 	//Move XY offset points towards the center of the box by the tunnelSize
-	Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? TunnelSize / 2 : 0;
-	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? TunnelSize / 2 : 0;
+	Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? 150 / 2 : 0;
+	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? 150 / 2 : 0;
 	
 	
 	// Adjust for Z position to be closer to the ground

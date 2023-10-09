@@ -34,6 +34,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UMaterialInterface> Material;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UMaterialInterface> EndRoomMaterial;
 
 
 	UPROPERTY(EditAnywhere, Category="Settings")
@@ -87,6 +89,7 @@ protected:
 	float BoxSDF(const FVector& point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation);
 
 	//Mesh
+	UPROPERTY()
 	TObjectPtr<UProceduralMeshComponent> Mesh;
 	FChunkMeshData MeshData;
 	TArray<FVector2D> UVCoords;

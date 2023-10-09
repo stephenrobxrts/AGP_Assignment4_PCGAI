@@ -31,6 +31,7 @@ public:
 	FVector Position;
 	FVector Size;
 	EBoxType Type;
+	FQuat Rotation = FQuat::Identity;
 };
 
 USTRUCT(BlueprintType)
@@ -136,7 +137,7 @@ protected:
 
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
 	void GenerateInterconnects();
-	void CreateBox(const FVector& Position, const FVector& Size, EBoxType Type);
+	void CreateBox(const FLevelBox& Box);
 
 	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction);
 	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);

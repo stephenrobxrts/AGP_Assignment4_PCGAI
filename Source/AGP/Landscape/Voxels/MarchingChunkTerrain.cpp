@@ -13,7 +13,7 @@ AMarchingChunkTerrain::AMarchingChunkTerrain()
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
 
 	// Mesh Settings
-	Mesh->SetCastShadow(false);
+	Mesh->SetCastShadow(true);
 
 	// Set Mesh as root
 	SetRootComponent(Mesh);
@@ -119,9 +119,7 @@ bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector B
 void AMarchingChunkTerrain::GenerateHeightMap()
 {
 	FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
-	//ChunkPosition = GetActorLocation();
-	float MaxSDF = 1.0f;
-	float MinSDF = 1.0f;
+
 	// Voxel count, 64Wide, 64Long, 64High
 	for (int x = 0; x <= VoxelsPerSide; ++x)
 	{
@@ -137,7 +135,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				for (FLevelBox Box : Boxes)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Box.Position, Box.Size, FQuat::Identity);
-					if (FMath::Abs(TempSDF) < FMath::Abs(VoxelSDF))
+					if (FMath::Abs(TempSDF) < FMath::Abs(VoxelSDF) )
 					{
 						VoxelSDF=TempSDF;
 					}
@@ -146,41 +144,37 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				for (FTunnel Tunnel : Tunnels)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation);
-					TunnelSDF = std::min(TunnelSDF, TempSDF);
+					
+					//If the value is more internal, take it
+					if ( TempSDF < TunnelSDF*3.0)
+					{
+						TunnelSDF = TempSDF*3.0;
+					}
 				}
 
-				//If the voxel is outside the box, take the min of Box,Tunnel
-				//Else just use Box
-				VoxelSDF = VoxelSDF > 0.0f ? std::min(TunnelSDF, VoxelSDF) : VoxelSDF;
-
-				//Debug SDF Scale
-				if (VoxelSDF > MaxSDF)
+				//If the value is more internal, take it
+				if ( TunnelSDF < VoxelSDF)
 				{
-					MaxSDF = VoxelSDF;
-				}
-				if (VoxelSDF < MinSDF)
-				{
-					MinSDF = VoxelSDF;
+					VoxelSDF = TunnelSDF;
 				}
 				
 				//ScaleSDF
-				/*float SDFScale = VoxelDiameter*3;
-				VoxelSDF *= 1/SDFScale;*/
+				float SDFScale = 150;
+				VoxelSDF *= 1/SDFScale;
 				// Clamp SDF
-				/*VoxelSDF = (VoxelSDF > 1.0f) ? 1.0f : VoxelSDF;
-				VoxelSDF = (VoxelSDF < -1.0f) ? -1.0f : VoxelSDF;*/
+				VoxelSDF = (VoxelSDF > 1.0f) ? 1.0f : VoxelSDF;
+				VoxelSDF = (VoxelSDF < -1.0f) ? -1.0f : VoxelSDF;
 				
 				//Noise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
 				float NoiseVal = Noise->GetNoise( (VoxelDiameter * x + ChunkPosition.X ),
 												  (VoxelDiameter * y + ChunkPosition.Y ),
-												  (VoxelDiameter * z + ChunkPosition.Z ))+1.0f; ;
-				NoiseVal = 0.0f;//NoiseRatio*InverseMultiplier;	
+												  (VoxelDiameter * z + ChunkPosition.Z )); ;
+				NoiseVal *= NoiseRatio*InverseMultiplier;	
 				Voxels[GetVoxelIndex(x,y,z)] = VoxelSDF*InverseMultiplier + NoiseVal;
 			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Max SDF: %f"), MaxSDF);
-	UE_LOG(LogTemp, Warning, TEXT("Min SDF: %f"), MinSDF);
+
 }
 
 void AMarchingChunkTerrain::GenerateMesh()
@@ -389,6 +383,8 @@ void AMarchingChunkTerrain::ApplyMesh() const
 		true
 	);
 	Mesh->SetMaterial(0, Material);
+	Mesh->bCastShadowAsTwoSided = true;
+	//esh->CreateStat
 }
 
 float AMarchingChunkTerrain::GetInterpolationOffset(float V1, float V2) const
@@ -401,3 +397,5 @@ int AMarchingChunkTerrain::GetVoxelIndex(int X, int Y, int Z) const
 {
 	return Z * (VoxelsPerSide + 1) * (VoxelsPerSide + 1) + Y * (VoxelsPerSide + 1) + X;
 }
+
+
