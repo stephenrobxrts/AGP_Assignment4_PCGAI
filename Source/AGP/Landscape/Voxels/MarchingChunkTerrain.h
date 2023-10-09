@@ -29,8 +29,8 @@ public:
 	int VoxelsPerSide = 8;
 	UPROPERTY(VisibleAnywhere, Category="Settings")
 	int ChunkSize = 1000;
-	UPROPERTY(EditAnywhere, Category="Settings")
-	double ChunkRatio = ChunkSize / VoxelsPerSide;
+	UPROPERTY(VisibleAnywhere, Category="Settings")
+	double VoxelDiameter = ChunkSize / VoxelsPerSide;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UMaterialInterface> Material;
@@ -59,7 +59,12 @@ public:
 	TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
 	TArray<FTunnel> Tunnels;
+	UPROPERTY(VisibleAnywhere, Category="Inputs")
+	TArray<FLevelBox> MeshedObjects;
 	void ClearMesh();
+
+	//Noise
+	float NoiseRatio = 0.7f;
 
 	//Debugging
 	UPROPERTY(EditAnywhere, Category="Settings")
@@ -70,6 +75,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category="Settings")
 	bool bDebugInvertSolids = true;
+	float InverseMultiplier;
 
 protected:
 	// Called when the game starts or when spawned
@@ -78,6 +84,7 @@ protected:
 	void CreateVoxels();
 	void GenerateHeightMap();
 	void GenerateMesh();
+	float BoxSDF(const FVector& point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation);
 
 	//Mesh
 	TObjectPtr<UProceduralMeshComponent> Mesh;

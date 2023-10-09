@@ -31,10 +31,6 @@ public:
 	FVector Position;
 	FVector Size;
 	EBoxType Type;
-	/*UPROPERTY()
-	ANavigationNode* RoomNode;
-	UPROPERTY()
-	TArray<ANavigationNode*> NavNodes;*/
 };
 
 USTRUCT(BlueprintType)
@@ -93,6 +89,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FVector MaxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	UPROPERTY(EditAnywhere)
+	float TunnelSize = 200.0f;
+	
+	UPROPERTY(EditAnywhere)
 	float Connectedness = 0.7f;
 	
 	
@@ -131,10 +130,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool bDebugInvertSolids = true;
 
+	UPROPERTY(EditAnywhere, Category="Noise")
+	float NoiseRatio = 0.8f;
+	
+
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
 	void GenerateInterconnects();
+	void CreateBox(const FVector& Position, const FVector& Size, EBoxType Type);
+
+	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction);
 	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
+	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
 	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
 	void ClearMap();
 	void DebugShow();

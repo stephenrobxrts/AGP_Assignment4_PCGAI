@@ -2,6 +2,7 @@
 
 #include "MarchingChunkTerrain.h"
 #include "./VoxelUtils/FastNoiseLite.h"
+#include "Field/FieldSystemNoiseAlgo.h"
 
 
 // Sets default values
@@ -41,11 +42,13 @@ void AMarchingChunkTerrain::ShowDebug()
 			{
 				for (double z = 0; z <= VoxelsPerSide; ++z)
 				{
-					if (Voxels[GetVoxelIndex(x, y, z)] == 1 || Voxels[GetVoxelIndex(x, y, z)] == 0)
-					{
-						voxelPosition = FVector(x * ChunkRatio, y * ChunkRatio, z * ChunkRatio) + ChunkPosition;
-						DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, FColor::White, false, -1, 0, 2.0f);
-					}
+					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)])*255;
+					const float VoxelSign = VoxelValue > 0 ? 1.0f : 0.10f;
+					VoxelValue = abs(VoxelValue);
+					FColor Color = FColor(VoxelValue*(1-VoxelSign), VoxelValue*VoxelSign, 0, VoxelValue);
+					voxelPosition = FVector(x * VoxelDiameter, y * VoxelDiameter, z * VoxelDiameter) + ChunkPosition;
+					DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, Color, false, -1, 0, 2.0f);
+
 				}
 			}
 		}
@@ -61,6 +64,10 @@ void AMarchingChunkTerrain::BeginPlay()
 void AMarchingChunkTerrain::CreateVoxels()
 {
 	Voxels.SetNum((VoxelsPerSide + 1) * (VoxelsPerSide + 1) * (VoxelsPerSide + 1));
+	for (float& Voxel : Voxels)
+	{
+		Voxel = 1.0f*InverseMultiplier;
+	}
 
 }
 
@@ -71,15 +78,17 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 
 	if (bUpdateMesh)
 	{
-		int SurfaceLevelMultiplier = bDebugInvertSolids ? 0 : 1;
-		SurfaceLevel = 0.5 * SurfaceLevelMultiplier;
-		ChunkRatio = ChunkSize / VoxelsPerSide;
+		Noise = new FastNoiseLite();
+		SetActorLocation(ChunkPosition);
+		InverseMultiplier = bDebugInvertSolids ? -1.0f : 1.0f;
+		SurfaceLevel = 0.0;
+		VoxelDiameter = ChunkSize / VoxelsPerSide;
 		CreateVoxels();
 		GenerateHeightMap();
 
 		GenerateMesh();
 		ApplyMesh();
-		SetActorLocation(ChunkPosition);
+		
 		bUpdateMesh = false;
 	}
 	ShowDebug();
@@ -110,7 +119,9 @@ bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector B
 void AMarchingChunkTerrain::GenerateHeightMap()
 {
 	FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
-
+	//ChunkPosition = GetActorLocation();
+	float MaxSDF = 1.0f;
+	float MinSDF = 1.0f;
 	// Voxel count, 64Wide, 64Long, 64High
 	for (int x = 0; x <= VoxelsPerSide; ++x)
 	{
@@ -118,36 +129,61 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 		{
 			for (int z = 0; z <= VoxelsPerSide; ++z)
 			{
-				voxelPosition = FVector(ChunkRatio * x + ChunkPosition.X, ChunkRatio * y + ChunkPosition.Y,
-				                        ChunkRatio * z + ChunkPosition.Z);
+				voxelPosition = FVector(VoxelDiameter * x + ChunkPosition.X, VoxelDiameter * y + ChunkPosition.Y,
+				                        VoxelDiameter * z + ChunkPosition.Z);
 
-				bool voxelInside = false;
+				float VoxelSDF = UE_MAX_FLT;
+				float TunnelSDF = UE_MAX_FLT;
 				for (FLevelBox Box : Boxes)
 				{
-					if (IsPointInsideBox(voxelPosition, Box.Position, Box.Size, FQuat::Identity))
+					float TempSDF = BoxSDF(voxelPosition, Box.Position, Box.Size, FQuat::Identity);
+					if (FMath::Abs(TempSDF) < FMath::Abs(VoxelSDF))
 					{
-						Voxels[GetVoxelIndex(x, y, z)] = 1.0f;
-						voxelInside = true;
-						break; // Exit once found
-					}
-				}
-				if (!voxelInside)
-				{
-					// Only check tunnels if not already inside a box
-					for (FTunnel Tunnel : Tunnels)
-					{
-						if (IsPointInsideBox(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation))
-						{
-							Voxels[GetVoxelIndex(x, y, z)] = 1.0f;
-							break;
-						}
+						VoxelSDF=TempSDF;
 					}
 				}
 				
-				//Voxels[GetVoxelIndex(x,y,z)] *= FMath::PerlinNoise3D(voxelPosition);
+				for (FTunnel Tunnel : Tunnels)
+				{
+					float TempSDF = BoxSDF(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation);
+					if (FMath::Abs(TempSDF) < FMath::Abs(TunnelSDF))
+					{
+						TunnelSDF=TempSDF;
+					}
+				}
+
+				//If the voxel is outside the box, take the min of Box,Tunnel
+				//Else just use Box
+				VoxelSDF = VoxelSDF > 0.0f ? std::min(TunnelSDF, VoxelSDF) : VoxelSDF;
+
+				//Debug SDF Scale
+				if (VoxelSDF > MaxSDF)
+				{
+					MaxSDF = VoxelSDF;
+				}
+				if (VoxelSDF < MinSDF)
+				{
+					MinSDF = VoxelSDF;
+				}
+				
+				//ScaleSDF
+				/*float SDFScale = VoxelDiameter*3;
+				VoxelSDF *= 1/SDFScale;*/
+				// Clamp SDF
+				/*VoxelSDF = (VoxelSDF > 1.0f) ? 1.0f : VoxelSDF;
+				VoxelSDF = (VoxelSDF < -1.0f) ? -1.0f : VoxelSDF;*/
+				
+				//Noise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
+				float NoiseVal = Noise->GetNoise( (VoxelDiameter * x + ChunkPosition.X ),
+												  (VoxelDiameter * y + ChunkPosition.Y ),
+												  (VoxelDiameter * z + ChunkPosition.Z ))+1.0f; ;
+				NoiseVal = 0.0f;//NoiseRatio*InverseMultiplier;	
+				Voxels[GetVoxelIndex(x,y,z)] = VoxelSDF*InverseMultiplier + NoiseVal;
 			}
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Max SDF: %f"), MaxSDF);
+	UE_LOG(LogTemp, Warning, TEXT("Min SDF: %f"), MinSDF);
 }
 
 void AMarchingChunkTerrain::GenerateMesh()
@@ -190,6 +226,25 @@ void AMarchingChunkTerrain::GenerateMesh()
 			}
 		}
 	}
+}
+
+float AMarchingChunkTerrain::BoxSDF(const FVector& Point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation)
+{
+	FVector HalfSize = BoxSize * 0.5f;
+	FQuat InvRotation = BoxRotation.Inverse();
+	FVector LocalPoint = InvRotation.RotateVector(Point - BoxPosition);
+
+	
+	FVector d = FVector(
+		FMath::Abs(LocalPoint.X) - HalfSize.X,
+		FMath::Abs(LocalPoint.Y) - HalfSize.Y,
+		FMath::Abs(LocalPoint.Z) - HalfSize.Z
+	);
+
+	float outsideDistance = d.GetMax(); 
+	float insideDistance = FMath::Max(d.X, FMath::Max(d.Y, d.Z)); 
+
+	return float(outsideDistance < 0 ? insideDistance : outsideDistance); 
 }
 
 enum class PredominantOrientation
@@ -275,9 +330,9 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 			break;
 		}
 
-		auto V1 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 0]] * ChunkRatio;
-		auto V2 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 1]] * ChunkRatio;
-		auto V3 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 2]] * ChunkRatio;
+		auto V1 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 0]] * VoxelDiameter;
+		auto V2 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 1]] * VoxelDiameter;
+		auto V3 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 2]] * VoxelDiameter;
 		
 		
 		auto Normal = FVector::CrossProduct(V2 - V1, V3 - V1);

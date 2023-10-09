@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 #include "EngineUtils.h"
+#include "Engine/PointLight.h"
 
 // Sets default values
 AProceduralCaveGen::AProceduralCaveGen()
@@ -35,20 +36,22 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 {
 	//Start and End Locations
 	FVector Start = FVector(GetActorLocation());
+	AddPlayerStartAtLocation(Start);
 	FVector End = FVector(LevelSize, LevelSize, FMath::RandRange(-HeightDifference, HeightDifference));
 	TArray<FLevelBox> boxes;
 
 	//Start Box
-	FLevelBox StartBox;
-	StartBox.Position = Start;
-	AddPlayerStartAtLocation(Start);
-	StartBox.Size = FVector
-	(
-		FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
-		FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-		FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
-	StartBox.Type = EBoxType::Start;
+	
+	FLevelBox StartBox
+	{	Start,
+		FVector(				
+					FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
+					FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
+					FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)),
+		EBoxType::Start
+	};
 	boxes.Add(StartBox);
+	CreateBox(StartBox.Position, StartBox.Size, StartBox.Type);
 
 
 	//Find paths up to number of paths
@@ -86,8 +89,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			//Or Gradient is too steep
 			if (BoxPositionValid(box, boxes))
 			{
-				FLevelBox lastBox;
-				j == 0 ? lastBox = StartBox : lastBox = Paths[i].Path[j - 1];
+				FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
 				boxes.Add(box);
 				
 				Paths[i].Path.Add(box);
@@ -166,23 +168,60 @@ void AProceduralCaveGen::GenerateInterconnects()
 	
 }
 
+void AProceduralCaveGen::CreateBox(const FVector& Position, const FVector& Size, EBoxType Type)
+{
+	if (UWorld* World = GetWorld())
+	{
+		APointLight* Light = World->SpawnActor<APointLight>(Position, FRotator::ZeroRotator);
+		Light->SetBrightness(5000.0f);
+	}
+}
+
+FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction)
+{
+	FVector Offset;
+
+	Offset.X = (Direction.X > 0) ? Box.Size.X / 2 : (Direction.X < 0) ? -Box.Size.X / 2 : 0;
+	Offset.Y = (Direction.Y > 0) ? Box.Size.Y / 2 : (Direction.Y < 0) ? -Box.Size.Y / 2 : 0;
+	Offset.Z = (Direction.Z > 0) ? Box.Size.Z / 2 : (Direction.Z < 0) ? -Box.Size.Z / 2 : 0;
+
+	//Move XY offset points towards the center of the box by the tunnelSize
+	Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? TunnelSize / 2 : 0;
+	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? TunnelSize / 2 : 0;
+	
+	
+	// Adjust for Z position to be closer to the ground
+	Offset.Z = -Box.Size.Z / 2;
+
+	// Optional: Add a fixed elevation offset so that the tunnel is slightly above the ground// adjust as needed
+	Offset.Z += TunnelSize / 2;
+
+	return Offset;
+}
+
 void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox)
 {
 	FTunnel Tunnel;
 	Tunnel.StartBox = &StartBox;
 	Tunnel.EndBox = &TargetBox;
 
-	FVector Start = StartBox.Position;
-	FVector End = TargetBox.Position;
+	FVector Direction = (TargetBox.Position - StartBox.Position).GetSafeNormal();
+	FVector StartOffset = CalculateBoxOffset(StartBox, Direction);
+	FVector EndOffset = CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
+
+	FVector Start = StartBox.Position + StartOffset;
+	FVector End = TargetBox.Position + EndOffset;
+
+	Direction = (End - Start).GetSafeNormal();
+
 	Tunnel.Position = (Start + End) / 2;
-	FVector Direction = (End - Start).GetSafeNormal();
-	Tunnel.Size = FVector((End - Start).Size(), 200, 200);
+	Tunnel.Size = FVector((End - Start).Size() + TunnelSize, TunnelSize, TunnelSize);
 	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::ForwardVector, Direction);
 
 	Tunnels.Add(Tunnel);
 }
 
-bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB)
+bool AProceduralCaveGen::BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
 	// Check for gap along X axis
 	if (BoxA.Position.X + BoxA.Size.X < BoxB.Position.X ||
@@ -209,6 +248,33 @@ bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& 
 	return true;
 }
 
+bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB)
+{
+
+	// Check for gap along X axis
+	if (BoxA.Position.X + BoxA.Size.X < BoxB.Position.X ||
+		BoxB.Position.X + BoxB.Size.X < BoxA.Position.X)
+	{
+		return false;
+	}
+
+	// Check for gap along Y axis
+	if (BoxA.Position.Y + BoxA.Size.Y < BoxB.Position.Y ||
+		BoxB.Position.Y + BoxB.Size.Y < BoxA.Position.Y)
+	{
+		return false;
+	}
+
+	// Check for gap along Z axis
+	if (BoxA.Position.Z + BoxA.Size.Z < BoxB.Position.Z ||
+		BoxB.Position.Z + BoxB.Size.Z < BoxA.Position.Z)
+	{
+		return false;
+	}
+
+	// If there's no gap along any axis, then the boxes intersect
+	return true;
+}
 
 
 void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
@@ -230,87 +296,57 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 void AProceduralCaveGen::GenerateMesh()
 {
 	//For loop for X/Y/Z chunks within levelSize
-
+	int ChunkAmounts = LevelSize / ChunkSize;
 	if (bDebugOnly1Chunk)
 	{
-		for (int i = 0; i < 1; i++)
-		{
-			FVector ChunkPosition = FVector(ChunkSize / 2, i * ChunkSize + ChunkSize / 2, ChunkSize / 2);
-			FLevelBox ChunkBox{ChunkPosition, FVector(ChunkSize * 2, ChunkSize * 2, ChunkSize * 2), EBoxType::Normal};
-			for (FLevelBox box : Boxes)
-			{
-				if (BoxesIntersect(ChunkBox, box))
-				{
-					const auto Chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>
-					(
-						AMarchingChunkTerrain::StaticClass(),
-						FTransform(), //Replace this with a transform that places the chunk in the correct location
-						this
-					);
-					Chunk->ChunkPosition = ChunkPosition;
-					Chunk->ChunkSize = ChunkSize;
-					Chunk->bDebugInvertSolids = bDebugInvertSolids;
-					Chunk->VoxelsPerSide = VoxelDensity;
-					Chunk->Boxes = Boxes;
-					Chunk->Tunnels = Tunnels;
-					Chunk->Material = Material;
-					Chunk->LevelSize = static_cast<int>(LevelSize);
-					Chunk->bUpdateMesh = bUpdateMesh;
-					Chunk->DebugChunk = DebugChunk;
-					Chunk->DebugVoxels = DebugVoxels;
-					
-
-					UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
-
-					Chunks.Add(Chunk);
-					break;
-				}
-			}
-		}
+		ChunkAmounts = -1;
 	}
-	else
+	int StartChunkXY = ChunkAmounts == -1 ? -1 : -1;
+	int StartChunkZ = ChunkAmounts == -1 ? -1 : -ChunkAmounts;
+	for (int x = StartChunkXY; x <= ChunkAmounts; x++)
 	{
-		for (int x = -1; x <= LevelSize / ChunkSize; x++)
+		for (int y = StartChunkXY; y <= ChunkAmounts; y++)
 		{
-			for (int y = -1; y <= LevelSize / ChunkSize; y++)
+			for (int z = StartChunkZ; z <= ChunkAmounts; z++)
 			{
-				for (int z = -6 * HeightDifference / ChunkSize; z <= 6 * HeightDifference / ChunkSize; z++)
+				FVector ChunkPosition = FVector(x * ChunkSize + ChunkSize / 2, y * ChunkSize + ChunkSize / 2,
+				                                z * ChunkSize + ChunkSize / 2);
+				//Check if chunk intersects with any boxes - if not, skip it
+				//ChunkSize is doubled to be safe
+				FLevelBox ChunkBox{
+					ChunkPosition, FVector(ChunkSize * 2, ChunkSize * 2, ChunkSize * 2), EBoxType::Normal
+				};
+				for (FLevelBox box : Boxes)
 				{
-					FVector ChunkPosition = FVector(x * ChunkSize + ChunkSize / 2, y * ChunkSize + ChunkSize / 2,
-					                                z * ChunkSize + ChunkSize / 2);
-					//Check if chunk intersects with any boxes - if not, skip it
-					//ChunkSize is doubled to be safe
-					FLevelBox ChunkBox{
-						ChunkPosition, FVector(ChunkSize * 2, ChunkSize * 2, ChunkSize * 2), EBoxType::Normal
-					};
-					for (FLevelBox box : Boxes)
+					if (BoxesIntersect(ChunkBox, box))
 					{
-						if (BoxesIntersect(ChunkBox, box))
-						{
-							const auto Chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>
-							(
-								AMarchingChunkTerrain::StaticClass(),
-								FTransform(),
-								//Replace this with a transform that places the chunk in the correct location
-								this
-							);
-							Chunk->ChunkPosition = ChunkPosition;
-							Chunk->ChunkSize = ChunkSize;
-							Chunk->bDebugInvertSolids = bDebugInvertSolids;
-							Chunk->VoxelsPerSide = VoxelDensity;
-							Chunk->Boxes = Boxes;
-							Chunk->Tunnels = Tunnels;
-							Chunk->Material = Material;
-							Chunk->LevelSize = static_cast<int>(LevelSize);
-							Chunk->bUpdateMesh = bUpdateMesh;
-							Chunk->DebugChunk = DebugChunk;
-							Chunk->DebugVoxels = DebugVoxels;
+						const auto Chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>
+						(
+							AMarchingChunkTerrain::StaticClass(),
+							FTransform(),
+							this
+						);
+						Chunk->bUpdateMesh = bUpdateMesh;
+						
+						Chunk->LevelSize = static_cast<int>(LevelSize);
+						Chunk->Boxes = Boxes;
+						Chunk->Tunnels = Tunnels;
+						Chunk->Material = Material;
+						
+						Chunk->ChunkPosition = ChunkPosition;
+						Chunk->ChunkSize = ChunkSize;
+						Chunk->VoxelsPerSide = VoxelDensity;
+						
+						Chunk->NoiseRatio = NoiseRatio;
+						
+						Chunk->bDebugInvertSolids = bDebugInvertSolids;
+						Chunk->DebugChunk = DebugChunk;
+						Chunk->DebugVoxels = DebugVoxels;
 
-							UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
+						UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
 
-							Chunks.Add(Chunk);
-							break;
-						}
+						Chunks.Add(Chunk);
+						break;
 					}
 				}
 			}
@@ -322,7 +358,7 @@ bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<
 {
 	for (const FLevelBox& Box : AllBoxes)
 	{
-		if (BoxesIntersect(Box, NewBox))
+		if (BoxesIntersect2D(Box, NewBox))
 		{
 			return false;
 		}
@@ -390,6 +426,14 @@ void AProceduralCaveGen::ClearMap()
 	}
 
 	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
+			(*It)->Destroy();
+		}
+	}
+
+	for (TActorIterator<APointLight> It(GetWorld()); It; ++It)
 	{
 		if (*It)
 		{
