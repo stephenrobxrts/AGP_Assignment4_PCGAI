@@ -22,6 +22,9 @@ Get into the cave system, find switch(es), escape
 		* Inner room details? 
 * PCG Pathfinding
 	* Node differentiation by doorway/terrain/InCanve(x)
+	* Jump Point Search (instead of A*)
+		* <iframe width="560" height="315" src="https://www.youtube.com/embed/kSm-ADXH808?si=Lr-eFDDqkvvqzi3p" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+	* 
 
 #### AI
 * AI Hearing (head to doorway of rooms if heard elsewhere -> *investigate*)
@@ -41,19 +44,64 @@ Get into the cave system, find switch(es), escape
 	* Explosions
 
 
-##### AI Names
-1. "Indy's Infinite Escapades"
-2. "Randomana Jones and the Temple of Chuckles"
-3. "Raiders of the Randomly Generated Relics"
-4. "Unreal Archaeology: The Chuckling Catacombs"
-5. "ProceduraJones: The Last Giggle Crusade"
-6. "Hilarity Jones and the Temple of Unrealism"
-7. "Indiana Clowns and the Procedural Pranks"
-8. "Mystic Mayhem: The Indy Generator"
-9. "Laughing Legends: The Infinite Indy"
-10. "Random Raider: Chuckles of Destiny"
-11. "Unreal Adventure: The Jokes of Indy"
-12. "Lara Laughs and the Random Relics"
-13. "Indy in Wonderland: The Unreal Odyssey"
-14. "Dr. Jokelove and the Hilarious Holy Grail"
-15. "The Lost Giggle: Indy's Procedural Pursuit"
+## Implementation
+
+### Cave generation
+Inputs:
+* LevelSize
+* HeightDifference (The difference between the start point and the end point)
+* Cave min/max sizes
+* Tunnel size
+* Number of paths (min 2)
+* Interconnection ratio (at 1 it generates ALL possible interconnects)
+
+Places Rooms 
+Level is given a size
+**WRITE MORE FOR THE VIDEO**
+
+
+
+
+## A3 Objectives
+
+### PCG
+- [ ] Level Generator
+	- [x] Makes Start/End Rooms ✅ 2023-10-09
+	- [x] Makes Rooms that follow paths inbetween ✅ 2023-10-09
+	- [x] Makes Tunnels to connect the path ✅ 2023-10-09
+	- [x] Makes Random Interconnects ✅ 2023-10-09
+	- [ ] Room NavNodes
+	- [x] Send RoomData to Marching Chunks ✅ 2023-10-09
+- [ ] Rooms
+	- [x] Boxes with (optional) lights ✅ 2023-10-09
+		- [ ] Light attached to wall
+		- [ ] LightEnabled Variable
+		- [ ] Light as a PickupObject
+	- [x] Random size ✅ 2023-10-09
+	- [ ] Room NavNode
+	- [ ] Walkable NavNodes
+	- [ ] Traps
+- [ ] Tunnels
+	- [ ] Connects Box/Box
+	- [ ] Correctly rotated floor
+- [ ] Marching Cubes
+	- [x] Correctly shows boxes/tunnels ✅ 2023-10-09
+		- [ ] Fix Seam Issue
+	- [x] Noise function ✅ 2023-10-09
+		- [ ] FBM noise
+	- [x] Working ChunkSize/VoxelDensity fields ✅ 2023-10-09
+	- [x] SDF for inside/outside ✅ 2023-10-09
+		- [x] SDF interacts with noise ✅ 2023-10-09
+- [ ] Chunks
+	- [x] Spawn chunks only where boxes/tunnels are ✅ 2023-10-09
+		- [x] Boxes ✅ 2023-10-09
+		- [ ] Tunnels
+	- [ ] Octree or similar chunk optimization
+		- [ ] Change ChunkSize OR Voxel Density?
+		- [ ] Switch out geometry w/o disrupting actors
+
+### AI
+
+
+## A4 Plan
+
