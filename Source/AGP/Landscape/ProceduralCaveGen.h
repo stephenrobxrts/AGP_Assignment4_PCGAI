@@ -95,7 +95,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Connectedness = 0.7f;
 	
-	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AMarchingChunkTerrain> Marcher;
 	TArray<AMarchingChunkTerrain*> Chunks;
