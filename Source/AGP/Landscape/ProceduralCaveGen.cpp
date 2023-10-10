@@ -36,6 +36,15 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bDebugOnly1Chunk && VoxelDensity < 12)
+	{
+		bSmallNumVoxels = true;
+	}
+	else
+	{
+		bSmallNumVoxels = false;
+	}
+
 	//If you click regenerate - clears map and generates the level
 	if (bShouldRegenerate)
 	{
@@ -80,7 +89,7 @@ float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
 	return deltaY / deltaX;
 }
 
-//ToDo: Tidy up second path by generalizing the function with for loop
+//ToDo: LevelBoxes as actors, move repeptitive code to CreateBox
 TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
                                                                   FVector BoxMaxSize)
 {
@@ -102,7 +111,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
 	
-	//Get Direction of sunlight. Point box towards sun
+	//Optional entrance sunlight - if DirectionalLight Present Get Direction of sunlight. Point box towards sun
 	FVector SunDirection = FVector::ZeroVector;
 	ADirectionalLight* Sun;
 	for (TActorIterator<ADirectionalLight> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -153,7 +162,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			RandomDirection.Z = verticalComponent;
 
 			FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
-				0.5f * MaxConnectionDistance, MaxConnectionDistance);
+				0.8f * MaxConnectionDistance, MaxConnectionDistance);
 			box.Position = newPosition;
 			box.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
 			                   FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),

@@ -112,6 +112,10 @@ protected:
 	//Debug
 	UPROPERTY(EditAnywhere)
 	bool bDebugView = true;
+
+	/**
+	 * @brief Disable to render the whole level, enable to render only the first section of it
+	 */
 	UPROPERTY(EditAnywhere)
 	bool bDebugOnly1Chunk = true;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
@@ -133,7 +137,10 @@ protected:
 	int VoxelDensity = 32;
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool DebugChunk = true;
-	UPROPERTY(EditAnywhere, Category="Chunk")
+
+	bool bSmallNumVoxels = false;
+
+	UPROPERTY(EditAnywhere, Category="Chunk", meta=(EditCondition="bSmallNumVoxels"))
 	bool DebugVoxels = false;
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool bDebugInvertSolids = true;
