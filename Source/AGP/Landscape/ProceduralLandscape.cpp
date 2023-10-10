@@ -39,17 +39,12 @@ void AProceduralLandscape::DebugShowNavNodes()
 
 void AProceduralLandscape::GenerateLandscape()
 {
-	//Set Perlin Offset
-	PerlinOffset = FMath::RandRange(-1'000'0.0f, 1'000'0.0f);
-
 	//Add the vertices, UV Coords and Tris to the arrays
 	for (int32 Y = 0; Y < Height; Y++)
 	{
 		for (int32 X = 0; X < Width; X++)
 		{
-			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing,
-			                     FMath::PerlinNoise2D(FVector2d(X * PerlinRoughness + PerlinOffset,
-			                                                    Y * PerlinRoughness + PerlinOffset)) * PerlinScale));
+			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, 0.0f));
 	
 			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
 		}
@@ -155,12 +150,6 @@ void AProceduralLandscape::CreateSimplePlane()
 	Vertices.Add(Vector2);
 	Vertices.Add(Vector3);
 	Vertices.Add(Vector4);
-
-	// Randomize Z-Height of each vertex
-	for (FVector& Vertex : Vertices)
-	{
-		Vertex.Z = FMath::RandRange(-500.0f, 500.0f);
-	}
 
 	// Add the specified integers to the Triangles array
 	Triangles.Add(0);
