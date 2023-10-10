@@ -21,6 +21,8 @@ public:
 	// Sets default values for this actor's properties
 	AMarchingChunkTerrain();
 	virtual bool ShouldTickIfViewportsOnly() const override;
+
+	
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
 	int LevelSize = 1000;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
@@ -76,7 +78,7 @@ public:
 	void ShowDebug();
 	
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool bDebugInvertSolids = true;
+	bool bDebugInvertSolids = false;
 	float InverseMultiplier;
 
 protected:
@@ -112,7 +114,6 @@ private:
 	int GetVoxelIndex(int X, int Y, int Z) const;
 
 	void ApplyMesh() const;
-
 
 	float GetInterpolationOffset(float V1, float V2) const;
 

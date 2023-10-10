@@ -29,13 +29,12 @@ void AMarchingChunkTerrain::ShowDebug()
 	if (DebugChunk)
 	{
 		FVector halfSize = FVector(ChunkSize / 2.0, ChunkSize / 2.0, ChunkSize / 2.0);
-		DrawDebugBox(GetWorld(), GetActorLocation() + CornerPosition, halfSize, FColor::Silver, false, -1, 0, 2.0f);
+		DrawDebugBox(GetWorld(), ChunkPosition + ChunkSize/2, halfSize, FColor::Silver, false, -1, 0, 2.0f);
 	}
 	if (DebugVoxels && !Voxels.IsEmpty())
 	{
-		FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
-		FColor color = FColor::White;
-		// Voxel count, e.g. 64Wide, 64Long, 64High
+		FVector voxelPosition = FVector::ZeroVector;
+		// For each Voxel, show the position and the SDF value as a color. 
 		for (double x = 0; x <= VoxelsPerSide; ++x)
 		{
 			for (double y = 0; y <= VoxelsPerSide; ++y)
@@ -85,7 +84,7 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 		VoxelDiameter = ChunkSize / VoxelsPerSide;
 		CreateVoxels();
 		GenerateHeightMap();
-
+		
 		GenerateMesh();
 		ApplyMesh();
 		
@@ -104,6 +103,14 @@ void AMarchingChunkTerrain::ClearMesh()
 	MeshData.Clear();
 }
 
+/**
+ * @brief UNUSED - Checks whether a point is inside a box - even if the box is rotated
+ * @param point The point (Position) to check
+ * @param BoxPosition Box Position
+ * @param BoxSize Box Size
+ * @param BoxRotation Box Rotation
+ * @return True if the point is inside the box
+ */
 bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation)
 {
 	FVector halfSize = BoxSize * 0.5f;
@@ -120,7 +127,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 {
 	FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
 
-	// Voxel count, 64Wide, 64Long, 64High
+	// For each voxel in the cube (+1 to overlap with next chunk)
 	for (int x = 0; x <= VoxelsPerSide; ++x)
 	{
 		for (int y = 0; y <= VoxelsPerSide; ++y)
@@ -135,9 +142,9 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				for (FLevelBox Box : Boxes)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Box.Position, Box.Size, FQuat::Identity);
-					if (FMath::Abs(TempSDF) < FMath::Abs(VoxelSDF) )
+					if (TempSDF < VoxelSDF )
 					{
-						VoxelSDF=TempSDF;
+						VoxelSDF = TempSDF;
 					}
 				}
 				
@@ -146,6 +153,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 					float TempSDF = BoxSDF(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation);
 					
 					//If the value is more internal, take it
+					//Stricter adherence to tunnels *3
 					if ( TempSDF < TunnelSDF*3.0)
 					{
 						TunnelSDF = TempSDF*3.0;
@@ -158,10 +166,10 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 					VoxelSDF = TunnelSDF;
 				}
 				
-				//ScaleSDF
-				float SDFScale = 150;
+				//ScaleSDF - The SDF is scale to approximately one human sized voxel - prevents getting stuck!
+				float SDFScale = 180;
 				VoxelSDF *= 1/SDFScale;
-				// Clamp SDF
+				// Clamp SDF between -1, 1 to make it valid and interact with noise
 				VoxelSDF = (VoxelSDF > 1.0f) ? 1.0f : VoxelSDF;
 				VoxelSDF = (VoxelSDF < -1.0f) ? -1.0f : VoxelSDF;
 				
@@ -196,9 +204,7 @@ void AMarchingChunkTerrain::GenerateMesh()
 	float Cube[8];
 
 
-	//If inside tunnel/box, set to 1, else 0
-	//ToDo: use this value to set the surface level variable differently inside vs outside caves!
-	//Voxel will be RGB -> R = SurfaceLevel, G = NoiseVal, B = extra (for now);
+	//For each voxel in the chunk (including the last one)
 	for (int X = 0; X < VoxelsPerSide; ++X)
 	{
 		for (int Y = 0; Y < VoxelsPerSide; ++Y)
@@ -219,6 +225,14 @@ void AMarchingChunkTerrain::GenerateMesh()
 	}
 }
 
+/**
+ * @brief Calculate a single voxels Signed Distance Field value in relation to a box
+ * @param Point 
+ * @param BoxPosition 
+ * @param BoxSize 
+ * @param BoxRotation 
+ * @return 
+ */
 float AMarchingChunkTerrain::BoxSDF(const FVector& Point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation)
 {
 	FVector HalfSize = BoxSize * 0.5f;

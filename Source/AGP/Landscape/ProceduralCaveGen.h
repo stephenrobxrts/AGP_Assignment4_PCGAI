@@ -20,7 +20,7 @@ enum class EBoxType : uint8
 };
 
 /**
- * @brief Level box struct contains Position, Size, Type (Start, Normal, End)
+ * @brief Level box struct contains Position, Size, Type (Start, Normal, End), Rotation (optional)
  */
 USTRUCT(BlueprintType)
 struct FLevelBox
@@ -78,6 +78,33 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
+	
+	//Box placement logic
+	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
+	void GenerateInterconnects();
+	void CreateBox(const FLevelBox& Box);
+
+	//Tunnel Creation
+	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction);
+	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
+
+	//Create array of all objects for chunks
+	void CreateObjects();
+	
+	//Creation Logic
+	void ClearMap();
+	void GenerateMesh();
+
+	//Helper Functions
+	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
+	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	void DebugShow();
+	void AddPlayerStartAtLocation(const FVector& Location); 
+
+
+
 	UPROPERTY(EditAnywhere)
 	bool bShouldRegenerate = true;
 	UPROPERTY(EditAnywhere)
@@ -86,22 +113,23 @@ protected:
 	UPROPERTY(EditAnywhere)
 	int NumPaths = 2;
 	UPROPERTY(EditAnywhere)
-	int NumBoxesPerPath = 10;
+	int NumBoxesPerPath = 6;
 	UPROPERTY(EditAnywhere)
 	float LevelSize = 10000.0f;
 	UPROPERTY(EditAnywhere)
 	float HeightDifference = 400.0f;
+
+	UPROPERTY(VisibleAnywhere)
+	FVector MinBoxSize = FVector(300.0f, 300.0f, 200.0f);
 	UPROPERTY(EditAnywhere)
-	float MaxConnectionDistance = LevelSize/(NumBoxesPerPath-2);
+	FVector MaxBoxSize = FVector(1000.0f, 1000.0f, 600.0f);
+	UPROPERTY(VisibleAnywhere)
+	float MaxConnectionDistance = (LevelSize/(NumBoxesPerPath)) + (MaxBoxSize.X/2);
 	UPROPERTY(EditAnywhere)
-	FVector MinSize = FVector(300.0f, 300.0f, 200.0f);
-	UPROPERTY(EditAnywhere)
-	FVector MaxSize = FVector(1000.0f, 1000.0f, 600.0f);
-	UPROPERTY(EditAnywhere)
-	float TunnelSize = 200.0f;
+	float TunnelSize = 260.0f;
 	
 	UPROPERTY(EditAnywhere)
-	float Connectedness = 0.7f;
+	float PathInterconnectedness = 0.7f;
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AMarchingChunkTerrain> Marcher;
@@ -109,7 +137,7 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category="Chunk")
 	TObjectPtr<UMaterialInterface> Material;
 
-	//Debug
+	//Debug Boxes and Tunnels
 	UPROPERTY(EditAnywhere)
 	bool bDebugView = true;
 
@@ -122,6 +150,8 @@ protected:
 	TArray<FLevelBox> Boxes;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 	TArray<FTunnel> Tunnels;
+	UPROPERTY()
+	TArray<FLevelBox> AllObjects;
 	
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 	TArray<FInnerArray> Paths;
@@ -136,33 +166,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	int VoxelDensity = 32;
 	UPROPERTY(EditAnywhere, Category="Chunk")
-	bool DebugChunk = true;
+	bool bDebugChunk = true;
 
 	bool bSmallNumVoxels = false;
 
 	UPROPERTY(EditAnywhere, Category="Chunk", meta=(EditCondition="bSmallNumVoxels"))
-	bool DebugVoxels = false;
+	bool bDebugVoxels = false;
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool bDebugInvertSolids = true;
 
 	UPROPERTY(EditAnywhere, Category="Noise")
 	float NoiseRatio = 0.8f;
-	
 
-	TArray<FLevelBox> GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize, FVector BoxMaxSize);
-	void GenerateInterconnects();
-	void CreateBox(const FLevelBox& Box);
-
-	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction);
-	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
-	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
-	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
-	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
-	void ClearMap();
-	void DebugShow();
-	void AddPlayerStartAtLocation(const FVector& Location); 
-
-	void GenerateMesh();
 
 public:
 	// Called every frame

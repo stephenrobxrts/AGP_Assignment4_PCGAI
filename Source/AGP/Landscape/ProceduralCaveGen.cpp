@@ -51,9 +51,11 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		ClearMap();
 
 		//Level Generation
-		Boxes = GenerateGuaranteedPathBoxes(NumBoxesPerPath, MinSize, MaxSize);
+		Boxes = GenerateGuaranteedPathBoxes();
 		GenerateInterconnects();
 
+		//Add All generated items to an array for chunk check
+		CreateObjects();
 		//Spawn Meshes
 		GenerateMesh();
 		bShouldRegenerate = false;
@@ -90,8 +92,7 @@ float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
 }
 
 //ToDo: LevelBoxes as actors, move repeptitive code to CreateBox
-TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesToGenerate, FVector BoxMinSize,
-                                                                  FVector BoxMaxSize)
+TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 {
 	//Start and End Locations
 	FVector Start = FVector(GetActorLocation());
@@ -103,9 +104,9 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 	FLevelBox StartBox
 	{	Start,
 		FVector(				
-					FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
-					FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-					FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)),
+					FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+					FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+					FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)),
 		EBoxType::Start
 	};
 	boxes.Add(StartBox);
@@ -162,11 +163,11 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			RandomDirection.Z = verticalComponent;
 
 			FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
-				0.8f * MaxConnectionDistance, MaxConnectionDistance);
+				0.5f * MaxConnectionDistance, MaxConnectionDistance);
 			box.Position = newPosition;
-			box.Size = FVector(FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
-			                   FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-			                   FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z));
+			box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+			                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+			                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
 			box.Type = EBoxType::Normal;
 			
 			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
@@ -194,9 +195,9 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 	FLevelBox EndBox{End, FVector(0, 0, 0), EBoxType::End};
 	EndBox.Size = FVector
 	(
-		FMath::RandRange(BoxMinSize.X, BoxMaxSize.X),
-		FMath::RandRange(BoxMinSize.Y, BoxMaxSize.Y),
-		FMath::RandRange(BoxMinSize.Z, BoxMaxSize.Z)
+		FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+		FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+		FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)
 	);
 	EndBox.Type = EBoxType::End;
 	CreateBox(EndBox);
@@ -220,7 +221,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
  */
 void AProceduralCaveGen::GenerateInterconnects()
 {
-	const int MaxInterconnects = Paths[0].Path.Num() * Connectedness;
+	const int MaxInterconnects = Paths[0].Path.Num() * PathInterconnectedness;
 	TArray<int> InterconnectIndices;
 	for (int i = 0; i < Paths[0].Path.Num(); i++)
 	{
@@ -314,8 +315,20 @@ void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox
 	Tunnels.Add(Tunnel);
 }
 
+void AProceduralCaveGen::CreateObjects()
+{
+	AllObjects.Append(Boxes);
+
+	for (FTunnel Tunnel : Tunnels)
+	{
+		FLevelBox TempBox{Tunnel.Position, Tunnel.Size, EBoxType::Normal, Tunnel.Rotation};
+		AllObjects.Add(TempBox);
+	}
+	
+}
+
 /**
- * @brief Check if two boxes intersect from topdown (XY only)
+ * @brief Check if two boxes intersect from topdown (XY only) NOT INCLUDING ROTATION
  * @param BoxA FLevelBox to check
  * @param BoxB Other FLevelBox
  * @return True if boxes intersect, false otherwise
@@ -349,7 +362,7 @@ bool AProceduralCaveGen::BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox
 
 
 /**
- * @brief Check if two boxes intersect (XYZ)
+ * @brief Check if two boxes intersect (XYZ) NOT INCLUDING ROTATION
  * @param BoxA FLevelBox to check
  * @param BoxB Other FLevelBox
  * @return True if boxes intersect, false otherwise
@@ -431,9 +444,9 @@ void AProceduralCaveGen::GenerateMesh()
 				FLevelBox ChunkBox{
 					ChunkPosition, FVector(ChunkSize * 2, ChunkSize * 2, ChunkSize * 2), EBoxType::Normal
 				};
-				for (FLevelBox box : Boxes)
+				for (FLevelBox Object : AllObjects)
 				{
-					if (BoxesIntersect(ChunkBox, box))
+					if (BoxesIntersect(ChunkBox, Object))
 					{
 						const auto Chunk = GetWorld()->SpawnActorDeferred<AMarchingChunkTerrain>
 						(
@@ -455,8 +468,8 @@ void AProceduralCaveGen::GenerateMesh()
 						Chunk->NoiseRatio = NoiseRatio;
 						
 						Chunk->bDebugInvertSolids = bDebugInvertSolids;
-						Chunk->DebugChunk = DebugChunk;
-						Chunk->DebugVoxels = DebugVoxels;
+						Chunk->DebugChunk = bDebugChunk;
+						Chunk->DebugVoxels = bDebugVoxels;
 
 						UGameplayStatics::FinishSpawningActor(Chunk, FTransform());
 

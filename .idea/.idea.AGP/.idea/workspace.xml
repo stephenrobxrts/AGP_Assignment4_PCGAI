@@ -8,7 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5d777a0d-b88f-4abc-bca8-f8ede2e3c558" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/Voxels/MarchingChunkTerrain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/Voxels/MarchingChunkTerrain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/Voxels/MarchingChunkTerrain.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/Voxels/MarchingChunkTerrain.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,7 +155,7 @@
       <workItem from="1696748584090" duration="5937000" />
       <workItem from="1696757921080" duration="5133000" />
       <workItem from="1696811469012" duration="25943000" />
-      <workItem from="1696896857242" duration="1878000" />
+      <workItem from="1696896857242" duration="4892000" />
     </task>
     <task id="LOCAL-00001" summary="Code Cleanup for A3">
       <option name="closed" value="true" />
