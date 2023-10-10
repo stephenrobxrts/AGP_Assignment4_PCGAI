@@ -28,11 +28,42 @@ bool AProceduralCaveGen::ShouldTickIfViewportsOnly() const
 void AProceduralCaveGen::BeginPlay()
 {
 	Super::BeginPlay();
-	//Boxes = GenerateGuaranteedPathBoxes(NumBoxes, MinSize, MaxSize);
-	//Tunnels = GenerateTunnels(Boxes);
+	//Level Generation is handled in Tick
 }
 
+// Called every frame
+void AProceduralCaveGen::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 
+	//If you click regenerate - clears map and generates the level
+	if (bShouldRegenerate)
+	{
+		ClearMap();
+
+		//Level Generation
+		Boxes = GenerateGuaranteedPathBoxes(NumBoxesPerPath, MinSize, MaxSize);
+		GenerateInterconnects();
+
+		//Spawn Meshes
+		GenerateMesh();
+		bShouldRegenerate = false;
+	}
+
+	//Debug to visualize boxes
+	if (!Boxes.IsEmpty() && bDebugView)
+	{
+		DebugShow();
+	}
+	
+}
+
+/**
+ * @brief Helper Function to calculate a gradient between two boxes
+ * @param BoxA FLevelBox Starting point
+ * @param BoxB FLevelBox End point
+ * @return float Gradient between the two boxes (deltaY/deltaX), or a large number if deltaX is very small (to avoid division by zero)
+ */
 float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
 	float deltaY = BoxB.Position.Z - BoxA.Position.Z;
@@ -60,7 +91,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 	TArray<FLevelBox> boxes;
 
 	//Start Box
-	
 	FLevelBox StartBox
 	{	Start,
 		FVector(				
@@ -99,9 +129,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 		}
 	}
 	
-
-
-
+	
 	//Find paths up to number of paths
 	FVector LastPosition = Start;
 	for (int i = 0; i < NumPaths; i++)
@@ -134,8 +162,8 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 			
 			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
 
-			//If box doesn't collide with any other boxes, add it to the list
-			//Or Gradient is too steep
+			//If box doesn't collide with any other boxes Or Gradient is too steep
+			//Add it to the list of boxes	
 			if (BoxPositionValid(box, boxes) && FMath::Abs(CalculateGradient(box, lastBox)) <= 0.3)
 			{
 				
@@ -176,6 +204,11 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes(int NumBoxesTo
 	return boxes;
 }
 
+/**
+ * @brief Creates tunnels between boxes with the same i \n
+ * Uses the Paths and Connectedness (0->1) to determine how many tunnels to create \n
+ * At 1.0 Connectedness it will attempt to generate all possible tunnels
+ */
 void AProceduralCaveGen::GenerateInterconnects()
 {
 	const int MaxInterconnects = Paths[0].Path.Num() * Connectedness;
@@ -185,7 +218,6 @@ void AProceduralCaveGen::GenerateInterconnects()
 		InterconnectIndices.Add(i);
 	}
 	Algo::RandomShuffle(InterconnectIndices);
-	//std::shuffle(InterconnectIndices.begin(), InterconnectIndices.end());
 	int NumInterconnects = 0;
 	int AttemptNum = 0;
 	while (AttemptNum < Paths[0].Path.Num() && NumInterconnects < MaxInterconnects)
@@ -203,6 +235,10 @@ void AProceduralCaveGen::GenerateInterconnects()
 	
 }
 
+/**
+ * @brief Helper function that creates associated items to be spawned at each room.
+ * @param Box is the room to be spawned in.
+ */
 void AProceduralCaveGen::CreateBox(const FLevelBox& Box)
 {
 	if (UWorld* World = GetWorld())
@@ -214,6 +250,12 @@ void AProceduralCaveGen::CreateBox(const FLevelBox& Box)
 	}
 }
 
+/**
+ * @brief Calculates an offset from the center of the box, towards the wall. This is the point a tunnel will spawn at
+ * @param Box - The box to calculate the offset from
+ * @param Direction - The direction the tunnel goes (usually center of this box towards center of another box)
+ * @return FVector Offset, the offset vector from the center of the box towards the wall
+ */
 FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction)
 {
 	FVector Offset;
@@ -236,6 +278,11 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 	return Offset;
 }
 
+/**
+ * @brief Creates a tunnel and adds it to the tunnel array
+ * @param StartBox 
+ * @param TargetBox 
+ */
 void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox)
 {
 	FTunnel Tunnel;
@@ -258,6 +305,12 @@ void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox
 	Tunnels.Add(Tunnel);
 }
 
+/**
+ * @brief Check if two boxes intersect from topdown (XY only)
+ * @param BoxA FLevelBox to check
+ * @param BoxB Other FLevelBox
+ * @return True if boxes intersect, false otherwise
+ */
 bool AProceduralCaveGen::BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
 	// Check for gap along X axis
@@ -285,6 +338,13 @@ bool AProceduralCaveGen::BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox
 	return true;
 }
 
+
+/**
+ * @brief Check if two boxes intersect (XYZ)
+ * @param BoxA FLevelBox to check
+ * @param BoxB Other FLevelBox
+ * @return True if boxes intersect, false otherwise
+ */
 bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
 
@@ -313,7 +373,10 @@ bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& 
 	return true;
 }
 
-
+/**
+ * @brief Adds a player spawn point
+ * @param Location Location to add player spawn point
+ */
 void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 {
 	if (GetWorld())
@@ -330,16 +393,22 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 	}
 }
 
+/**
+ * @brief Generate Mesh using MarchingChunkTerrain
+ */
 void AProceduralCaveGen::GenerateMesh()
 {
 	//For loop for X/Y/Z chunks within levelSize
 	int ChunkAmounts = LevelSize / ChunkSize;
+	int StartChunkXY = -1;
+	int StartChunkZ = -ChunkAmounts;
 	if (bDebugOnly1Chunk)
 	{
 		ChunkAmounts = -1;
+		StartChunkZ = -1;
+		
 	}
-	int StartChunkXY = ChunkAmounts == -1 ? -1 : -1;
-	int StartChunkZ = ChunkAmounts == -1 ? -1 : -ChunkAmounts;
+	
 	for (int x = StartChunkXY; x <= ChunkAmounts; x++)
 	{
 		for (int y = StartChunkXY; y <= ChunkAmounts; y++)
@@ -391,6 +460,12 @@ void AProceduralCaveGen::GenerateMesh()
 	}
 }
 
+/**
+ * @brief Check if box position is valid
+ * @param NewBox Box to check
+ * @param AllBoxes All boxes to check against
+ * @return Generated box
+ */
 bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& AllBoxes)
 {
 	for (const FLevelBox& Box : AllBoxes)
@@ -403,29 +478,11 @@ bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<
 	return true;
 }
 
-// Called every frame
-void AProceduralCaveGen::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	if (bShouldRegenerate)
-	{
-		ClearMap();
-		Boxes = GenerateGuaranteedPathBoxes(NumBoxesPerPath, MinSize, MaxSize);
-		GenerateInterconnects();
 
-		GenerateMesh();
-		//SpawnPickups(); //Now implemented in PickupManagerSubsystem
-		bShouldRegenerate = false;
-	}
-
-	//Debug to visualize boxes
-	if (!Boxes.IsEmpty() && bDebugView)
-	{
-		DebugShow();
-	}
-	
-}
-
+/**
+ * @brief Empties Boxes,Tunnels, Paths, Associated objects /n
+ * and clears the mesh
+ */
 void AProceduralCaveGen::ClearMap()
 {
 	Boxes.Empty();
@@ -450,8 +507,7 @@ void AProceduralCaveGen::ClearMap()
 		}
 		Chunks.Empty();
 	}
-
-	//ToDo: If level has only just been initialized iterate through marching chunks and destroy them
+	
 	//Iterate through all APickupBase actors in the world and destroy them
 	for (TActorIterator<AMarchingChunkTerrain> It(GetWorld()); It; ++It)
 	{
@@ -479,6 +535,9 @@ void AProceduralCaveGen::ClearMap()
 	}
 }
 
+/**
+ * @brief Draw Boxes and Tunnel widgets
+ */
 void AProceduralCaveGen::DebugShow()
 {
 	for (const FLevelBox& box : Boxes)

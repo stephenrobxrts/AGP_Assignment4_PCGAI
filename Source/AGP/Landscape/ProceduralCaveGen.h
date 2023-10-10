@@ -34,6 +34,9 @@ public:
 	FQuat Rotation = FQuat::Identity;
 };
 
+/**
+ * @brief Tunnel Strut behaves like a level box but also includes a start and end box
+ */
 USTRUCT(BlueprintType)
 struct FTunnel
 {
@@ -47,6 +50,9 @@ public:
 	FQuat Rotation = FQuat::Identity;
 };
 
+/**
+ * @brief This is just an Array of Arrays because apparently we can't do that :(
+ */
 USTRUCT()
 struct FInnerArray
 {
@@ -55,7 +61,9 @@ struct FInnerArray
 	TArray<FLevelBox> Path;
 };
 
-
+/**
+ * @brief Procedurally create boxes and tunnels, pass to MarchingChunkTerrain to create mesh
+ */
 UCLASS()
 class AGP_API AProceduralCaveGen : public AActor
 {
@@ -84,7 +92,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float HeightDifference = 400.0f;
 	UPROPERTY(EditAnywhere)
-	float MaxConnectionDistance = 2000.0f;
+	float MaxConnectionDistance = LevelSize/(NumBoxesPerPath-2);
 	UPROPERTY(EditAnywhere)
 	FVector MinSize = FVector(300.0f, 300.0f, 200.0f);
 	UPROPERTY(EditAnywhere)
