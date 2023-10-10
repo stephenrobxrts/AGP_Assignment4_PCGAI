@@ -90,7 +90,7 @@ protected:
 	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
 
 	//Create array of all objects for chunks
-	void CreateObjects();
+	void AddAllObjects();
 	
 	//Creation Logic
 	void ClearMap();
@@ -99,7 +99,7 @@ protected:
 	//Helper Functions
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
 	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
-	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	static bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
 	void DebugShow();
 	void AddPlayerStartAtLocation(const FVector& Location); 
 
@@ -124,7 +124,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FVector MaxBoxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	UPROPERTY(VisibleAnywhere)
-	float MaxConnectionDistance = (LevelSize/(NumBoxesPerPath)) + (MaxBoxSize.X/2);
+	float AvgConnectionDistance = (LevelSize/(NumBoxesPerPath));
 	UPROPERTY(EditAnywhere)
 	float TunnelSize = 260.0f;
 	
@@ -167,10 +167,13 @@ protected:
 	int VoxelDensity = 32;
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool bDebugChunk = true;
+	UPROPERTY()
+	FVector OffsetChunkStart;
 
+	UPROPERTY(meta=(EditCondition="bSmallNumVoxels"));
 	bool bSmallNumVoxels = false;
 
-	UPROPERTY(EditAnywhere, Category="Chunk", meta=(EditCondition="bSmallNumVoxels"))
+	UPROPERTY(EditAnywhere, Category="Chunk", meta=(EditConditionHides="bSmallNumVoxels"))
 	bool bDebugVoxels = false;
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool bDebugInvertSolids = true;

@@ -45,9 +45,9 @@ public:
 
 	FVector Position = FVector::ZeroVector;
 
-	FVector CornerPosition = FVector(+ChunkSize / 2.0,
-	                                 +ChunkSize / 2.0,
-	                                 +ChunkSize / 2.0);
+	FVector CornerPosition = FVector(ChunkPosition.X + ChunkSize / 2.0,
+	                                 ChunkPosition.X + ChunkSize / 2.0,
+	                                 ChunkPosition.X + ChunkSize / 2.0);
 	bool bInterpolate = true;
 
 	//For noise
@@ -72,9 +72,9 @@ public:
 
 	//Debugging
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool DebugChunk = true;
+	bool bDebugChunk = true;
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool DebugVoxels = true;
+	bool bDebugVoxels = true;
 	void ShowDebug();
 	
 	UPROPERTY(EditAnywhere, Category="Settings")

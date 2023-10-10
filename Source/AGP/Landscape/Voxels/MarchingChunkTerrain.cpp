@@ -24,35 +24,6 @@ bool AMarchingChunkTerrain::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
-void AMarchingChunkTerrain::ShowDebug()
-{
-	if (DebugChunk)
-	{
-		FVector halfSize = FVector(ChunkSize / 2.0, ChunkSize / 2.0, ChunkSize / 2.0);
-		DrawDebugBox(GetWorld(), ChunkPosition + ChunkSize/2, halfSize, FColor::Silver, false, -1, 0, 2.0f);
-	}
-	if (DebugVoxels && !Voxels.IsEmpty())
-	{
-		FVector voxelPosition = FVector::ZeroVector;
-		// For each Voxel, show the position and the SDF value as a color. 
-		for (double x = 0; x <= VoxelsPerSide; ++x)
-		{
-			for (double y = 0; y <= VoxelsPerSide; ++y)
-			{
-				for (double z = 0; z <= VoxelsPerSide; ++z)
-				{
-					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)])*255;
-					const float VoxelSign = VoxelValue > 0 ? 1.0f : 0.10f;
-					VoxelValue = abs(VoxelValue);
-					FColor Color = FColor(VoxelValue*(1-VoxelSign), VoxelValue*VoxelSign, 0, VoxelValue);
-					voxelPosition = FVector(x * VoxelDiameter, y * VoxelDiameter, z * VoxelDiameter) + ChunkPosition;
-					DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, Color, false, -1, 0, 2.0f);
-
-				}
-			}
-		}
-	}
-}
 
 // Called when the game starts or when spawned
 void AMarchingChunkTerrain::BeginPlay()
@@ -125,8 +96,8 @@ bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector B
 
 void AMarchingChunkTerrain::GenerateHeightMap()
 {
+	CornerPosition = ChunkPosition + FVector(ChunkSize / 2.0f, ChunkSize / 2.0f, ChunkSize / 2.0f);
 	FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
-
 	// For each voxel in the cube (+1 to overlap with next chunk)
 	for (int x = 0; x <= VoxelsPerSide; ++x)
 	{
@@ -134,7 +105,8 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 		{
 			for (int z = 0; z <= VoxelsPerSide; ++z)
 			{
-				voxelPosition = FVector(VoxelDiameter * x + ChunkPosition.X, VoxelDiameter * y + ChunkPosition.Y,
+				voxelPosition = FVector(VoxelDiameter * x + ChunkPosition.X,
+										VoxelDiameter * y + ChunkPosition.Y,
 				                        VoxelDiameter * z + ChunkPosition.Z);
 
 				float VoxelSDF = UE_MAX_FLT;
@@ -412,4 +384,33 @@ int AMarchingChunkTerrain::GetVoxelIndex(int X, int Y, int Z) const
 	return Z * (VoxelsPerSide + 1) * (VoxelsPerSide + 1) + Y * (VoxelsPerSide + 1) + X;
 }
 
+void AMarchingChunkTerrain::ShowDebug()
+{
+	if (bDebugChunk)
+	{
+		FVector halfSize = FVector(ChunkSize / 2.0, ChunkSize / 2.0, ChunkSize / 2.0);
+		DrawDebugBox(GetWorld(), ChunkPosition + halfSize.X, halfSize, FColor::Silver, false, -1, 0, 2.0f);
+	}
+	if (bDebugVoxels && !Voxels.IsEmpty())
+	{
+		FVector voxelPosition = FVector::ZeroVector;
+		// For each Voxel, show the position and the SDF value as a color. 
+		for (double x = 0; x <= VoxelsPerSide; ++x)
+		{
+			for (double y = 0; y <= VoxelsPerSide; ++y)
+			{
+				for (double z = 0; z <= VoxelsPerSide; ++z)
+				{
+					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)])*255;
+					const float VoxelSign = VoxelValue > 0 ? 1.0f : 0.10f;
+					VoxelValue = abs(VoxelValue);
+					FColor Color = FColor(VoxelValue*(1-VoxelSign), VoxelValue*VoxelSign, 0, VoxelValue);
+					voxelPosition = FVector(x * VoxelDiameter, y * VoxelDiameter, z * VoxelDiameter) + ChunkPosition;
+					DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, Color, false, -1, 0, 2.0f);
+
+				}
+			}
+		}
+	}
+}
 
