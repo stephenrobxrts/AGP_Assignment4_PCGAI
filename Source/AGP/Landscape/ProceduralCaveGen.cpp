@@ -703,7 +703,7 @@ bool ProjectionsOverlap(const FVector2D& ProjectionA, const FVector2D& Projectio
 
 
 /**
- * @brief Check if two boxes intersect (XYZ) NOT INCLUDING ROTATION
+ * @brief Check if two boxes intersect (XYZ + Rotations)
  * @param BoxA FLevelBox to check
  * @param BoxB Other FLevelBox
  * @return True if boxes intersect, false otherwise
