@@ -8,3 +8,13 @@ UClass* UAGPGameInstance::GetWeaponPickupClass() const
 {
 	return WeaponPickupClass.Get();
 }
+
+UClass* UAGPGameInstance::GetLevelBoxClass() const
+{
+	
+}
+
+UClass* UAGPGameInstance::GetRoomClass() const
+{
+	return RoomClass.Get();
+}

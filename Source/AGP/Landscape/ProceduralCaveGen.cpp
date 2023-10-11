@@ -8,6 +8,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 #include "EngineUtils.h"
+#include "LevelObjects/LevelBox.h"
+#include "LevelObjects/Room.h"
+#include "LevelObjects/Tunnel.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
@@ -78,20 +81,22 @@ void AProceduralCaveGen::Tick(float DeltaTime)
  * @param BoxB FLevelBox End point
  * @return float Gradient between the two boxes (deltaY/deltaX), or a large number if deltaX is very small (to avoid division by zero)
  */
-float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
+float CalculateGradient(const ALevelBox& BoxA, const ALevelBox& BoxB)
 {
-	float deltaY = BoxB.Position.Z - BoxA.Position.Z;
+	FVector BoxALocation = BoxA.GetActorLocation();
+	FVector BoxBLocation = BoxB.GetActorLocation();
+	const float DeltaY = BoxALocation.Z - BoxBLocation.Z;
 
 	// Compute horizontal distance
-	float deltaX = FVector(BoxA.Position.X - BoxB.Position.X, BoxA.Position.Y - BoxB.Position.Y, 0).Size();
+	const float DeltaX = FVector(BoxALocation.X - BoxBLocation.X, BoxALocation.Y - BoxBLocation.Y, 0).Size();
 
 	// Check for a very small deltaX to avoid division by zero
-	if (FMath::Abs(deltaX) < KINDA_SMALL_NUMBER)
+	if (FMath::Abs(DeltaX) < KINDA_SMALL_NUMBER)
 	{
 		return MAX_FLT; // return a large number to indicate a very steep gradient
 	}
 
-	return deltaY / deltaX;
+	return DeltaY / DeltaX;
 }
 
 //ToDo: LevelBoxes as actors, move repeptitive code to CreateBox
@@ -103,21 +108,55 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	FVector End = FVector(LevelSize, 0, FMath::RandRange(-HeightDifference, 0.0f));
 
 	TArray<FLevelBox> boxes;
+	// Make sure the World pointer is valid
+	if (!World)
+	{
+		// Attempt to retrieve the world context from the game's primary actor, 
+		// if ProceduralCaveGen isn't an actor and doesn't have one assigned
+		World = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
+	}
 
+	if (World)
+	{
+		 // Define your position
+		FVector Size = FVector(
+			FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+			FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+			FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)
+		);
+		FRotator Rotation = FRotator::ZeroRotator; // Define your rotation
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this; // this might need to be changed depending on the ownership you want
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		ALevelBox* NewBox = World->SpawnActor<ALevelBox>(End, Rotation, SpawnParams);
+
+		if (NewBox != nullptr)
+		{
+			NewBox->SetActorScale3D(Size); // Assuming a 1x1x1 cube model for the box
+			// Set any other properties you need
+		}
+	}
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	FVector TempSize = FVector(
+				FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+				FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+				FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
+
+
+	FTransform transform = FTransform(FRotator::ZeroRotator, Start, TempSize.GetAbs());
 	//Start Box
-	FLevelBox StartBox
-	{	Start,
-		FVector(				
-					FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
-					FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
-					FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)),
-		EBoxType::Start
+	ALevelBox* StartBox = GetWorld()->SpawnActor<ALevelBox>(Start, FRotator::ZeroRotator, SpawnParams);
+
 	};
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
 
 	//Log Start box position and size
-	UE_LOG(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
 	
 	//Optional entrance sunlight - if DirectionalLight Present Get Direction of sunlight. Point box towards sun
 	FVector SunDirection = FVector::ZeroVector;
@@ -198,17 +237,17 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 		}
 	}
 
-	//End Box
-	FLevelBox EndBox{End, FVector(0, 0, 0), EBoxType::End};
-	EndBox.Size = FVector
-	(
-		FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
-		FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
-		FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)
-	);
-	EndBox.Type = EBoxType::End;
-	CreateBox(EndBox);
-	boxes.Add(EndBox);
+		//End Box
+		FLevelBox EndBox{End, FVector(0, 0, 0), EBoxType::End};
+		EndBox.Size = FVector
+		(
+			FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+			FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+			FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)
+		);
+		EndBox.Type = EBoxType::End;
+		CreateBox(EndBox);
+		boxes.Add(EndBox);
 
 	//Join Paths to end box
 	for (int i = 0; i < NumPaths; i++)

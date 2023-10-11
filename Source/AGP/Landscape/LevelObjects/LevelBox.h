@@ -15,9 +15,9 @@ public:
 	// Sets default values for this actor's properties
 	ALevelBox();
 
-	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction);
-	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
-	bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	FVector CalculateBoxOffset(const ALevelBox& Box, const FVector& Direction);
+	bool BoxesIntersect2D(const ALevelBox& BoxA, const ALevelBox& BoxB);
+	bool BoxesIntersect(const ALevelBox& BoxA, const ALevelBox& BoxB);
 
 protected:
 	// Called when the game starts or when spawned

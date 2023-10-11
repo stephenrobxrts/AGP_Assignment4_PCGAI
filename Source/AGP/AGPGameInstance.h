@@ -18,6 +18,10 @@ class AGP_API UAGPGameInstance : public UGameInstance
 
 public:
 	UClass* GetWeaponPickupClass() const;
+	/*UClass* GetLevelBoxClass() const;
+	UClass* GetRoomClass() const;
+	UClass* GetTunnelClass() const;*/
+	
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "PickupClasses")

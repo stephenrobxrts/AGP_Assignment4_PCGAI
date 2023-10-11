@@ -144,7 +144,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Noise")
 	float NoiseRatio = 0.8f;
 
-
+private:
+	UWorld* World;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
