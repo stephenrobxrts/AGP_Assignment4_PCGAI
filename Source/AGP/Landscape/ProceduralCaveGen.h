@@ -8,47 +8,10 @@
 #include "GameFramework/PlayerStart.h"
 #include "ProceduralCaveGen.generated.h"
 
-/**
- * @brief Box type enum
- */
-UENUM(BlueprintType)
-enum class EBoxType : uint8
-{
-	Start,
-	Normal,
-	End
-};
+class ALevelBox;
+class ARoom;
+class ATunnel;
 
-/**
- * @brief Level box struct contains Position, Size, Type (Start, Normal, End), Rotation (optional)
- */
-USTRUCT(BlueprintType)
-struct FLevelBox
-{
-	GENERATED_BODY()
-
-public:
-	FVector Position;
-	FVector Size;
-	EBoxType Type;
-	FQuat Rotation = FQuat::Identity;
-};
-
-/**
- * @brief Tunnel Strut behaves like a level box but also includes a start and end box
- */
-USTRUCT(BlueprintType)
-struct FTunnel
-{
-	GENERATED_BODY()
-
-public:
-	const FLevelBox* StartBox;
-	const FLevelBox* EndBox;
-	FVector Position;
-	FVector Size;
-	FQuat Rotation = FQuat::Identity;
-};
 
 /**
  * @brief This is just an Array of Arrays because apparently we can't do that :(
@@ -58,7 +21,7 @@ struct FInnerArray
 {
 	GENERATED_BODY()
 	UPROPERTY()
-	TArray<FLevelBox> Path;
+	TArray<ALevelBox> Path;
 };
 
 /**
