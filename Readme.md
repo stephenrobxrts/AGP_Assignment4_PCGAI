@@ -190,8 +190,7 @@ Creating geometry is easy, we've done that in the Procedural Landscape tutorial 
 But that created a 2D plane, we need a lot of 3D geometry to make our caves. 
 
 We'll use an algorithm called Marching Cubes to do this. The premise is surprisingly simple. If we have some random boolean noise (1 or 0) that we sample at 4 points then we could make a square out of those 4 points, drawing a line between the midpoints of the square where the values are opposite.
-![Pasted image 20231012155146](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a84e508f-3403-4bea-837e-43f5eaed4ac0)
-
+![MarchingCubesCases](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/e0015767-7641-46fe-b3eb-39a1fe6ab189)
 
 This idea scales up to 3D as well, instead of a line it will generate a rectangle, which we can split to make 2 triangles. 
 
