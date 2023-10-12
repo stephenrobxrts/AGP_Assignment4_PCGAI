@@ -32,6 +32,8 @@ public:
 	FVector Size;
 	EBoxType Type;
 	FQuat Rotation = FQuat::Identity;
+	UPROPERTY(EditInstanceOnly)
+	ANavigationNode* RoomNode = nullptr;
 };
 
 /**
@@ -48,6 +50,8 @@ public:
 	FVector Position;
 	FVector Size;
 	FQuat Rotation = FQuat::Identity;
+	//UPROPERTY(EditInstanceOnly)
+	//ANavigationNode* TunnelNode = nullptr;
 };
 
 /**
@@ -83,11 +87,11 @@ protected:
 	//Box placement logic
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
 	void GenerateInterconnects();
-	void CreateBox(const FLevelBox& Box);
+	void CreateBox(FLevelBox& Box);
 
 	//Tunnel Creation
-	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction);
-	void CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox);
+	FVector CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction) const;
+	void CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox);
 
 	//Create array of all objects for chunks
 	void AddAllObjects();
@@ -96,11 +100,14 @@ protected:
 	void ClearMap();
 	void GenerateMesh();
 
+
+
 	//Helper Functions
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
 	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
 	static bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
 	void DebugShow();
+	void DebugShowNavNodes();
 	void AddPlayerStartAtLocation(const FVector& Location); 
 
 
@@ -137,9 +144,15 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category="Chunk")
 	TObjectPtr<UMaterialInterface> Material;
 
+	//Navigation Nodes
+	UPROPERTY(EditAnywhere)
+	TArray<ANavigationNode*> RoomNodes;
+	
 	//Debug Boxes and Tunnels
 	UPROPERTY(EditAnywhere)
 	bool bDebugView = true;
+	UPROPERTY(EditAnywhere)
+    bool bDebugNavNodes = true;
 
 	/**
 	 * @brief Disable to render the whole level, enable to render only the first section of it

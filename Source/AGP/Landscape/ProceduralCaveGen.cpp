@@ -69,6 +69,11 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 	{
 		DebugShow();
 	}
+
+	if (!RoomNodes.IsEmpty() && bDebugNavNodes)
+	{
+		DebugShowNavNodes();
+	}
 	
 }
 
@@ -336,7 +341,7 @@ void AProceduralCaveGen::GenerateInterconnects()
  * @brief Helper function that creates associated items to be spawned at each room.
  * @param Box is the room to be spawned in.
  */
-void AProceduralCaveGen::CreateBox(const FLevelBox& Box)
+void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 {
 	if (UWorld* World = GetWorld())
 	{
@@ -344,6 +349,13 @@ void AProceduralCaveGen::CreateBox(const FLevelBox& Box)
 		Light->SetBrightness(20000.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
+	}
+	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
+			ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
+	{
+		Box.RoomNode = RoomNode;
+		RoomNodes.Add(Box.RoomNode);
+		RoomNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
 }
 
@@ -353,7 +365,7 @@ void AProceduralCaveGen::CreateBox(const FLevelBox& Box)
  * @param Direction - The direction the tunnel goes (usually center of this box towards center of another box)
  * @return FVector Offset, the offset vector from the center of the box towards the wall
  */
-FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction)
+FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVector& Direction) const
 {
 	FVector Offset;
 
@@ -380,7 +392,7 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
  * @param StartBox 
  * @param TargetBox 
  */
-void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox& TargetBox)
+void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 {
 	FTunnel Tunnel;
 	Tunnel.StartBox = &StartBox;
@@ -400,6 +412,21 @@ void AProceduralCaveGen::CreateTunnel(const FLevelBox& StartBox, const FLevelBox
 	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::ForwardVector, Direction);
 
 	Tunnels.Add(Tunnel);
+
+	//CreateNavNode connections reciprocally
+	//Add both start node and end node to an array
+	TArray<ANavigationNode*> Nodes = {StartBox.RoomNode, TargetBox.RoomNode};
+
+	//Unrolled loop to connect both nodes to each other
+	if (!StartBox.RoomNode->GetConnectedNodes().Contains(TargetBox.RoomNode))
+	{
+		StartBox.RoomNode->SetConnectedNodes(TargetBox.RoomNode);
+	}
+	if (!TargetBox.RoomNode->GetConnectedNodes().Contains(StartBox.RoomNode))
+	{
+		TargetBox.RoomNode->SetConnectedNodes(StartBox.RoomNode);
+	}
+	
 }
 
 /**
@@ -480,6 +507,7 @@ void AProceduralCaveGen::ClearMap()
 	Boxes.Empty();
 	Tunnels.Empty();
 	AllObjects.Empty();
+	RoomNodes.Empty();
 	if (!Paths.IsEmpty())
 	{
 		for (FInnerArray& Path : Paths)
@@ -487,6 +515,8 @@ void AProceduralCaveGen::ClearMap()
 			Path.Path.Empty();
 		}
 	}
+	Paths.Empty();
+	
 	//If the marched terrain chunk has been spawned, destroy it
 	if (!Chunks.IsEmpty())
 	{
@@ -511,6 +541,14 @@ void AProceduralCaveGen::ClearMap()
 		}
 	}
 
+	//Iterate through all APickupBase actors in the world and destroy them
+	for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
+			(*It)->Destroy();
+		}
+	}
 	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
 	{
 		if (*It)
@@ -585,8 +623,20 @@ void AProceduralCaveGen::DebugShow()
 						 0, 10.0f);
 		}
 	}
+
+
 }
 
+void AProceduralCaveGen::DebugShowNavNodes()
+{
+	if (!RoomNodes.IsEmpty())
+	{
+		for (ANavigationNode* RoomNode : RoomNodes)
+		{
+			RoomNode->DebugSetVisibility(true);
+		}
+	}
+}
 
 
 //Box intersection functions follow below - I may switch to UE's functions but these are pretty fast
