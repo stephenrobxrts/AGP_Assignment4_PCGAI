@@ -59,28 +59,28 @@ By default I have set this up to generate simple test level that is light on per
 Debug options are at the bottom of each section. 
 In PCG You can toggle Showing the rooms/tunnels in realtime and set it to only render 1 chunk instead of the whole level.
 ![Pasted image 20231012104255](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/99c5ac0b-7014-4df2-af80-d0c70fcaaf3e)
-![Pasted image 20231010164338](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2cfbf221-c324-488b-9848-2a38e3472cad)
-![Pasted image 20231010164352](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/381b6aa1-44d9-447f-b0fe-87e6bde136ae)
-
+![Pasted image 20231012104255](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/68069a4d-9c1f-403e-b66d-706d4273359d)
+![Pasted image 20231010164352](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/be371226-3459-457f-a9ca-cc606e53f113)
 
 You can also set it to show the RoomNodes, low LOD navNodes that will allow for efficient pathing across a large level. 
-![Pasted image 20231012104206](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/60a0e926-f8f0-4b4d-9b48-d8d2aec3df2a)
+![Pasted image 20231012104206](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/f95c9644-9193-46c1-9e00-8192011e9f1f)
 
 
 In Chunks you can show Chunk Borders and show every voxel
-![Pasted image 20231010164431](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/f4181951-7cb3-4f77-9b21-7c98dc233310)
-![Pasted image 20231010164604](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/8bc4d1bf-b12c-4b6c-b4be-4dbd7c84febd)
+![Pasted image 20231010164431](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/e6e352f9-27d5-4779-b80e-cbb066af2b39)
+![Pasted image 20231010164604](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/4dd73271-4cb8-4848-9b72-89232389d541)
+
 
 ```ad-warning
 Do not turn on DebugVoxels unless DebugOnly1Chunk is ON and VoxelDensity is less than 12. 
 ```
 
 You can also invert the solids to make the cave visible from the outside, which has a corresponding impact on the voxel values 
-![Pasted image 20231010164727](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d6b0ee84-156a-46b1-9a88-316422e024bb)
+![Pasted image 20231010164727](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/45bbfb00-dbcf-4ac7-a017-7b387cacc488)
 
 
 (Invert solids with a directional light in the scene)
-![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a59cd839-8eea-400a-8983-d8e987c5b49d)
+![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/dfc81642-120f-417e-ac4b-8ea137417d9c)
 
 ### Level Generator Controls
 
@@ -91,7 +91,7 @@ You can also invert the solids to make the cave visible from the outside, which 
 * Number of paths (minimum 2)
 * Approximate number of boxes per path (in diagram below this is 4)
 * Interconnection ratio (at 1 it generates ALL possible interconnects)
-![Pasted image 20231010120934](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/93d5ed53-c0ea-42a6-9f0c-f8983ebe2a2e)
+![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2ee1983c-f8e1-4a5e-83c0-fd01a84be979)
 
 
 #### Operation
@@ -118,7 +118,7 @@ A tunnel is just a room but with a start and end box defined.
 Tunnels are rotated and sized to face the destination box, they are also offset from the center of the box to stop tunnels being made above head height. 
 
 Offsetting the tunnels also makes the different paths clear to the player
-![Pasted image 20231012164539](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/dfc689d6-5d21-454f-bbe8-864506a3c9f7)
+![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a4a05a5f-2378-4893-b400-a461d9bd771d)
 
 
 
@@ -127,8 +127,8 @@ We then generate interconnects based on the **Interconnectedness** variable. Int
 A connection is deemed "possible" if it doesn't intersect with another box, and the gradient isn't so steep you can't walk down it. 
 
 High vs Low interconnectedness
-![Pasted image 20231010172846](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/e6197f15-c97f-41f3-9e66-b7ab86c258c2)
-![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/531412e3-86fb-4cd6-a9a4-f7a1c1908763)
+![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2f84721f-40da-446c-9cfc-7f72b985a9fb)
+![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/588bdcb0-d687-46b6-aeb7-b1b13c7db42e)
 
 
 
@@ -141,13 +141,13 @@ Only the voxels inside a chunk will be checked during marching cubes, this gives
 
 
 1024 sized chunks
-![Pasted image 20231010174157](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/1d77f108-1c3e-4d53-b6f0-0fe3c86ce00d)
+![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/372cce9d-4834-4007-af24-55e1910dc168)
 
 512
-![Pasted image 20231010174213](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/7c3eadf1-0084-41b8-9e47-3b8e1d0b60a2)
+![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/c870c2a8-a02e-41f5-94fd-3abff2344b60)
 
 256
-![Pasted image 20231010174249](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/bd63c384-3829-4b7e-bf94-20a3aaf62905)
+![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a4963740-76c6-41a6-8ca4-c154948694e9)
 
 
 
@@ -169,11 +169,11 @@ To do this we sample the space at discrete locations, these voxels (volumetric p
 
 ##### Signed Distance Fields
 
-![Pasted image 20231012154726](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2f2cd463-3470-4774-89c3-10c6c318e1aa)
+![Pasted image 20231012154726](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/7cbc74c2-d07b-413e-aceb-6d32721cbc83)
 
-![Pasted image 20231012155020](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/5905b361-ab81-4dce-9565-3b23eb8fad5c)
+![Pasted image 20231012155020](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/73564014-90c9-4e51-99ae-01b5499d8a34)
 
-![Pasted image 20231012155146](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/6c46c0b3-4906-4504-942c-a576435238c0)
+![Pasted image 20231012155146](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/90aaa7c7-d28b-4472-ba3c-260396d483df)
 
 
 In this scenario we are directly parallel with the length, but if the voxel is not parallel with any major axis of the box then it needs to be the sum of the components in that direction. 
@@ -190,7 +190,7 @@ Creating geometry is easy, we've done that in the Procedural Landscape tutorial 
 But that created a 2D plane, we need a lot of 3D geometry to make our caves. 
 
 We'll use an algorithm called Marching Cubes to do this. The premise is surprisingly simple. If we have some random boolean noise (1 or 0) that we sample at 4 points then we could make a square out of those 4 points, drawing a line between the midpoints of the square where the values are opposite.
-![Pasted image 20231012153739](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d5211b5b-268b-4ae0-9280-704a818b7a81)
+![Pasted image 20231012155146](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a84e508f-3403-4bea-837e-43f5eaed4ac0)
 
 
 This idea scales up to 3D as well, instead of a line it will generate a rectangle, which we can split to make 2 triangles. 
@@ -202,7 +202,7 @@ Lastly, if the values are not boolean but instead some float between
 -1 and 1 then we can draw the line only if they have opposite signs, and bias it towards the smallest (absolute) value. 
 
 So if we look at this example again
-![Pasted image 20231012153739](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/fbf72c6e-dfaf-4c02-a071-64dd2229b1b7)
+![Pasted image 20231012153739](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/288b6227-87bc-4943-8c86-59027b987dc2)
 
 If a filled circle = 1.0 and unfilled = -1.0 the above is correct. 
 The points are the maximum difference apart they could be: **2.0**.
@@ -211,7 +211,7 @@ But if the filled circle is only 0.2 then the points lie only 1.2 units apart. T
 
 We can march this over the voxels we created earlier and make the rooms!
 
-![Pasted image 20231012155433](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/5aba5644-22cb-4c8a-91a4-e0e2f37ca476)
+![Pasted image 20231012155433](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/5bf9491c-386c-4efd-9004-94562eb00c2b)
 
 
 ```ad-note
@@ -231,10 +231,10 @@ The noise is currently very high frequency (lots of small geometry) but I'd like
 
 #### Chunks
 Say that we want a reasonable resolution for our cave:
-![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/da5b034b-f83c-45d1-89e2-dc9ae2af054b)
+![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d948857f-575f-404d-b415-cf9ec7bb10f6)
 
 Achieving this sort of resolution over the entire cave requires 32 voxels per side length of chunk. The debug image earlier had 8.
-![Pasted image 20231012151444](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/f2ba62a2-1e67-4d23-9c3c-bac408f236e8)
+![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a41a31c3-8a43-4148-8477-38e02f8bfbeb)
 Therefore each chunk will contain 32^3 voxels. 
 The test level I'm using is about 10,000 units in length, and at a chunk size of 1024 that means it will be around 10 chunks long. If we're not using chunks that means we need 320^3 voxels to make a cube shaped play area that fits the level. 
 
@@ -267,17 +267,22 @@ Especially placing navNodes inside this custom geometry. Actors can path between
 The AI side of things should be integrated, and any missed core objectives there must be implemented. AI will need some extra checks for finding alternative pathways if a certain route is blocked. Ideally they can notice that a route is blocked and (after trying to get through it for a bit and not succeeding) get rid of the node->node connection they thought was valid. It would also be great to implement jumping and crouching for the enemy.
 
 #### Optimization
+The level already performs well. It is capped at 60fps in all scenarios I can throw at it. 
+But there is definitely room to optimize the loading times.
+
 A few ToDo's above are in reference to optimization. Beyond that I've set up the system to behave well if you switch out chunks (either for smaller chunks, or higher voxel densities). The framerate is already great, even at high resolutions like 
 512x ChunkSize 32x VoxelDensity
-![Pasted image 20231012170341](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/1ba744cb-c1e5-45c3-bf81-6a0bedc1ddf4)
+![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/7c6206d0-a2e5-4a5b-9ad4-4574d67a758a)
 
 
 
 But more importantly it would allow us to speed up the loading times and RAM used during level generation (which gets to 16gb at 512x Chunk and 64x Voxel Density)
-![Pasted image 20231012170646](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/cf9d3e76-4116-46fb-b834-58ebb27ef1ca)
+![Pasted image 20231012170646](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/54f2e65c-7d36-4ce3-871c-d3a762b4d8e9)
 
 
 I anticipate using Oct-Trees for this, but have not experimented with it enough to see if switching out parts of a procedural mesh will play nice with the player/enemy collisions or any physical objects. Those may have to be cached and spawned when a player is close enough to load in the LOD0 caves (best quality). 
+I also aim to investigate whether compute shaders can be used in Unreal Engine - I am competent at writing shaders but unfortunately they weren't implemented on the other software I'm used to so I'd like to explore that area more.
+
 #### Interactions
 
 A core part of this will be having the player interact with parts of the levels. We anticipate adding: 
@@ -288,6 +293,13 @@ A core part of this will be having the player interact with parts of the levels.
 * **Traps:** It's easy to make holes in the mesh, these pits will not have AI paths over them to stop them from falling in. But you could be able to place wooden squares over the top which makes the mesh appear to exist but with a trigger box that gets rid of it (and a brushed dirt texture so players don't fall into it themselves). 
 * **Interactive torches:** Some rooms will spawn without lights, they player should be able to light/snuff torches that are on the walls and carry a torch with them. Lights are great for seeing what you're doing, but a dark room prevents you from getting caught!
 * **AI Spawn points** while setting these are easy (the same logic as the PlayerStart Position) we need to think through where we should place them
+
+##### Putting it together
+Given the other sections get completed, it would be very nice to have this as a playable experience with AI Voice lines (like the F.E.A.R AI Whitepaper) that indicate lots of states. I have found that recording the voicelines and passing them through AI Voice imitation is great for this, and it gives the player an indication of AI state while playing that really adds to the experience. 
+
+With the addition of a second player, the concept of kiting enemies, distracting and noise-makers would be amazing to add. 
+
+And... well after taking the idol at the end of the level generating a run area that is linear but timed (with something chasing you) or a spline-based minecart escape would really add to the experience. Because I expect this area will be separated with a door it can be loaded (and the main section unloaded) out of the players' sight. 
 
 
 ## A3 Objectives
