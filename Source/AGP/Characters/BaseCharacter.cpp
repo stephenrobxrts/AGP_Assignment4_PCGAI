@@ -15,6 +15,16 @@ ABaseCharacter::ABaseCharacter()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
+void ABaseCharacter::SetCurrentRoom(AStaticMeshActor* NewRoom)
+{
+	CurrentRoom = NewRoom;
+}
+
+AStaticMeshActor* ABaseCharacter::GetCurrentRoom()
+{
+	return CurrentRoom;
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {

@@ -17,6 +17,26 @@ bool ANavigationNode::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
+void ANavigationNode::SetRoom(AStaticMeshActor* NewRoom)
+{
+	Room = NewRoom;
+}
+
+void ANavigationNode::SetRoomName(FString NewRoomName)
+{
+	RoomName = NewRoomName;
+}
+
+AStaticMeshActor* ANavigationNode::GetRoom()
+{
+	return Room;
+}
+
+FString ANavigationNode::GetRoomName()
+{
+	return RoomName;
+}
+
 void ANavigationNode::DebugSetVisibility(const bool bNewVisibility)
 {
 	bDebugVisible = bNewVisibility;

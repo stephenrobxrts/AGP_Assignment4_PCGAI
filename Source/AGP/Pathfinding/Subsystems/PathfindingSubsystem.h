@@ -35,6 +35,7 @@ private:
 	ANavigationNode* FindNearestNode(const FVector& TargetLocation);
 	ANavigationNode* FindFurthestNode(const FVector& TargetLocation);
 	TArray<FVector> GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode);
+	float GetDistance(const FVector& StartLocation, const FVector& TargetLocation);
 
 
 	TArray<FVector> ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode);

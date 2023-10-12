@@ -2,6 +2,8 @@
 
 
 #include "PickupBase.h"
+
+#include "AGP/Characters/BaseCharacter.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
@@ -39,5 +41,9 @@ void APickupBase::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AAct
                                   UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
                                   const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Display, TEXT("Overlap event occurred on PickupBase."))
+	UE_LOG(LogTemp, Display, TEXT("Overlap event occurred on PickupBase."));
+	// Check if the overlapped actor is a BaseCharacter
+	// Component->GetParentActor() returns the actor that owns the component which should be static mesh room
+	// If so: Set the BaseCharacter's->SetRoom(This Collider's Static Mesh parent)
+
 }

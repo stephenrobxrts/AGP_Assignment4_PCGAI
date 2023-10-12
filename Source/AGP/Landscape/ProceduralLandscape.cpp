@@ -51,7 +51,7 @@ void AProceduralLandscape::GenerateLandscape()
 	}
 
 	//Add NavNodes
-	for (FVector& Vertex : Vertices)
+	/*for (FVector& Vertex : Vertices)
 	{
 		if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
 			ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator))
@@ -59,7 +59,7 @@ void AProceduralLandscape::GenerateLandscape()
 			Nodes.Add(NavNode);
 			NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 		}
-	}
+	}*/
 
 	// Define the triangles and NavNode Connections
 	for (int32 Y = 0; Y < Height - 1; Y++)
@@ -73,14 +73,14 @@ void AProceduralLandscape::GenerateLandscape()
 			int32 TopLeft = (X + 1) + (Y + 1) * Width;
 
 			//Define the 4 NavNode vertices
-			ANavigationNode* BottomRightNode = Nodes[BottomRight];
+			/*ANavigationNode* BottomRightNode = Nodes[BottomRight];
 			ANavigationNode* BottomLeftNode = Nodes[BottomLeft];
 			ANavigationNode* TopRightNode = Nodes[TopRight];
-			ANavigationNode* TopLeftNode = Nodes[TopLeft];
+			ANavigationNode* TopLeftNode = Nodes[TopLeft];*/
 
-			TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
+			//TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
 
-			for (ANavigationNode* Node : QuadNodes)
+			/*for (ANavigationNode* Node : QuadNodes)
 			{
 				for (ANavigationNode* OtherNode : QuadNodes)
 				{
@@ -89,7 +89,7 @@ void AProceduralLandscape::GenerateLandscape()
 						Node->SetConnectedNodes(OtherNode);
 					}
 				}
-			}
+			}*/
 			// Define the two triangles for this quad
 			// Triangle 1: 
 			Triangles.Add(BottomRight);

@@ -16,11 +16,19 @@ public:
 	ANavigationNode();
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
+	void SetRoom(AStaticMeshActor* NewRoom);
+	void SetRoomName(FString NewRoomName);
+	AStaticMeshActor* GetRoom();
+	FString GetRoomName();
+
+	
 	float GScore;
 	float HScore;
 	float FScore = 0;
 	UPROPERTY()
 	ANavigationNode* ParentNode;
+
+
 
 	void DebugSetVisibility(const bool bNewVisibility);
 
@@ -29,6 +37,13 @@ public:
 	void DestroyNode();
 
 protected:
+
+	UPROPERTY()
+	AStaticMeshActor* Room = nullptr;
+	UPROPERTY(VisibleAnywhere)
+	FString RoomName = "";
+
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere)
