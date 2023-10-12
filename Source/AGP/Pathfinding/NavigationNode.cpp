@@ -3,6 +3,8 @@
 
 #include "NavigationNode.h"
 
+#include "AGP/Pickups/RoomOverlap.h"
+
 // Sets default values
 ANavigationNode::ANavigationNode()
 {
@@ -17,7 +19,7 @@ bool ANavigationNode::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
-void ANavigationNode::SetRoom(AStaticMeshActor* NewRoom)
+void ANavigationNode::SetRoom(ARoomOverlap* NewRoom)
 {
 	Room = NewRoom;
 }
@@ -27,7 +29,7 @@ void ANavigationNode::SetRoomName(FString NewRoomName)
 	RoomName = NewRoomName;
 }
 
-AStaticMeshActor* ANavigationNode::GetRoom()
+ARoomOverlap* ANavigationNode::GetRoom()
 {
 	return Room;
 }

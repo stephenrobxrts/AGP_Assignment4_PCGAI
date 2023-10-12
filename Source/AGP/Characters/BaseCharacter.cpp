@@ -15,12 +15,12 @@ ABaseCharacter::ABaseCharacter()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
-void ABaseCharacter::SetCurrentRoom(AStaticMeshActor* NewRoom)
+void ABaseCharacter::SetCurrentRoom(AActor* NewRoom)
 {
 	CurrentRoom = NewRoom;
 }
 
-AStaticMeshActor* ABaseCharacter::GetCurrentRoom()
+AActor* ABaseCharacter::GetCurrentRoom()
 {
 	return CurrentRoom;
 }

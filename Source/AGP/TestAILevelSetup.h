@@ -19,7 +19,7 @@ public:
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<AStaticMeshActor*> Rooms;
+	TArray<ARoomOverlap*> Rooms;
 
 	//Manually add your room nodes to this array
 	UPROPERTY(EditAnywhere)
@@ -28,7 +28,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bUpdateNavNodes = false;
 
-	void CheckAgainstNavNodes(UBoxComponent* BoxCollider, AStaticMeshActor* Room);
+	void CheckAgainstNavNodes(UBoxComponent* BoxCollider, ARoomOverlap* Room);
 	void AssignNavNodes();
 
 protected:

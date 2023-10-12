@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AGP/Pickups/RoomOverlap.h"
 #include "GameFramework/Actor.h"
 #include "NavigationNode.generated.h"
 
@@ -16,9 +17,9 @@ public:
 	ANavigationNode();
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
-	void SetRoom(AStaticMeshActor* NewRoom);
+	void SetRoom(ARoomOverlap* NewRoom);
 	void SetRoomName(FString NewRoomName);
-	AStaticMeshActor* GetRoom();
+	ARoomOverlap* GetRoom();
 	FString GetRoomName();
 
 	
@@ -39,7 +40,7 @@ public:
 protected:
 
 	UPROPERTY()
-	AStaticMeshActor* Room = nullptr;
+	ARoomOverlap* Room = nullptr;
 	UPROPERTY(VisibleAnywhere)
 	FString RoomName = "";
 

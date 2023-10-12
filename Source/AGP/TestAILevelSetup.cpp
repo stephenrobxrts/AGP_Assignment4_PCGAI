@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 #include "DynamicMesh/ColliderMesh.h"
 #include "Engine/StaticMeshActor.h"
+#include "Pickups/RoomOverlap.h"
 
 
 // Sets default values
@@ -46,7 +47,7 @@ bool IsNodeInsideBox(ANavigationNode* Node, const UBoxComponent* BoxCollider)
 	return true;
 }
 
-void ATestAILevelSetup::CheckAgainstNavNodes(UBoxComponent* BoxCollider, AStaticMeshActor* Room)
+void ATestAILevelSetup::CheckAgainstNavNodes(UBoxComponent* BoxCollider, ARoomOverlap* Room)
 {
 	//Box Collider Location
 	UE_LOG(LogTemp, Warning, TEXT("Box Collider Location: %s"), *BoxCollider->GetComponentLocation().ToString());
@@ -71,7 +72,7 @@ void ATestAILevelSetup::AssignNavNodes()
 
 	// Get the components of the actor
 
-	for (AStaticMeshActor* Room : Rooms)
+	for (ARoomOverlap* Room : Rooms)
 	{
 		TArray<UActorComponent*> ActorComponents;
 		Room->GetComponents(ActorComponents);
@@ -105,9 +106,9 @@ void ATestAILevelSetup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent
 void ATestAILevelSetup::GetRooms()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Getting Rooms"));
-	for (TActorIterator<AStaticMeshActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	for (TActorIterator<ARoomOverlap> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		AStaticMeshActor* MeshActor = *ActorItr;
+		ARoomOverlap* MeshActor = *ActorItr;
 		Rooms.Add(MeshActor);
 		UE_LOG(LogTemp, Warning, TEXT("Room Added"));
 		// Proceed to check for the box collider

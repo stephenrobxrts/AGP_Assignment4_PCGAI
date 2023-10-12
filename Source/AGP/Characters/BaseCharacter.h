@@ -17,8 +17,8 @@ public:
 	// Sets default values for this character's properties
 	ABaseCharacter();
 
-	void SetCurrentRoom(AStaticMeshActor* NewRoom);
-	AStaticMeshActor* GetCurrentRoom();
+	void SetCurrentRoom(AActor* NewRoom);
+	AActor* GetCurrentRoom();
 	
 	/**
 	 * @brief A getter to retrieve whether the player has a weapon equipped or not.
@@ -42,7 +42,7 @@ protected:
 	// For the purposes of the lab activities currently, we will just be using a boolean for simplicity.
 
 	UPROPERTY(VisibleAnywhere)
-	AStaticMeshActor* CurrentRoom = nullptr;
+	AActor* CurrentRoom = nullptr;
 	
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BulletStartPosition;
