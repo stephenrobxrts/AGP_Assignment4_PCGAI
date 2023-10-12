@@ -1,4 +1,4 @@
-![Pasted image 20231012104255](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/68069a4d-9c1f-403e-b66d-706d4273359d)## Procedural Jones: Raiders of the Randomly Generated Relics
+## Procedural Jones: Raiders of the Randomly Generated Relics
 
 ![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d76dba22-63a7-48f7-bdf0-1706b5d6add0)
 
