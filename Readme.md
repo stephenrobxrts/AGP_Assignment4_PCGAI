@@ -141,12 +141,15 @@ Only the voxels inside a chunk will be checked during marching cubes, this gives
 
 
 1024 sized chunks
+
 ![Pasted image 20231010174157](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/6cae2a5b-f760-4665-a693-e88809d8e89c)
 
 512
+
 ![Pasted image 20231010174213](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/21919075-5d52-40bb-8641-cfd83bd3122f)
 
 256
+
 ![Pasted image 20231010174249](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/59c0a2f2-e171-4056-9743-a28f79f8ea1e)
 
 
@@ -190,6 +193,7 @@ Creating geometry is easy, we've done that in the Procedural Landscape tutorial 
 But that created a 2D plane, we need a lot of 3D geometry to make our caves. 
 
 We'll use an algorithm called Marching Cubes to do this. The premise is surprisingly simple. If we have some random boolean noise (1 or 0) that we sample at 4 points then we could make a square out of those 4 points, drawing a line between the midpoints of the square where the values are opposite.
+
 ![MarchingCubesCases](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/e0015767-7641-46fe-b3eb-39a1fe6ab189)
 
 This idea scales up to 3D as well, instead of a line it will generate a rectangle, which we can split to make 2 triangles. 
