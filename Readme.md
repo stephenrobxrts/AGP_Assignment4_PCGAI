@@ -118,7 +118,7 @@ A tunnel is just a room but with a start and end box defined.
 Tunnels are rotated and sized to face the destination box, they are also offset from the center of the box to stop tunnels being made above head height. 
 
 Offsetting the tunnels also makes the different paths clear to the player
-![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a4a05a5f-2378-4893-b400-a461d9bd771d)
+![Pasted image 20231012164539](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/3b486113-39a8-4d96-b7bc-d74ff782b652)
 
 
 
@@ -127,8 +127,8 @@ We then generate interconnects based on the **Interconnectedness** variable. Int
 A connection is deemed "possible" if it doesn't intersect with another box, and the gradient isn't so steep you can't walk down it. 
 
 High vs Low interconnectedness
-![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2f84721f-40da-446c-9cfc-7f72b985a9fb)
-![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/588bdcb0-d687-46b6-aeb7-b1b13c7db42e)
+![Pasted image 20231010172846](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d41c1357-46c0-4fff-b453-4a1d975f5b1c)
+![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/0a6e98e6-42f9-4f64-b189-c08f39153dc3)
 
 
 
