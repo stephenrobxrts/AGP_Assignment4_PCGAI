@@ -91,7 +91,7 @@ You can also invert the solids to make the cave visible from the outside, which 
 * Number of paths (minimum 2)
 * Approximate number of boxes per path (in diagram below this is 4)
 * Interconnection ratio (at 1 it generates ALL possible interconnects)
-![Pasted image 20231010164847](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2ee1983c-f8e1-4a5e-83c0-fd01a84be979)
+![Pasted image 20231010120934](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/7ea215e1-8dc0-4b87-b27b-877c40469a2b)
 
 
 #### Operation
