@@ -234,7 +234,7 @@ Say that we want a reasonable resolution for our cave:
 ![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d948857f-575f-404d-b415-cf9ec7bb10f6)
 
 Achieving this sort of resolution over the entire cave requires 32 voxels per side length of chunk. The debug image earlier had 8.
-![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a41a31c3-8a43-4148-8477-38e02f8bfbeb)
+![Pasted image 20231012151444](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/dd2674e0-0037-442a-a44a-d479963582d5)
 Therefore each chunk will contain 32^3 voxels. 
 The test level I'm using is about 10,000 units in length, and at a chunk size of 1024 that means it will be around 10 chunks long. If we're not using chunks that means we need 320^3 voxels to make a cube shaped play area that fits the level. 
 
@@ -272,7 +272,7 @@ But there is definitely room to optimize the loading times.
 
 A few ToDo's above are in reference to optimization. Beyond that I've set up the system to behave well if you switch out chunks (either for smaller chunks, or higher voxel densities). The framerate is already great, even at high resolutions like 
 512x ChunkSize 32x VoxelDensity
-![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/7c6206d0-a2e5-4a5b-9ad4-4574d67a758a)
+![Pasted image 20231012170341](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/87811213-6941-474e-90a7-fe63230a06ba)
 
 
 
