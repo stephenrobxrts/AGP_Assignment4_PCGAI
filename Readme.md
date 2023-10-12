@@ -1,6 +1,6 @@
-## Procedural Jones: Raiders of the Randomly Generated Relics
+![Pasted image 20231012104255](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/68069a4d-9c1f-403e-b66d-706d4273359d)## Procedural Jones: Raiders of the Randomly Generated Relics
 
-![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a3266887-166e-4dea-90d4-9db7a0352aec)
+![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/d76dba22-63a7-48f7-bdf0-1706b5d6add0)
 
 
 ```ad-abstract
@@ -50,7 +50,7 @@ The system uses deterministic algorithms to generate the cave and mesh, making r
 To interact with the level go to Levels, SamTests, ProceduralMap. 
 
 The AProceduralCaveGen Actor contains the controls for the generation. These controls are arranged in to sections for the CaveGen, Chunks and Noise
-![Pasted image 20231010163948](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/1dac3e62-ca29-4657-90c4-cbfcc9035239)
+![Pasted image 20231010163948](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/1c3a2bff-599e-4fa3-a518-0df90b4b9b3c)
 
 
 By default I have set this up to generate simple test level that is light on performance.
@@ -58,8 +58,7 @@ By default I have set this up to generate simple test level that is light on per
 
 Debug options are at the bottom of each section. 
 In PCG You can toggle Showing the rooms/tunnels in realtime and set it to only render 1 chunk instead of the whole level.
-
-![Pasted image 20231012104255](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/5ba2bdaf-7fd1-4119-ace2-000c1de57de8)
+![Pasted image 20231012104255](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/99c5ac0b-7014-4df2-af80-d0c70fcaaf3e)
 ![Pasted image 20231010164338](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/2cfbf221-c324-488b-9848-2a38e3472cad)
 ![Pasted image 20231010164352](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/381b6aa1-44d9-447f-b0fe-87e6bde136ae)
 
