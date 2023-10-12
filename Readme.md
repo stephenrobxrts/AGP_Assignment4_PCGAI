@@ -1,6 +1,3 @@
-#Uni  #U41024  #Unreal #CPP  #Assignment 
-
-
 ## Procedural Jones: Raiders of the Randomly Generated Relics
 
 ![Pasted image 20231012151325](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a3266887-166e-4dea-90d4-9db7a0352aec)
