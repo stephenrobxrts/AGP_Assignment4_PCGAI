@@ -99,7 +99,11 @@ float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
 	return deltaY / deltaX;
 }
 
-//ToDo: LevelBoxes as actors, move repeptitive code to CreateBox
+//ToDo: LevelBoxes as a class - Move repetitive code to CreateBox / internal code
+/**
+ * @brief Creates the boxes (Rooms and tunnels) for the world
+ * @return The array of boxes created
+ */
 TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 {
 	//Start and End Locations

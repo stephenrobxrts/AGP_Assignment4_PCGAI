@@ -114,10 +114,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				for (FLevelBox Box : Boxes)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Box.Position, Box.Size, FQuat::Identity);
-					if (TempSDF < VoxelSDF )
-					{
-						VoxelSDF = TempSDF;
-					}
+					VoxelSDF = std::min(VoxelSDF, TempSDF);
 				}
 				
 				for (FTunnel Tunnel : Tunnels)
