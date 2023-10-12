@@ -141,13 +141,13 @@ Only the voxels inside a chunk will be checked during marching cubes, this gives
 
 
 1024 sized chunks
-![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/372cce9d-4834-4007-af24-55e1910dc168)
+![Pasted image 20231010174157](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/6cae2a5b-f760-4665-a693-e88809d8e89c)
 
 512
-![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/c870c2a8-a02e-41f5-94fd-3abff2344b60)
+![Pasted image 20231010174213](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/21919075-5d52-40bb-8641-cfd83bd3122f)
 
 256
-![Pasted image 20231010172902](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/a4963740-76c6-41a6-8ca4-c154948694e9)
+![Pasted image 20231010174249](https://github.com/Peregrine777/AGP_Assignment3_PCGAI/assets/111720817/59c0a2f2-e171-4056-9743-a28f79f8ea1e)
 
 
 
