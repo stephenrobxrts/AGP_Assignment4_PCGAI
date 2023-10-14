@@ -96,8 +96,8 @@ void AEnemyCharacter::TickInvestigate()
 		// Loop through each connected node
 		for (ANavigationNode* ConnectedNode : ConnectedNodes)
 		{
-			if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), Player->GetActorLocation()) <
-				PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()))
+			if (PathfindingSubsystem->GetPathLength(ConnectedNode->GetActorLocation(), Player->GetActorLocation()) <
+				PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()))
 			{
 				PossibleNodes.Add(ConnectedNode);
 			}
@@ -123,7 +123,7 @@ void AEnemyCharacter::TickAmbush()
 	if (CurrentPath.IsEmpty())
 	{
 		// If player is 3 nodes away from enemy, generate path to player
-		if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) <= 3)
+		if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) <= 3)
 		{
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
@@ -148,8 +148,8 @@ void AEnemyCharacter::TickAmbush()
 			for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
 			{
 				// If node is of equal distance to end node as the enemy is AND node is not initial node (secondary connections also included initial node)
-				if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
-					== PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
+				if (PathfindingSubsystem->GetPathLength(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
+					== PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation())
 					&& ConnectedNode != PathfindingSubsystem->FindNearestNode(GetActorLocation()))
 				{
 					// Set target node to node
@@ -181,9 +181,9 @@ void AEnemyCharacter::TickProtect()
 	if (CurrentPath.IsEmpty())
 	{
 		// If enemy is equal distance away from end room as the player, move towards player first to try and engage
-		if (PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
-			== PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-			&& PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 3)
+		if (PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation())
+			== PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation())
+			&& PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) == 3)
 		{
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
@@ -243,8 +243,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentState = EEnemyState::Engage;
 		}
 		// Else if player is closer or of equal distance away from the end room to the enemy
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-				<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation())
+				<= PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
@@ -252,7 +252,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		else
 		{
 			// Get node count between enemy and player
-			float DistanceToPlayer = PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation());
+			float DistanceToPlayer = PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation());
 			// If node distance is 6 or 7 and the player is currently moving ("creating sound")
 			if ((DistanceToPlayer == 6 || DistanceToPlayer == 7) && Player->IsPlayerMoving())
 			{
@@ -274,26 +274,26 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		if (!SensedCharacter)
 		{
 			// If player is closer or of equal distance away from the end room to the enemy
-			if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-				<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+			if (PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation())
+				<= PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Protect;
 			}
 			// Although enemy could never go from nearby to greater than 7 nodes away from the player, just for precautions if SensesCharacter view distance is altered
-			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
+			else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) > 7)
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Patrol; 
 			}
 			// Else if enemy is 6 or 7 nodes away from the player
-			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
+			else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) >= 6)
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Investigate;
 			}
 			// Else if enemy is 1, 2, 3, 4, or 5 nodes away from the player
-			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 1)
+			else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) >= 1)
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Ambush; 
@@ -311,20 +311,20 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentState = EEnemyState::Engage;
 		}
 		// Else if player is closer or of equal distance away from the end room to the enemy
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-			<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation())
+			<= PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
 		}
 		// Else if enemy is greater than 7 nodes away from the player
-		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
+		else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) > 7)
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Patrol;
 		}
 		// Else if enemy is 1, 2, 3, 4, or 5 nodes away from the player and the player is currently moving ("creating sound")
-		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) <= 5 && Player->IsPlayerMoving())
+		else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) <= 5 && Player->IsPlayerMoving())
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Ambush;
@@ -340,20 +340,20 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentState = EEnemyState::Engage;
 		}
 		// Else if player is closer or of equal distance away from the end room to the enemy
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-			<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation())
+			<= PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
 		}
 		// Else if enemy is greater than 7 nodes away from the player
-		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
+		else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) > 7)
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Patrol;
 		}
 		// Else if enemy is 6 or 7 nodes away from the player
-		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
+		else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) >= 6)
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Investigate;
@@ -369,23 +369,23 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentState = EEnemyState::Engage;
 		}
 		// If player is further away from the end room to the enemy
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-			> PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation())
+			> PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			// If enemy is greater than 7 nodes away from the player
-			if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
+			if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) > 7)
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Patrol;
 			}
 			// Else if enemy is 6 or 7 nodes away from the player
-			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
+			else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) >= 6)
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Investigate;
 			}
 			// Else enemy is 1, 2, 3, 4, or 5 nodes away from the player
-			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 1)
+			else if (PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()) >= 1)
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Ambush;
@@ -396,9 +396,9 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 	//// DEBUG LOGS ////
 	UE_LOG(LogTemp, Display, TEXT("Enemy State is currently: %s"), *UEnum::GetValueAsString(CurrentState));
-	UE_LOG(LogTemp, Display, TEXT("Player and enemy node distance:        %f"), PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()))
-	UE_LOG(LogTemp, Display, TEXT("Enemy to end room node distance:       %f"), PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
-	UE_LOG(LogTemp, Display, TEXT("Player to end room node distance:      %f"), PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()))
+	UE_LOG(LogTemp, Display, TEXT("Player and enemy node distance:        %f"), PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()))
+	UE_LOG(LogTemp, Display, TEXT("Enemy to end room node distance:       %f"), PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
+	UE_LOG(LogTemp, Display, TEXT("Player to end room node distance:      %f"), PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation()))
 	if (Player->IsPlayerMoving())
 	{
 		UE_LOG(LogTemp, Display, TEXT("Player is moving"));

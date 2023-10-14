@@ -197,7 +197,14 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 	return Path;
 }
 
-float UPathfindingSubsystem::GetDistance(const FVector& StartLocation, const FVector& TargetLocation)
+
+/**
+ * @brief Get number of nodes required to go from A->B
+ * @param StartLocation 
+ * @param TargetLocation 
+ * @return float num of nodes in path - not currently distance between each node on path
+ */
+float UPathfindingSubsystem::GetPathLength(const FVector& StartLocation, const FVector& TargetLocation)
 {
 	return GetPath(FindNearestNode(StartLocation), FindNearestNode(TargetLocation)).Num();
 

@@ -25,7 +25,7 @@ public:
 
 	TArray<FVector> GetWaypointPositions();
 
-	float GetDistance(const FVector& StartLocation, const FVector& TargetLocation);
+	float GetPathLength(const FVector& StartLocation, const FVector& TargetLocation);
 	ANavigationNode* FindNearestNode(const FVector& TargetLocation);
 
 protected:
