@@ -19,7 +19,8 @@ public:
 
 	void SetCurrentRoom(AActor* NewRoom);
 	AActor* GetCurrentRoom();
-	
+	bool IsPlayerMoving();
+
 	/**
 	 * @brief A getter to retrieve whether the player has a weapon equipped or not.
 	 * @return true if player has weapon and false otherwise

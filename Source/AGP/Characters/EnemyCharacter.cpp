@@ -252,14 +252,26 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Engage;
-			//if (HealthComponent->GetCurrentHealthPercentage() > 0.4f)
-			//{
-			//}
 		}
-		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 7)
+		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+				<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath.Empty();
-			CurrentState = EEnemyState::Investigate;
+			CurrentState = EEnemyState::Protect;
+		}
+		else
+		{
+			float DistanceToPlayer = PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation());
+			if ((DistanceToPlayer == 6 || DistanceToPlayer == 7) && Player->IsPlayerMoving())
+			{
+				CurrentPath.Empty();
+				CurrentState = EEnemyState::Investigate;
+			}
+			else if (DistanceToPlayer <= 5 && Player->IsPlayerMoving())
+			{
+				CurrentPath.Empty();
+				CurrentState = EEnemyState::Ambush;
+			}
 		}
 		break;
 	case EEnemyState::Engage:
@@ -272,10 +284,11 @@ void AEnemyCharacter::Tick(float DeltaTime)
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Protect;
 			}
+			// Dont think this could ever occur, but just in case
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
 			{
 				CurrentPath.Empty();
-				CurrentState = EEnemyState::Patrol; // Switch to Engage when the player is not moving or is too close
+				CurrentState = EEnemyState::Patrol; 
 			}
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
 			{
@@ -285,7 +298,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 1)
 			{
 				CurrentPath.Empty();
-				CurrentState = EEnemyState::Ambush; // Implement the logic to move one node closer to the player
+				CurrentState = EEnemyState::Ambush; 
 			}
 			break;
 		}
@@ -304,7 +317,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
 		}
-		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 5)
+		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 5 && Player->IsPlayerMoving())
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Ambush; // Implement the logic to move one node closer to the player
@@ -378,6 +391,15 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	UE_LOG(LogTemp, Display, TEXT("Player and enemy are %f nodes away from each other"), PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()))
 	UE_LOG(LogTemp, Display, TEXT("Enemy is %f nodes away from the end room"), PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 	UE_LOG(LogTemp, Display, TEXT("Player is %f nodes away from the end room"), PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()))
+	if (Player->IsPlayerMoving())
+	{
+		UE_LOG(LogTemp, Display, TEXT("Player is currently moving"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Player is not moving"));
+	}
+	
 
 	//UE_LOG(LogTemp, Display, TEXT("Enemy previous state is %s"), *UEnum::GetValueAsString(PreviousState));
 	

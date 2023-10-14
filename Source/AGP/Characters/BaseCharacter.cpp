@@ -27,6 +27,26 @@ AActor* ABaseCharacter::GetCurrentRoom()
 	return CurrentRoom;
 }
 
+bool ABaseCharacter::IsPlayerMoving()
+{
+	if (Controller)
+	{
+		// Get the player character's velocity
+		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
+
+		// You can adjust this threshold as needed
+		const float MovingThreshold = 10.0f; // You may need to adjust this value
+
+		// Check if the character's velocity magnitude is above the threshold
+		if (CharacterVelocity.SizeSquared() > FMath::Square(MovingThreshold))
+		{
+			return true; // Player is moving
+		}
+	}
+
+	return false; // Player is not moving or controller not found
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
