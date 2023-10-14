@@ -29,7 +29,6 @@ void AProceduralCaveGen::BeginPlay()
 {
 	Super::BeginPlay();
 	//Level Generation is handled in Tick
-
 }
 
 // Called every frame
@@ -46,11 +45,11 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		bSmallNumVoxels = false;
 	}
 
-	
+
 	//If you click regenerate - clears map and generates the level
 	if (bShouldRegenerate)
 	{
-		AvgConnectionDistance = (LevelSize/(NumBoxesPerPath));
+		AvgConnectionDistance = (LevelSize / (NumBoxesPerPath));
 		ClearMap();
 
 		//Level Generation
@@ -74,7 +73,6 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 	{
 		DebugShowNavNodes();
 	}
-	
 }
 
 /**
@@ -115,11 +113,12 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 
 	//Start Box
 	FLevelBox StartBox
-	{	Start,
-		FVector(				
-					FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
-					FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
-					FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)),
+	{
+		Start,
+		FVector(
+			FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+			FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+			FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)),
 		EBoxType::Start
 	};
 	boxes.Add(StartBox);
@@ -127,7 +126,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 
 	//Log Start box position and size
 	UE_LOG(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
-	
+
 	//Optional entrance sunlight - if DirectionalLight Present Get Direction of sunlight. Point box towards sun
 	FVector SunDirection = FVector::ZeroVector;
 	ADirectionalLight* Sun;
@@ -139,12 +138,14 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 			SunDirection = -Sun->GetActorRotation().Vector();
 			UE_LOG(LogTemp, Warning, TEXT("Sun Direction is %s"), *SunDirection.ToString());
 			//FVector SunDirection = GetSunDirection();
-			FLevelBox Entrance{Start+SunDirection*ChunkSize*2,
+			FLevelBox Entrance{
+				Start + SunDirection * ChunkSize * 2,
 				FVector(
-					StartBox.Size.X/4,
-					StartBox.Size.Y/4,
-					StartBox.Size.Z/4),
-					EBoxType::Normal, SunDirection.ToOrientationQuat() };
+					StartBox.Size.X / 4,
+					StartBox.Size.Y / 4,
+					StartBox.Size.Z / 4),
+				EBoxType::Normal, SunDirection.ToOrientationQuat()
+			};
 			boxes.Add(Entrance);
 
 			CreateTunnel(StartBox, Entrance);
@@ -154,8 +155,8 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 			UE_LOG(LogTemp, Warning, TEXT("No Sun Found"));
 		}
 	}
-	
-	
+
+
 	//Find paths up to number of paths
 	FVector LastPosition = Start;
 	for (int i = 0; i < NumPaths; i++)
@@ -185,17 +186,16 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 			                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
 			                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
 			box.Type = EBoxType::Normal;
-			
+
 			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
 
 			//If box doesn't collide with any other boxes Or Gradient is too steep
 			//Add it to the list of boxes	
 			if (BoxPositionValid(box, boxes) && FMath::Abs(CalculateGradient(box, lastBox)) <= 0.3)
 			{
-				
 				boxes.Add(box);
 				CreateBox(box);
-				
+
 				Paths[i].Path.Add(box);
 				CreateTunnel(lastBox, box);
 				LastPosition = newPosition;
@@ -237,32 +237,32 @@ void AProceduralCaveGen::GenerateMesh()
 {
 	//For loop for X/Y/Z chunks within levelSize
 	int ChunkAmounts = (LevelSize) / ChunkSize;
-	
-	int StartChunkXY = -ChunkAmounts/2;
-	int StartChunkZ = -ChunkAmounts/2;
+
+	int StartChunkXY = -ChunkAmounts / 2;
+	int StartChunkZ = -ChunkAmounts / 2;
 	if (bDebugOnly1Chunk)
 	{
 		ChunkAmounts = 0;
 		StartChunkXY = 0;
 		StartChunkZ = 0;
-		
 	}
 	//OffsetChunkStart = FVector(-ChunkAmounts, -ChunkAmounts, -ChunkAmounts) * ChunkSize;
-	
+
 	for (int x = StartChunkXY; x <= ChunkAmounts; x++)
 	{
 		for (int y = StartChunkXY; y <= ChunkAmounts; y++)
 		{
 			for (int z = StartChunkZ; z <= ChunkAmounts; z++)
 			{
-				FVector ChunkOffset = FVector(ChunkSize/2, ChunkSize/2, ChunkSize/2);
-				
-				FVector ChunkPosition = FVector(x * ChunkSize - ChunkSize/2, y * ChunkSize - ChunkSize/2 ,
-				                                z * ChunkSize - ChunkSize/2) ;
+				FVector ChunkOffset = FVector(ChunkSize / 2, ChunkSize / 2, ChunkSize / 2);
+
+				FVector ChunkPosition = FVector(x * ChunkSize - ChunkSize / 2, y * ChunkSize - ChunkSize / 2,
+				                                z * ChunkSize - ChunkSize / 2);
 				//Check if chunk intersects with any boxes - if not, skip it
 				//ChunkSize is doubled to be safe
 				FLevelBox ChunkBox{
-					ChunkPosition + ChunkOffset, FVector(ChunkSize * 1.2, ChunkSize * 1.2, ChunkSize * 1.2), EBoxType::Normal
+					ChunkPosition + ChunkOffset, FVector(ChunkSize * 1.2, ChunkSize * 1.2, ChunkSize * 1.2),
+					EBoxType::Normal
 				};
 				for (FLevelBox Object : AllObjects)
 				{
@@ -275,18 +275,18 @@ void AProceduralCaveGen::GenerateMesh()
 							this
 						);
 						Chunk->bUpdateMesh = bUpdateMesh;
-						
+
 						Chunk->LevelSize = static_cast<int>(LevelSize);
 						Chunk->Boxes = Boxes;
 						Chunk->Tunnels = Tunnels;
 						Chunk->Material = Material;
-						
+
 						Chunk->ChunkPosition = ChunkPosition;
 						Chunk->ChunkSize = ChunkSize;
 						Chunk->VoxelsPerSide = VoxelDensity;
-						
+
 						Chunk->NoiseRatio = NoiseRatio;
-						
+
 						Chunk->bDebugInvertSolids = bDebugInvertSolids;
 						Chunk->bDebugChunk = bDebugChunk;
 						Chunk->bDebugVoxels = bDebugVoxels;
@@ -338,7 +338,6 @@ void AProceduralCaveGen::GenerateInterconnects()
 		}
 		AttemptNum++;
 	}
-	
 }
 
 /**
@@ -355,7 +354,7 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		Light->PointLightComponent->SetTemperature(2500);
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
-			ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
+		ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
 	{
 		Box.RoomNode = RoomNode;
 		RoomNodes.Add(Box.RoomNode);
@@ -380,8 +379,8 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 	//Move XY offset points towards the center of the box by the tunnelSize
 	Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? 150 / 2 : 0;
 	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? 150 / 2 : 0;
-	
-	
+
+
 	// Adjust for Z position to be closer to the ground
 	Offset.Z = -Box.Size.Z / 2;
 
@@ -430,7 +429,6 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 	{
 		TargetBox.RoomNode->SetConnectedNodes(StartBox.RoomNode);
 	}
-	
 }
 
 /**
@@ -482,7 +480,6 @@ bool AProceduralCaveGen::BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox
 }
 
 
-
 /**
  * @brief Check if box position is valid
  * @param NewBox Box to check
@@ -520,7 +517,7 @@ void AProceduralCaveGen::ClearMap()
 		}
 	}
 	Paths.Empty();
-	
+
 	//If the marched terrain chunk has been spawned, destroy it
 	if (!Chunks.IsEmpty())
 	{
@@ -534,7 +531,7 @@ void AProceduralCaveGen::ClearMap()
 		}
 		Chunks.Empty();
 	}
-	
+
 	//Iterate through all APickupBase actors in the world and destroy them
 	for (TActorIterator<AMarchingChunkTerrain> It(GetWorld()); It; ++It)
 	{
@@ -581,8 +578,9 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		APlayerStart* NewPlayerStart = GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), Location, FRotator(0, 0, 0), SpawnParams);
-        
+		APlayerStart* NewPlayerStart = GetWorld()->SpawnActor<APlayerStart>(
+			APlayerStart::StaticClass(), Location, FRotator(0, 0, 0), SpawnParams);
+
 		if (NewPlayerStart)
 		{
 			// Optionally, you can set any other properties on NewPlayerStart
@@ -624,11 +622,9 @@ void AProceduralCaveGen::DebugShow()
 		for (const FTunnel& tunnel : Tunnels)
 		{
 			DrawDebugBox(GetWorld(), tunnel.Position, tunnel.Size / 2, tunnel.Rotation, FColor::Green, false, -1.0,
-						 0, 10.0f);
+			             0, 10.0f);
 		}
 	}
-
-
 }
 
 void AProceduralCaveGen::DebugShowNavNodes()
@@ -647,35 +643,33 @@ void AProceduralCaveGen::DebugShowNavNodes()
 //They check if box intersects box incl rotation over XYZ. 
 TArray<FVector> CalculateBoxCorners(const FLevelBox& Box)
 {
-    TArray<FVector> Corners;
+	TArray<FVector> Corners;
 
-    // Half sizes for each dimension
-    FVector HalfSize = Box.Size * 0.5f;
+	// Half sizes for each dimension
+	FVector HalfSize = Box.Size * 0.5f;
 
-    // Calculate the local position of each corner as if the box were axis-aligned
-    Corners.Add(FVector(-HalfSize.X, -HalfSize.Y, -HalfSize.Z));
-    Corners.Add(FVector(-HalfSize.X, HalfSize.Y, -HalfSize.Z));
-    Corners.Add(FVector(HalfSize.X, HalfSize.Y, -HalfSize.Z));
-    Corners.Add(FVector(HalfSize.X, -HalfSize.Y, -HalfSize.Z));
-    Corners.Add(FVector(-HalfSize.X, -HalfSize.Y, HalfSize.Z));
-    Corners.Add(FVector(-HalfSize.X, HalfSize.Y, HalfSize.Z));
-    Corners.Add(FVector(HalfSize.X, HalfSize.Y, HalfSize.Z));
-    Corners.Add(FVector(HalfSize.X, -HalfSize.Y, HalfSize.Z));
+	// Calculate the local position of each corner as if the box were axis-aligned
+	Corners.Add(FVector(-HalfSize.X, -HalfSize.Y, -HalfSize.Z));
+	Corners.Add(FVector(-HalfSize.X, HalfSize.Y, -HalfSize.Z));
+	Corners.Add(FVector(HalfSize.X, HalfSize.Y, -HalfSize.Z));
+	Corners.Add(FVector(HalfSize.X, -HalfSize.Y, -HalfSize.Z));
+	Corners.Add(FVector(-HalfSize.X, -HalfSize.Y, HalfSize.Z));
+	Corners.Add(FVector(-HalfSize.X, HalfSize.Y, HalfSize.Z));
+	Corners.Add(FVector(HalfSize.X, HalfSize.Y, HalfSize.Z));
+	Corners.Add(FVector(HalfSize.X, -HalfSize.Y, HalfSize.Z));
 
-    // Now, rotate each corner around the box's center position
-    for (FVector& Corner : Corners)
-    {
-        // Rotate the corner around the box center
-        Corner = Box.Rotation.RotateVector(Corner);
+	// Now, rotate each corner around the box's center position
+	for (FVector& Corner : Corners)
+	{
+		// Rotate the corner around the box center
+		Corner = Box.Rotation.RotateVector(Corner);
 
-        // Translate the corner to the box's world position
-        Corner += Box.Position;
-    }
+		// Translate the corner to the box's world position
+		Corner += Box.Position;
+	}
 
-    return Corners;
+	return Corners;
 }
-
-
 
 TArray<FVector> GetOrientationVectors(const FQuat& Rotation)
 {
@@ -694,34 +688,34 @@ TArray<FVector> GetOrientationVectors(const FQuat& Rotation)
 
 TArray<FVector> FindAxesToTest(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
-    TArray<FVector> Axes;
+	TArray<FVector> Axes;
 
-    // Get the orientation vectors (local axes) for each box
-    TArray<FVector> BoxA_Orientation = GetOrientationVectors(BoxA.Rotation);
-    TArray<FVector> BoxB_Orientation = GetOrientationVectors(BoxB.Rotation);
+	// Get the orientation vectors (local axes) for each box
+	TArray<FVector> BoxA_Orientation = GetOrientationVectors(BoxA.Rotation);
+	TArray<FVector> BoxB_Orientation = GetOrientationVectors(BoxB.Rotation);
 
-    // Add the face normals of BoxA to the list
-    Axes.Append(BoxA_Orientation);
+	// Add the face normals of BoxA to the list
+	Axes.Append(BoxA_Orientation);
 
-    // Add the face normals of BoxB to the list
-    Axes.Append(BoxB_Orientation);
+	// Add the face normals of BoxB to the list
+	Axes.Append(BoxB_Orientation);
 
-    // Compute the cross products of each pair of edges from both boxes
-    for (int i = 0; i < 3; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            FVector CrossProduct = FVector::CrossProduct(BoxA_Orientation[i], BoxB_Orientation[j]);
+	// Compute the cross products of each pair of edges from both boxes
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			FVector CrossProduct = FVector::CrossProduct(BoxA_Orientation[i], BoxB_Orientation[j]);
 
-            // If the cross product is non-zero, add it to the list
-            if (!CrossProduct.IsNearlyZero())
-            {
-                Axes.Add(CrossProduct.GetSafeNormal());
-            }
-        }
-    }
+			// If the cross product is non-zero, add it to the list
+			if (!CrossProduct.IsNearlyZero())
+			{
+				Axes.Add(CrossProduct.GetSafeNormal());
+			}
+		}
+	}
 
-    return Axes;
+	return Axes;
 }
 
 // ProjectCornersOntoAxis projects the corners of a box onto an axis and returns the min and max of the projection.
@@ -762,7 +756,6 @@ bool ProjectionsOverlap(const FVector2D& ProjectionA, const FVector2D& Projectio
  * @param BoxB Other FLevelBox
  * @return True if boxes intersect, false otherwise
  */
-
 bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB)
 {
 	// Step 1: Calculate the corners of each box.

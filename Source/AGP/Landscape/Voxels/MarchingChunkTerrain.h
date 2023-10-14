@@ -11,7 +11,6 @@
 #include "MarchingChunkTerrain.generated.h"
 
 
-
 UCLASS()
 class AGP_API AMarchingChunkTerrain : public AActor
 {
@@ -22,7 +21,6 @@ public:
 	AMarchingChunkTerrain();
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
-	
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
 	int LevelSize = 1000;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
@@ -76,7 +74,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	bool bDebugVoxels = true;
 	void ShowDebug();
-	
+
 	UPROPERTY(EditAnywhere, Category="Settings")
 	bool bDebugInvertSolids = false;
 	float InverseMultiplier;

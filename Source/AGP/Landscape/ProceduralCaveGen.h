@@ -83,7 +83,6 @@ protected:
 	virtual void BeginPlay() override;
 
 
-	
 	//Box placement logic
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
 	void GenerateInterconnects();
@@ -95,11 +94,10 @@ protected:
 
 	//Create array of all objects for chunks
 	void AddAllObjects();
-	
+
 	//Creation Logic
 	void ClearMap();
 	void GenerateMesh();
-
 
 
 	//Helper Functions
@@ -108,8 +106,7 @@ protected:
 	static bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
 	void DebugShow();
 	void DebugShowNavNodes();
-	void AddPlayerStartAtLocation(const FVector& Location); 
-
+	void AddPlayerStartAtLocation(const FVector& Location);
 
 
 	UPROPERTY(EditAnywhere)
@@ -131,13 +128,13 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FVector MaxBoxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	UPROPERTY(VisibleAnywhere)
-	float AvgConnectionDistance = (LevelSize/(NumBoxesPerPath));
+	float AvgConnectionDistance = (LevelSize / (NumBoxesPerPath));
 	UPROPERTY(EditAnywhere)
 	float TunnelSize = 260.0f;
-	
+
 	UPROPERTY(EditAnywhere)
 	float PathInterconnectedness = 0.7f;
-	
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AMarchingChunkTerrain> Marcher;
 	TArray<AMarchingChunkTerrain*> Chunks;
@@ -147,12 +144,12 @@ protected:
 	//Navigation Nodes
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> RoomNodes;
-	
+
 	//Debug Boxes and Tunnels
 	UPROPERTY(EditAnywhere)
 	bool bDebugView = true;
 	UPROPERTY(EditAnywhere)
-    bool bDebugNavNodes = true;
+	bool bDebugNavNodes = true;
 
 	/**
 	 * @brief Disable to render the whole level, enable to render only the first section of it
@@ -165,7 +162,7 @@ protected:
 	TArray<FTunnel> Tunnels;
 	UPROPERTY()
 	TArray<FLevelBox> AllObjects;
-	
+
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 	TArray<FInnerArray> Paths;
 
@@ -183,7 +180,8 @@ protected:
 	UPROPERTY()
 	FVector OffsetChunkStart;
 
-	UPROPERTY(meta=(EditCondition="bSmallNumVoxels"));
+	UPROPERTY(meta=(EditCondition="bSmallNumVoxels"))
+	;
 	bool bSmallNumVoxels = false;
 
 	UPROPERTY(EditAnywhere, Category="Chunk", meta=(EditConditionHides="bSmallNumVoxels"))
@@ -193,7 +191,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Noise")
 	float NoiseRatio = 0.8f;
-
 
 public:
 	// Called every frame

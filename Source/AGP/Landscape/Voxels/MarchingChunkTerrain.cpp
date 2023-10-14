@@ -36,9 +36,8 @@ void AMarchingChunkTerrain::CreateVoxels()
 	Voxels.SetNum((VoxelsPerSide + 1) * (VoxelsPerSide + 1) * (VoxelsPerSide + 1));
 	for (float& Voxel : Voxels)
 	{
-		Voxel = 1.0f*InverseMultiplier;
+		Voxel = 1.0f * InverseMultiplier;
 	}
-
 }
 
 // Called every frame
@@ -55,10 +54,10 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 		VoxelDiameter = ChunkSize / VoxelsPerSide;
 		CreateVoxels();
 		GenerateHeightMap();
-		
+
 		GenerateMesh();
 		ApplyMesh();
-		
+
 		bUpdateMesh = false;
 	}
 	ShowDebug();
@@ -106,7 +105,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 			for (int z = 0; z <= VoxelsPerSide; ++z)
 			{
 				voxelPosition = FVector(VoxelDiameter * x + ChunkPosition.X,
-										VoxelDiameter * y + ChunkPosition.Y,
+				                        VoxelDiameter * y + ChunkPosition.Y,
 				                        VoxelDiameter * z + ChunkPosition.Z);
 
 				float VoxelSDF = UE_MAX_FLT;
@@ -116,42 +115,41 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 					float TempSDF = BoxSDF(voxelPosition, Box.Position, Box.Size, FQuat::Identity);
 					VoxelSDF = std::min(VoxelSDF, TempSDF);
 				}
-				
+
 				for (FTunnel Tunnel : Tunnels)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation);
-					
+
 					//If the value is more internal, take it
 					//Stricter adherence to tunnels *3
-					if ( TempSDF < TunnelSDF*3.0)
+					if (TempSDF < TunnelSDF * 3.0)
 					{
-						TunnelSDF = TempSDF*3.0;
+						TunnelSDF = TempSDF * 3.0;
 					}
 				}
 
 				//If the value is more internal, take it
-				if ( TunnelSDF < VoxelSDF)
+				if (TunnelSDF < VoxelSDF)
 				{
 					VoxelSDF = TunnelSDF;
 				}
-				
+
 				//ScaleSDF - The SDF is scale to approximately one human sized voxel - prevents getting stuck!
 				float SDFScale = 180;
-				VoxelSDF *= 1/SDFScale;
+				VoxelSDF *= 1 / SDFScale;
 				// Clamp SDF between -1, 1 to make it valid and interact with noise
 				VoxelSDF = (VoxelSDF > 1.0f) ? 1.0f : VoxelSDF;
 				VoxelSDF = (VoxelSDF < -1.0f) ? -1.0f : VoxelSDF;
-				
+
 				//Noise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-				float NoiseVal = Noise->GetNoise( (VoxelDiameter * x + ChunkPosition.X ),
-												  (VoxelDiameter * y + ChunkPosition.Y ),
-												  (VoxelDiameter * z + ChunkPosition.Z )); ;
-				NoiseVal *= NoiseRatio*InverseMultiplier;	
-				Voxels[GetVoxelIndex(x,y,z)] = VoxelSDF*InverseMultiplier + NoiseVal;
+				float NoiseVal = Noise->GetNoise((VoxelDiameter * x + ChunkPosition.X),
+				                                 (VoxelDiameter * y + ChunkPosition.Y),
+				                                 (VoxelDiameter * z + ChunkPosition.Z));
+				NoiseVal *= NoiseRatio * InverseMultiplier;
+				Voxels[GetVoxelIndex(x, y, z)] = VoxelSDF * InverseMultiplier + NoiseVal;
 			}
 		}
 	}
-
 }
 
 void AMarchingChunkTerrain::GenerateMesh()
@@ -208,17 +206,17 @@ float AMarchingChunkTerrain::BoxSDF(const FVector& Point, const FVector BoxPosit
 	FQuat InvRotation = BoxRotation.Inverse();
 	FVector LocalPoint = InvRotation.RotateVector(Point - BoxPosition);
 
-	
+
 	FVector d = FVector(
 		FMath::Abs(LocalPoint.X) - HalfSize.X,
 		FMath::Abs(LocalPoint.Y) - HalfSize.Y,
 		FMath::Abs(LocalPoint.Z) - HalfSize.Z
 	);
 
-	float outsideDistance = d.GetMax(); 
-	float insideDistance = FMath::Max(d.X, FMath::Max(d.Y, d.Z)); 
+	float outsideDistance = d.GetMax();
+	float insideDistance = FMath::Max(d.X, FMath::Max(d.Y, d.Z));
 
-	return float(outsideDistance < 0 ? insideDistance : outsideDistance); 
+	return outsideDistance < 0 ? insideDistance : outsideDistance;
 }
 
 enum class PredominantOrientation
@@ -235,14 +233,11 @@ PredominantOrientation GetPredominantOrientation(const FVector& Normal)
 	{
 		return PredominantOrientation::YZ;
 	}
-	else if (AbsNormal.Y > AbsNormal.X && AbsNormal.Y > AbsNormal.Z)
+	if (AbsNormal.Y > AbsNormal.X && AbsNormal.Y > AbsNormal.Z)
 	{
 		return PredominantOrientation::XZ;
 	}
-	else
-	{
-		return PredominantOrientation::XY;
-	}
+	return PredominantOrientation::XY;
 }
 
 FVector2D ComputeUV(const FVector& Vertex, PredominantOrientation Orientation)
@@ -307,12 +302,12 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 		auto V1 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 0]] * VoxelDiameter;
 		auto V2 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 1]] * VoxelDiameter;
 		auto V3 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 2]] * VoxelDiameter;
-		
-		
+
+
 		auto Normal = FVector::CrossProduct(V2 - V1, V3 - V1);
 
 		PredominantOrientation Orientation = GetPredominantOrientation(Normal);
-		
+
 		//Compute UVs
 		auto UV1 = ComputeUV(V1, Orientation);
 		auto UV2 = ComputeUV(V2, Orientation);
@@ -349,12 +344,10 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 
 		VertexCount += 3;
 	}
-	
 }
 
 void AMarchingChunkTerrain::ApplyMesh() const
 {
-	
 	Mesh->CreateMeshSection(
 		0,
 		MeshData.Vertices,
@@ -398,16 +391,14 @@ void AMarchingChunkTerrain::ShowDebug()
 			{
 				for (double z = 0; z <= VoxelsPerSide; ++z)
 				{
-					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)])*255;
+					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)]) * 255;
 					const float VoxelSign = VoxelValue > 0 ? 1.0f : 0.10f;
 					VoxelValue = abs(VoxelValue);
-					FColor Color = FColor(VoxelValue*(1-VoxelSign), VoxelValue*VoxelSign, 0, VoxelValue);
+					FColor Color = FColor(VoxelValue * (1 - VoxelSign), VoxelValue * VoxelSign, 0, VoxelValue);
 					voxelPosition = FVector(x * VoxelDiameter, y * VoxelDiameter, z * VoxelDiameter) + ChunkPosition;
 					DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, Color, false, -1, 0, 2.0f);
-
 				}
 			}
 		}
 	}
 }
-
