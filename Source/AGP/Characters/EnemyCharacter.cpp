@@ -130,8 +130,57 @@ void AEnemyCharacter::TickInvestigate()
 
 void AEnemyCharacter::TickAmbush()
 {
+	// If current path is empty
+	if (CurrentPath.Num() == 0)
+	{
+		// Store connected nodes in array
+		TArray<ANavigationNode*> ConnectedNodes = PathfindingSubsystem->FindNearestNode(GetActorLocation())->GetConnectedNodes();
+		// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms)
+		TArray<ANavigationNode*> SecondLevelConnectedNodes;
+		// For each loop iterating through each connected node
+		for (ANavigationNode* ConnectedNode : ConnectedNodes)
+		{
+			// Add second level connection nodes to array
+			SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
+		}
 
+		//if player is one away from enemy and enemy moving to player makes enemy further away from end (that means enemy is in front of player)
+
+		if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+			> PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		{
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
+		}
+		else
+		{
+			ANavigationNode* TargetNode = nullptr;
+			for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
+			{
+				if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
+					== PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
+					&& ConnectedNode != PathfindingSubsystem->FindNearestNode(GetActorLocation()))
+				{
+					TargetNode = ConnectedNode;
+				}
+			}
+			if (TargetNode)
+			{
+				CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), TargetNode->GetActorLocation());
+			}
+			else
+			{
+				CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), EndNode->GetActorLocation());			
+			}
+			// Sets array size to first node so it rechecks above stuff after each node 
+			CurrentPath.SetNum(2);
+			MoveAlongPath();
+		}
 	
+	}
+	else
+	{
+		MoveAlongPath();
+	}
 }
 
 void AEnemyCharacter::TickProtect()
