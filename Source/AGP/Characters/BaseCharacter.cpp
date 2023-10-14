@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 
 #include "../Pickups/WeaponPickup.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -13,6 +14,7 @@ ABaseCharacter::ABaseCharacter()
 	BulletStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("BulletStartPosition"));
 	BulletStartPosition->SetupAttachment(GetRootComponent());
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	GetCharacterMovement()->MaxWalkSpeed = 750.0f;
 }
 
 void ABaseCharacter::SetCurrentRoom(AActor* NewRoom)

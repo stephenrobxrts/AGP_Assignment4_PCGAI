@@ -19,7 +19,11 @@ enum class EEnemyState : uint8
 	Engage,
 	// set to 1
 
-	Evade // set to 2
+	Investigate,
+
+	Ambush,
+
+	Protect,
 };
 
 UCLASS()
@@ -46,6 +50,8 @@ protected:
 	APlayerCharacter* Player;
 	UPROPERTY(VisibleAnywhere)
 	APlayerCharacter* SensedCharacter = nullptr;
+	UPROPERTY(VisibleAnywhere)
+	ANavigationNode* EndNode;
 
 	UPROPERTY(EditAnywhere)
 	EEnemyState CurrentState = EEnemyState::Patrol;
@@ -54,7 +60,9 @@ protected:
 
 	void TickPatrol();
 	void TickEngage();
-	void TickEvade();
+	void TickInvestigate();
+	void TickAmbush();
+	void TickProtect();
 
 	UFUNCTION()
 	virtual void OnSensedPawn(APawn* Pawn);
