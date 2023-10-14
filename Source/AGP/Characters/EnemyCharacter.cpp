@@ -28,11 +28,12 @@ void AEnemyCharacter::BeginPlay()
 	 	Player = *It;
 	 	if (Player)
 	 	{
-	 		//found player and player location
+	 		// Found player and player location
 	 		UE_LOG(LogTemp, Display, TEXT("Found player"));
 	 		break;
 	 	}
 	 }
+	// Get end node location in end room based off enemy player's starting position
 	EndNode = PathfindingSubsystem->FindNearestNode(GetActorLocation());
 
 	if (PawnSensingComponent)
@@ -43,49 +44,38 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::TickPatrol()
 {
-	if (CurrentPath.Num() == 0)
+	// If current path is empty
+	if (CurrentPath.IsEmpty())
 	{
-		FVector Location = GetActorLocation();
-		CurrentPath = PathfindingSubsystem->GetRandomPath(Location);
-		MoveAlongPath();
+		// Generate random path from enemy player's position
+		CurrentPath = PathfindingSubsystem->GetRandomPath(GetActorLocation());
 	}
-	else
-	{
-		MoveAlongPath();
-	}
+	// Move enemy player along path
+	MoveAlongPath();
+	
 }
 
 void AEnemyCharacter::TickEngage()
 {
-	if (CurrentPath.Num() <= 0)
+	// If current path is empty
+	if (CurrentPath.IsEmpty())
 	{
-		if (SensedCharacter)
-		{
-			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), SensedCharacter->GetActorLocation());
-
-			Fire(SensedCharacter->GetActorLocation());
-		}
+		CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), SensedCharacter->GetActorLocation());
 	}
-	else
-	{
-		MoveAlongPath();
-		if (SensedCharacter)
-		{			
-			Fire(SensedCharacter->GetActorLocation());
-		}
-	}
+	// Move enemy player along path
+	MoveAlongPath();
 	if (SensedCharacter)
 	{
+		// Fire at player
+		Fire(SensedCharacter->GetActorLocation());
+		// Get direction to player
 		FVector DirectionToPlayer = (SensedCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-
-		// Use LookAt to compute the rotation
+		// Rotate enemy player towards player
 		FRotator NewRotation = FRotationMatrix::MakeFromX(DirectionToPlayer).Rotator();
-
-		// Set the enemy character's rotation
-		SetActorRotation(NewRotation);		
+		// Set the enemy player's rotation
+		SetActorRotation(NewRotation);	
 	}
-
-	//if weapon is empty, reload
+	// If weapon is empty, reload
 	if (WeaponComponent)
 	{
 		if (WeaponComponent->GetRoundsRemainingInMagazine() <= 0)
@@ -99,70 +89,85 @@ void AEnemyCharacter::TickEngage()
 void AEnemyCharacter::TickInvestigate()
 {
 	// If current path is empty
-	if (CurrentPath.Num() == 0)
+	if (CurrentPath.IsEmpty())
 	{
-		// Store connected nodes in array
+		// Store connected nodes in array (that connect to node nearest to enemy player)
 		TArray<ANavigationNode*> ConnectedNodes = PathfindingSubsystem->FindNearestNode(GetActorLocation())->GetConnectedNodes();
-		// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms)
+		// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms
+		// Keep in mind that corridors also have nodes)
 		TArray<ANavigationNode*> SecondLevelConnectedNodes;
-		// For each loop iterating through each connected node
+		// Loop through each connected node
 		for (ANavigationNode* ConnectedNode : ConnectedNodes)
 		{
 			// Add second level connection nodes to array
 			SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
 		}
 
+		// Set target node to null
 		ANavigationNode* TargetNode = nullptr;
+		// Loop through each secondary connected node
 		for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
 		{
+			// If node is of equal distance to end node as the enemy is AND node is not initial node (secondary connections also included initial node)
 			if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
 				== PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
 				&& ConnectedNode != PathfindingSubsystem->FindNearestNode(GetActorLocation()))
 			{
+				// Set target node to node
 				TargetNode = ConnectedNode;
 			}
 		}
+		// If target node is not null
 		if (TargetNode)
 		{
+			// Generate path from enemy player's node to target node
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), TargetNode->GetActorLocation());
 		}
 		else
 		{
+			// Generate path from enemy player's node to player's node
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());			
 		}
-		MoveAlongPath();
+		//
+		CurrentPath.SetNum(2);
 	}
-	else
-	{
-		MoveAlongPath();
-	}
+	// Move enemy player along path
+	MoveAlongPath();
 }
 
 void AEnemyCharacter::TickAmbush()
 {
 	// If current path is empty
-	if (CurrentPath.Num() == 0)
+	if (CurrentPath.IsEmpty())
 	{
-		// Store connected nodes in array
-		TArray<ANavigationNode*> ConnectedNodes = PathfindingSubsystem->FindNearestNode(GetActorLocation())->GetConnectedNodes();
-		// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms)
-		TArray<ANavigationNode*> SecondLevelConnectedNodes;
-		// For each loop iterating through each connected node
-		for (ANavigationNode* ConnectedNode : ConnectedNodes)
+		// If enemy is 3 or less nodes away from player's node, generate path to player
+		if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) <= 3)
 		{
-			// Add second level connection nodes to array
-			SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
 
 		//if player is one away from enemy and enemy moving to player makes enemy further away from end (that means enemy is in front of player)
 
-		if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
 			> PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
+
 		else
 		{
+			// Store connected nodes in array (that connect to node nearest to enemy player)
+			TArray<ANavigationNode*> ConnectedNodes = PathfindingSubsystem->FindNearestNode(GetActorLocation())->GetConnectedNodes();
+			// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms
+			// Keep in mind that corridors also have nodes)
+			TArray<ANavigationNode*> SecondLevelConnectedNodes;
+			// Loop through each connected node
+			for (ANavigationNode* ConnectedNode : ConnectedNodes)
+			{
+				// Add second level connection nodes to array
+				SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
+			}
+			
 			ANavigationNode* TargetNode = nullptr;
 			for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
 			{
@@ -195,9 +200,10 @@ void AEnemyCharacter::TickAmbush()
 
 void AEnemyCharacter::TickProtect()
 {
-	if (CurrentPath.Num() == 0)
+	// If current path is empty
+	if (CurrentPath.IsEmpty())
 	{
-		// If equal distance away from end room as player and in middle connecting rooms corridors, move towards player first to try and engage
+		// If equal distance away from end room as player, move towards player first to try and engage ### ! and in middle connecting rooms corridors
 		if (PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
 			== PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
 			&& PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 3)
@@ -244,10 +250,6 @@ void AEnemyCharacter::UpdateSight()
 		SensedCharacter = nullptr;
 	}
 }
-
-//add transitions from engage to and patrol to the other 3 based on sensed character and distance to end node
-//consider if intercept is necessary
-//program logic
 
 // Called every frame
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -395,12 +397,12 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			break;
 		}
 	}
-	// If player 
-	
-	UE_LOG(LogTemp, Display, TEXT("Enemy current state is %s"), *UEnum::GetValueAsString(CurrentState));
-	UE_LOG(LogTemp, Display, TEXT("Player and enemy are %f nodes away from each other"), PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()))
-	UE_LOG(LogTemp, Display, TEXT("Enemy is %f nodes away from the end room"), PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
-	UE_LOG(LogTemp, Display, TEXT("Player is %f nodes away from the end room"), PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()))
+
+	//// DEBUG LOGS ////
+	UE_LOG(LogTemp, Display, TEXT("Enemy State is currently: %s"), *UEnum::GetValueAsString(CurrentState));
+	UE_LOG(LogTemp, Display, TEXT("Player and enemy node distance:        %f"), PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()))
+	UE_LOG(LogTemp, Display, TEXT("Enemy to end room node distance:       %f"), PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+	UE_LOG(LogTemp, Display, TEXT("Player to end room node distance:      %f"), PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()))
 	if (Player->IsPlayerMoving())
 	{
 		UE_LOG(LogTemp, Display, TEXT("Player is currently moving"));
@@ -409,16 +411,6 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Player is not moving"));
 	}
-	
-
-	//UE_LOG(LogTemp, Display, TEXT("Enemy previous state is %s"), *UEnum::GetValueAsString(PreviousState));
-	
-	//if (CurrentState != PreviousState)
-	//{
-	//	UE_LOG(LogTemp, Display, TEXT("Enemy state changed from %s to %s"),
-	//		*UEnum::GetValueAsString(CurrentState), *UEnum::GetValueAsString(PreviousState));
-	//	PreviousState = CurrentState;
-	//
 }
 
 void AEnemyCharacter::MoveAlongPath()

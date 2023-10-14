@@ -33,18 +33,17 @@ bool ABaseCharacter::IsPlayerMoving()
 	{
 		// Get the player character's velocity
 		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
-
-		// You can adjust this threshold as needed
-		const float MovingThreshold = 10.0f; // You may need to adjust this value
-
+		// Small moving threshold
+		const float MovingThreshold = 10.0f;
 		// Check if the character's velocity magnitude is above the threshold
 		if (CharacterVelocity.SizeSquared() > FMath::Square(MovingThreshold))
 		{
-			return true; // Player is moving
+			// Player is moving
+			return true;
 		}
 	}
-
-	return false; // Player is not moving or controller not found
+	// Player is not moving
+	return false;
 }
 
 // Called when the game starts or when spawned
