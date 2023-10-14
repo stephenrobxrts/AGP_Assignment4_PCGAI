@@ -93,43 +93,26 @@ void AEnemyCharacter::TickInvestigate()
 	{
 		// Store connected nodes in array (that connect to node nearest to enemy player)
 		TArray<ANavigationNode*> ConnectedNodes = PathfindingSubsystem->FindNearestNode(GetActorLocation())->GetConnectedNodes();
-		// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms
-		// Keep in mind that corridors also have nodes)
-		TArray<ANavigationNode*> SecondLevelConnectedNodes;
+		TArray<ANavigationNode*> PossibleNodes;
 		// Loop through each connected node
 		for (ANavigationNode* ConnectedNode : ConnectedNodes)
 		{
-			// Add second level connection nodes to array
-			SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
-		}
-
-		// Set target node to null
-		ANavigationNode* TargetNode = nullptr;
-		// Loop through each secondary connected node
-		for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
-		{
-			// If node is of equal distance to end node as the enemy is AND node is not initial node (secondary connections also included initial node)
-			if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
-				== PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
-				&& ConnectedNode != PathfindingSubsystem->FindNearestNode(GetActorLocation()))
+			if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), Player->GetActorLocation()) <
+				PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()))
 			{
-				// Set target node to node
-				TargetNode = ConnectedNode;
+				PossibleNodes.Add(ConnectedNode);
 			}
 		}
-		// If target node is not null
-		if (TargetNode)
+		// Rare but possible occurence, simply generate path from enemy to player
+		if (PossibleNodes.IsEmpty())
 		{
-			// Generate path from enemy player's node to target node
-			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), TargetNode->GetActorLocation());
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
 		else
 		{
-			// Generate path from enemy player's node to player's node
-			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());			
+			// Pick one of the available paths to bring enemy closer to player
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), PossibleNodes[FMath::RandRange(0, PossibleNodes.Num()-1)]->GetActorLocation());			
 		}
-		//
-		CurrentPath.SetNum(2);
 	}
 	// Move enemy player along path
 	MoveAlongPath();
@@ -140,20 +123,12 @@ void AEnemyCharacter::TickAmbush()
 	// If current path is empty
 	if (CurrentPath.IsEmpty())
 	{
-		// If enemy is 3 or less nodes away from player's node, generate path to player
+		// If player is 3 nodes away from enemy, generate path to player
 		if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) <= 3)
 		{
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
-
-		//if player is one away from enemy and enemy moving to player makes enemy further away from end (that means enemy is in front of player)
-
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
-			> PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
-		{
-			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
-		}
-
+		// Calculate intercept pathway
 		else
 		{
 			// Store connected nodes in array (that connect to node nearest to enemy player)
@@ -167,35 +142,38 @@ void AEnemyCharacter::TickAmbush()
 				// Add second level connection nodes to array
 				SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
 			}
-			
+
+			// Set target node to null
 			ANavigationNode* TargetNode = nullptr;
+			// Loop through each secondary connected node
 			for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
 			{
+				// If node is of equal distance to end node as the enemy is AND node is not initial node (secondary connections also included initial node)
 				if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
-					== PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
+					>= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
 					&& ConnectedNode != PathfindingSubsystem->FindNearestNode(GetActorLocation()))
 				{
+					// Set target node to node
 					TargetNode = ConnectedNode;
 				}
 			}
+			// If target node is not null
 			if (TargetNode)
 			{
+				// Generate path from enemy player's node to target node
 				CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), TargetNode->GetActorLocation());
 			}
 			else
 			{
+				// Generate path from enemy player's node to end room node
 				CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), EndNode->GetActorLocation());			
 			}
-			// Sets array size to first node so it rechecks above stuff after each node 
-			CurrentPath.SetNum(2);
-			MoveAlongPath();
+			// Shorten path to recheck conditions after enemy has reached new room
+			CurrentPath.SetNum(3);
 		}
-	
 	}
-	else
-	{
-		MoveAlongPath();
-	}
+	// Move enemy player along path
+	MoveAlongPath();
 }
 
 void AEnemyCharacter::TickProtect()
@@ -203,23 +181,21 @@ void AEnemyCharacter::TickProtect()
 	// If current path is empty
 	if (CurrentPath.IsEmpty())
 	{
-		// If equal distance away from end room as player, move towards player first to try and engage ### ! and in middle connecting rooms corridors
+		// If equal distance away from end room as player, move towards player first to try and engage
 		if (PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
 			== PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
 			&& PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 3)
 		{
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
 		}
+		// ELse, retreat back to end room 
 		else
 		{
 			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), EndNode->GetActorLocation());			
 		}
-		MoveAlongPath();
 	}
-	else
-	{
-		MoveAlongPath();
-	}
+	// Move enemy player along path
+	MoveAlongPath();
 }
 
 void AEnemyCharacter::OnSensedPawn(APawn* Pawn)
