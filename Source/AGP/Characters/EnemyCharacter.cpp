@@ -98,6 +98,15 @@ void AEnemyCharacter::TickAmbush()
 
 void AEnemyCharacter::TickProtect()
 {
+	if (CurrentPath.Num() == 0)
+	{
+		CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), EndNode->GetActorLocation());
+		MoveAlongPath();
+	}
+	else
+	{
+		MoveAlongPath();
+	}
 }
 
 void AEnemyCharacter::OnSensedPawn(APawn* Pawn)
@@ -152,6 +161,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 7)
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Investigate;
 		}
 		break;
@@ -161,18 +171,22 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		{
 			if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) <= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Protect;
 			}
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Patrol; // Switch to Engage when the player is not moving or is too close
 			}
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Investigate;
 			}
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 1)
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Ambush; // Implement the logic to move one node closer to the player
 			}
 			break;
@@ -188,14 +202,17 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) <= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
 		}
 		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 5)
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Ambush; // Implement the logic to move one node closer to the player
 		}
 		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Patrol; // Switch to Engage when the player is not moving or is too close
 		}
 		break;
@@ -210,14 +227,17 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) <= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
 		}
 		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Patrol; // Switch to Engage when the player is not moving or is too close
 		}
 		else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
 		{
+			CurrentPath.Empty();
 			CurrentState = EEnemyState::Investigate; // Implement the logic to move one node closer to the player
 		}
 		break;
@@ -234,15 +254,18 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		{
 			if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Patrol; // Switch to Engage when the player is not moving or is too close
 			}
 			// Equals 6 or 7
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 6)
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Investigate;
 			}
 			else if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) >= 1)
 			{
+				CurrentPath.Empty();
 				CurrentState = EEnemyState::Ambush; // Implement the logic to move one node closer to the player
 			}
 			break;
