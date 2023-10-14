@@ -70,9 +70,19 @@ void AEnemyCharacter::TickEngage()
 	{
 		MoveAlongPath();
 		if (SensedCharacter)
-		{
+		{			
 			Fire(SensedCharacter->GetActorLocation());
 		}
+	}
+	if (SensedCharacter)
+	{
+		FVector DirectionToPlayer = (SensedCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+
+		// Use LookAt to compute the rotation
+		FRotator NewRotation = FRotationMatrix::MakeFromX(DirectionToPlayer).Rotator();
+
+		// Set the enemy character's rotation
+		SetActorRotation(NewRotation);		
 	}
 
 	//if weapon is empty, reload

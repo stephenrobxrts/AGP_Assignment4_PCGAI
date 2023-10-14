@@ -9,8 +9,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5d777a0d-b88f-4abc-bca8-f8ede2e3c558" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -166,6 +164,8 @@
       <workItem from="1697274276714" duration="5493000" />
       <workItem from="1697282039841" duration="11321000" />
       <workItem from="1697293822498" duration="45000" />
+      <workItem from="1697294493982" duration="564000" />
+      <workItem from="1697295355342" duration="778000" />
     </task>
     <task id="LOCAL-00001" summary="Code Cleanup for A3">
       <option name="closed" value="true" />
