@@ -138,7 +138,17 @@ void AEnemyCharacter::TickProtect()
 {
 	if (CurrentPath.Num() == 0)
 	{
-		CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), EndNode->GetActorLocation());
+		// If equal distance away from end room as player and in middle connecting rooms corridors, move towards player first to try and engage
+		if (PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
+			== PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+			&& PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) == 3)
+		{
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());
+		}
+		else
+		{
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), EndNode->GetActorLocation());			
+		}
 		MoveAlongPath();
 	}
 	else
@@ -207,7 +217,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		TickEngage();
 		if (!SensedCharacter)
 		{
-			if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) <= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+			if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+				<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 			{
 				CurrentPath.Empty();
 				CurrentState = EEnemyState::Protect;
@@ -238,7 +249,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Engage;
 		}
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) <= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+			<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
@@ -263,7 +275,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Engage;
 		}
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) <= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+			<= PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Protect;
@@ -288,7 +301,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			CurrentPath.Empty();
 			CurrentState = EEnemyState::Engage;
 		}
-		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation()) > PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
+		else if (PathfindingSubsystem->GetDistance(Player->GetActorLocation(), EndNode->GetActorLocation())
+			> PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation()))
 		{
 			if (PathfindingSubsystem->GetDistance(GetActorLocation(), Player->GetActorLocation()) > 7)
 			{
