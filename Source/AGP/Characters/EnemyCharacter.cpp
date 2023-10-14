@@ -3,6 +3,8 @@
 
 #include "EnemyCharacter.h"
 
+#include "../Pathfinding/NavigationNode.h"
+
 
 // Sets default values
 AEnemyCharacter::AEnemyCharacter()
@@ -86,8 +88,44 @@ void AEnemyCharacter::TickEngage()
 
 void AEnemyCharacter::TickInvestigate()
 {
+	// If current path is empty
+	if (CurrentPath.Num() == 0)
+	{
+		// Store connected nodes in array
+		TArray<ANavigationNode*> ConnectedNodes = PathfindingSubsystem->FindNearestNode(GetActorLocation())->GetConnectedNodes();
+		// Create array for second level connections (in case initial node is a room and you need to determine surrounding rooms)
+		TArray<ANavigationNode*> SecondLevelConnectedNodes;
+		// For each loop iterating through each connected node
+		for (ANavigationNode* ConnectedNode : ConnectedNodes)
+		{
+			// Add second level connection nodes to array
+			SecondLevelConnectedNodes.Append(ConnectedNode->GetConnectedNodes());
+		}
 
-	
+		ANavigationNode* TargetNode = nullptr;
+		for (ANavigationNode* ConnectedNode : SecondLevelConnectedNodes)
+		{
+			if (PathfindingSubsystem->GetDistance(ConnectedNode->GetActorLocation(), EndNode->GetActorLocation())
+				== PathfindingSubsystem->GetDistance(GetActorLocation(), EndNode->GetActorLocation())
+				&& ConnectedNode != PathfindingSubsystem->FindNearestNode(GetActorLocation()))
+			{
+				TargetNode = ConnectedNode;
+			}
+		}
+		if (TargetNode)
+		{
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), TargetNode->GetActorLocation());
+		}
+		else
+		{
+			CurrentPath = PathfindingSubsystem->GetPath(GetActorLocation(), Player->GetActorLocation());			
+		}
+		MoveAlongPath();
+	}
+	else
+	{
+		MoveAlongPath();
+	}
 }
 
 void AEnemyCharacter::TickAmbush()
