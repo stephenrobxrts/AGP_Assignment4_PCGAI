@@ -71,7 +71,7 @@ public:
         RotationType3D_ImproveXYPlanes,
         RotationType3D_ImproveXZPlanes
     };
-
+    
     enum FractalType
     {
         FractalType_None,

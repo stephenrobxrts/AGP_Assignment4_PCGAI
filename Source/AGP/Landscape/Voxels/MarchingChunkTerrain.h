@@ -48,8 +48,7 @@ public:
 	                                 ChunkPosition.X + ChunkSize / 2.0);
 	bool bInterpolate = true;
 
-	//For noise
-	float Frequency;
+
 
 	//Marching Cube specific
 	FastNoiseLite* Noise;
@@ -66,7 +65,9 @@ public:
 	void ClearMesh();
 
 	//Noise
-	float NoiseRatio = 0.7f;
+	float NoiseRatio = 0.55f;
+	float Frequency;
+	FNoiseParams* NoiseParams;
 
 	//Debugging
 	UPROPERTY(EditAnywhere, Category="Settings")

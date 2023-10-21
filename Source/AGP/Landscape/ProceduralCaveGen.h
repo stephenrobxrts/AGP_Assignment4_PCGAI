@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Voxels/VoxelUtils/FastNoiseLite.h" 
 #include "../Pathfinding/NavigationNode.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerStart.h"
 #include "ProceduralCaveGen.generated.h"
+
 
 /**
  * @brief Box type enum
@@ -63,6 +65,56 @@ struct FInnerArray
 	GENERATED_BODY()
 	UPROPERTY()
 	TArray<FLevelBox> Path;
+};
+
+//UE friendly Fractal typing
+UENUM(BlueprintType)
+enum class EFractalType : uint8
+{
+	FractalType_None,
+	FractalType_FBm,
+	FractalType_Ridged,
+	FractalType_PingPong,
+	FractalType_DomainWarpProgressive,
+	FractalType_DomainWarpIndependent
+};
+
+UENUM(BlueprintType)
+enum class ENoiseType : uint8
+{
+	NoiseType_OpenSimplex2,
+	NoiseType_OpenSimplex2S,
+	NoiseType_Cellular,
+	NoiseType_Perlin,
+	NoiseType_ValueCubic,
+	NoiseType_Value
+};
+
+USTRUCT()
+struct FNoiseParams
+{
+	GENERATED_BODY()
+	ENoiseType NoiseType = ENoiseType::NoiseType_Perlin;
+	float NoiseRatio = 0.8f;
+	EFractalType FractalType = EFractalType::FractalType_FBm;
+	int mOctaves = 3;
+	float mLacunarity = 2.0f;
+	float mGain = 0.5f;
+	float mWeightedStrength = 0.0f;
+	float mPingPongStength = 2.0f;
+
+public:
+	void SetParams(ENoiseType _NoiseType, float _NoiseRatio, EFractalType _FractalType, int _mOctaves, float _mLacunarity, float _mGain, float _mWeightedStrength, float _mPingPongStength)
+	{
+		this->NoiseType = _NoiseType;
+		this->NoiseRatio = _NoiseRatio;
+		this->FractalType = _FractalType;
+		this->mOctaves = _mOctaves;
+		this->mLacunarity = _mLacunarity;
+		this->mGain = _mGain;
+		this->mWeightedStrength = _mWeightedStrength;
+		this->mPingPongStength = _mPingPongStength;
+	}
 };
 
 /**
@@ -189,8 +241,32 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Chunk")
 	bool bDebugInvertSolids = true;
 
+
+	UPROPERTY(EditAnywhere, Category="Noise")
+	float NoiseBlendRatio = 0.8f;
+	FastNoiseLite* Noise = new FastNoiseLite();
+	UPROPERTY(EditAnywhere, Category="Noise")
+	ENoiseType NoiseType = ENoiseType::NoiseType_Perlin;
 	UPROPERTY(EditAnywhere, Category="Noise")
 	float NoiseRatio = 0.8f;
+	UPROPERTY(EditAnywhere, Category="Noise")
+	EFractalType FractalType = EFractalType::FractalType_FBm;
+	UPROPERTY(EditAnywhere, Category="Noise")
+	int mOctaves = 3;
+	UPROPERTY(EditAnywhere, Category="Noise")
+	float mLacunarity = 2.0f;
+	UPROPERTY(EditAnywhere, Category="Noise")
+	float mGain = 0.5f;
+	UPROPERTY(EditAnywhere, Category="Noise")
+	float mWeightedStrength = 0.0f;
+	UPROPERTY(EditAnywhere, Category="Noise")
+	float mPingPongStength = 2.0f;
+
+	UPROPERTY()
+	FNoiseParams NoiseParams;
+
+
+
 
 public:
 	// Called every frame

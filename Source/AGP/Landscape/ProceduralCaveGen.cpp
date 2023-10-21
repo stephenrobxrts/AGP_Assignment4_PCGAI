@@ -247,7 +247,11 @@ void AProceduralCaveGen::GenerateMesh()
 		StartChunkZ = 0;
 	}
 	//OffsetChunkStart = FVector(-ChunkAmounts, -ChunkAmounts, -ChunkAmounts) * ChunkSize;
+	
+	
+	NoiseParams.SetParams(NoiseType, NoiseRatio, FractalType, mOctaves, mLacunarity, mGain, mWeightedStrength, mPingPongStength);
 
+	//Spawn chunks
 	for (int x = StartChunkXY; x <= ChunkAmounts; x++)
 	{
 		for (int y = StartChunkXY; y <= ChunkAmounts; y++)
@@ -264,6 +268,8 @@ void AProceduralCaveGen::GenerateMesh()
 					ChunkPosition + ChunkOffset, FVector(ChunkSize * 1.2, ChunkSize * 1.2, ChunkSize * 1.2),
 					EBoxType::Normal
 				};
+
+				//Pass all level features to the chunk - Marching Cubes will handle the rest
 				for (FLevelBox Object : AllObjects)
 				{
 					if (BoxesIntersect(ChunkBox, Object))
@@ -284,8 +290,8 @@ void AProceduralCaveGen::GenerateMesh()
 						Chunk->ChunkPosition = ChunkPosition;
 						Chunk->ChunkSize = ChunkSize;
 						Chunk->VoxelsPerSide = VoxelDensity;
-
-						Chunk->NoiseRatio = NoiseRatio;
+						Chunk->NoiseRatio = NoiseBlendRatio;
+						Chunk->NoiseParams = &NoiseParams;
 
 						Chunk->bDebugInvertSolids = bDebugInvertSolids;
 						Chunk->bDebugChunk = bDebugChunk;
@@ -349,6 +355,8 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 	if (UWorld* World = GetWorld())
 	{
 		APointLight* Light = World->SpawnActor<APointLight>(Box.Position, FRotator::ZeroRotator);
+		Light->PointLightComponent->AttenuationRadius = 2000.0f;
+		Light->PointLightComponent->SetAttenuationRadius(2000.0f);
 		Light->SetBrightness(20000.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
