@@ -1,6 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MarchingChunkTerrain.h"
+
+#include "FrameTypes.h"
 #include "./VoxelUtils/FastNoiseLite.h"
 #include "Field/FieldSystemNoiseAlgo.h"
 
@@ -24,36 +26,6 @@ bool AMarchingChunkTerrain::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
-void AMarchingChunkTerrain::ShowDebug()
-{
-	if (DebugChunk)
-	{
-		FVector halfSize = FVector(ChunkSize / 2.0, ChunkSize / 2.0, ChunkSize / 2.0);
-		DrawDebugBox(GetWorld(), GetActorLocation() + CornerPosition, halfSize, FColor::Silver, false, -1, 0, 2.0f);
-	}
-	if (DebugVoxels && !Voxels.IsEmpty())
-	{
-		FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
-		FColor color = FColor::White;
-		// Voxel count, e.g. 64Wide, 64Long, 64High
-		for (double x = 0; x <= VoxelsPerSide; ++x)
-		{
-			for (double y = 0; y <= VoxelsPerSide; ++y)
-			{
-				for (double z = 0; z <= VoxelsPerSide; ++z)
-				{
-					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)])*255;
-					const float VoxelSign = VoxelValue > 0 ? 1.0f : 0.10f;
-					VoxelValue = abs(VoxelValue);
-					FColor Color = FColor(VoxelValue*(1-VoxelSign), VoxelValue*VoxelSign, 0, VoxelValue);
-					voxelPosition = FVector(x * VoxelDiameter, y * VoxelDiameter, z * VoxelDiameter) + ChunkPosition;
-					DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, Color, false, -1, 0, 2.0f);
-
-				}
-			}
-		}
-	}
-}
 
 // Called when the game starts or when spawned
 void AMarchingChunkTerrain::BeginPlay()
@@ -66,9 +38,8 @@ void AMarchingChunkTerrain::CreateVoxels()
 	Voxels.SetNum((VoxelsPerSide + 1) * (VoxelsPerSide + 1) * (VoxelsPerSide + 1));
 	for (float& Voxel : Voxels)
 	{
-		Voxel = 1.0f*InverseMultiplier;
+		Voxel = 1.0f * InverseMultiplier;
 	}
-
 }
 
 // Called every frame
@@ -79,6 +50,14 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 	if (bUpdateMesh)
 	{
 		Noise = new FastNoiseLite();
+		Noise->SetFrequency(0.005);
+		Noise->SetNoiseType(static_cast<FastNoiseLite::NoiseType>(static_cast<int32>(NoiseParams->NoiseType)));
+		Noise->SetFractalOctaves(NoiseParams->mOctaves);
+		Noise->SetFractalLacunarity(NoiseParams->mLacunarity);
+		Noise->SetFractalGain(NoiseParams->mGain);
+		Noise->SetFractalType(static_cast<FastNoiseLite::FractalType>(static_cast<int32>(NoiseParams->FractalType)));
+		Noise->SetFractalWeightedStrength(NoiseParams->mWeightedStrength);
+		Noise->SetFractalPingPongStrength(NoiseParams->mPingPongStength);
 		SetActorLocation(ChunkPosition);
 		InverseMultiplier = bDebugInvertSolids ? -1.0f : 1.0f;
 		SurfaceLevel = 0.0;
@@ -88,7 +67,7 @@ void AMarchingChunkTerrain::Tick(float DeltaTime)
 
 		GenerateMesh();
 		ApplyMesh();
-		
+
 		bUpdateMesh = false;
 	}
 	ShowDebug();
@@ -104,6 +83,14 @@ void AMarchingChunkTerrain::ClearMesh()
 	MeshData.Clear();
 }
 
+/**
+ * @brief UNUSED - Checks whether a point is inside a box - even if the box is rotated
+ * @param point The point (Position) to check
+ * @param BoxPosition Box Position
+ * @param BoxSize Box Size
+ * @param BoxRotation Box Rotation
+ * @return True if the point is inside the box
+ */
 bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation)
 {
 	FVector halfSize = BoxSize * 0.5f;
@@ -118,16 +105,17 @@ bool IsPointInsideBox(const FVector& point, const FVector BoxPosition, FVector B
 
 void AMarchingChunkTerrain::GenerateHeightMap()
 {
+	CornerPosition = ChunkPosition + FVector(ChunkSize / 2.0f, ChunkSize / 2.0f, ChunkSize / 2.0f);
 	FVector voxelPosition = FVector(0.0f, 0.0f, 100.0f);
-
-	// Voxel count, 64Wide, 64Long, 64High
+	// For each voxel in the cube (+1 to overlap with next chunk)
 	for (int x = 0; x <= VoxelsPerSide; ++x)
 	{
 		for (int y = 0; y <= VoxelsPerSide; ++y)
 		{
 			for (int z = 0; z <= VoxelsPerSide; ++z)
 			{
-				voxelPosition = FVector(VoxelDiameter * x + ChunkPosition.X, VoxelDiameter * y + ChunkPosition.Y,
+				voxelPosition = FVector(VoxelDiameter * x + ChunkPosition.X,
+				                        VoxelDiameter * y + ChunkPosition.Y,
 				                        VoxelDiameter * z + ChunkPosition.Z);
 
 				float VoxelSDF = UE_MAX_FLT;
@@ -135,46 +123,45 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				for (FLevelBox Box : Boxes)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Box.Position, Box.Size, FQuat::Identity);
-					if (FMath::Abs(TempSDF) < FMath::Abs(VoxelSDF) )
-					{
-						VoxelSDF=TempSDF;
-					}
+					VoxelSDF = std::min(VoxelSDF, TempSDF);
 				}
-				
+
 				for (FTunnel Tunnel : Tunnels)
 				{
 					float TempSDF = BoxSDF(voxelPosition, Tunnel.Position, Tunnel.Size, Tunnel.Rotation);
-					
+
 					//If the value is more internal, take it
-					if ( TempSDF < TunnelSDF*3.0)
+					//Stricter adherence to tunnels *3
+					if (TempSDF < TunnelSDF * 3.0)
 					{
-						TunnelSDF = TempSDF*3.0;
+						TunnelSDF = TempSDF * 3.0;
 					}
 				}
 
 				//If the value is more internal, take it
-				if ( TunnelSDF < VoxelSDF)
+				if (TunnelSDF < VoxelSDF)
 				{
 					VoxelSDF = TunnelSDF;
 				}
-				
-				//ScaleSDF
-				float SDFScale = 150;
-				VoxelSDF *= 1/SDFScale;
-				// Clamp SDF
+
+				//ScaleSDF - The SDF is scale to approximately one human sized voxel - prevents getting stuck!
+				float SDFScale = 180;
+				VoxelSDF *= 1 / SDFScale;
+				// Clamp SDF between -1, 1 to make it valid and interact with noise
 				VoxelSDF = (VoxelSDF > 1.0f) ? 1.0f : VoxelSDF;
 				VoxelSDF = (VoxelSDF < -1.0f) ? -1.0f : VoxelSDF;
-				
+				VoxelSDF *= InverseMultiplier;
+
 				//Noise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-				float NoiseVal = Noise->GetNoise( (VoxelDiameter * x + ChunkPosition.X ),
-												  (VoxelDiameter * y + ChunkPosition.Y ),
-												  (VoxelDiameter * z + ChunkPosition.Z )); ;
-				NoiseVal *= NoiseRatio*InverseMultiplier;	
-				Voxels[GetVoxelIndex(x,y,z)] = VoxelSDF*InverseMultiplier + NoiseVal;
+				float NoiseVal = Noise->GetNoise((VoxelDiameter * x + ChunkPosition.X),
+				                                 (VoxelDiameter * y + ChunkPosition.Y),
+				                                 (VoxelDiameter * z + ChunkPosition.Z));
+				NoiseVal *= NoiseRatio * InverseMultiplier;
+				float NoiseDifference = VoxelSDF - NoiseVal;
+				Voxels[GetVoxelIndex(x, y, z)] = VoxelSDF + NoiseRatio*NoiseDifference;
 			}
 		}
 	}
-
 }
 
 void AMarchingChunkTerrain::GenerateMesh()
@@ -196,9 +183,7 @@ void AMarchingChunkTerrain::GenerateMesh()
 	float Cube[8];
 
 
-	//If inside tunnel/box, set to 1, else 0
-	//ToDo: use this value to set the surface level variable differently inside vs outside caves!
-	//Voxel will be RGB -> R = SurfaceLevel, G = NoiseVal, B = extra (for now);
+	//For each voxel in the chunk (including the last one)
 	for (int X = 0; X < VoxelsPerSide; ++X)
 	{
 		for (int Y = 0; Y < VoxelsPerSide; ++Y)
@@ -219,23 +204,31 @@ void AMarchingChunkTerrain::GenerateMesh()
 	}
 }
 
+/**
+ * @brief Calculate a single voxels Signed Distance Field value in relation to a box
+ * @param Point 
+ * @param BoxPosition 
+ * @param BoxSize 
+ * @param BoxRotation 
+ * @return 
+ */
 float AMarchingChunkTerrain::BoxSDF(const FVector& Point, const FVector BoxPosition, FVector BoxSize, FQuat BoxRotation)
 {
 	FVector HalfSize = BoxSize * 0.5f;
 	FQuat InvRotation = BoxRotation.Inverse();
 	FVector LocalPoint = InvRotation.RotateVector(Point - BoxPosition);
 
-	
+
 	FVector d = FVector(
 		FMath::Abs(LocalPoint.X) - HalfSize.X,
 		FMath::Abs(LocalPoint.Y) - HalfSize.Y,
 		FMath::Abs(LocalPoint.Z) - HalfSize.Z
 	);
 
-	float outsideDistance = d.GetMax(); 
-	float insideDistance = FMath::Max(d.X, FMath::Max(d.Y, d.Z)); 
+	float outsideDistance = d.GetMax();
+	float insideDistance = FMath::Max(d.X, FMath::Max(d.Y, d.Z));
 
-	return float(outsideDistance < 0 ? insideDistance : outsideDistance); 
+	return outsideDistance < 0 ? insideDistance : outsideDistance;
 }
 
 enum class PredominantOrientation
@@ -252,14 +245,11 @@ PredominantOrientation GetPredominantOrientation(const FVector& Normal)
 	{
 		return PredominantOrientation::YZ;
 	}
-	else if (AbsNormal.Y > AbsNormal.X && AbsNormal.Y > AbsNormal.Z)
+	if (AbsNormal.Y > AbsNormal.X && AbsNormal.Y > AbsNormal.Z)
 	{
 		return PredominantOrientation::XZ;
 	}
-	else
-	{
-		return PredominantOrientation::XY;
-	}
+	return PredominantOrientation::XY;
 }
 
 FVector2D ComputeUV(const FVector& Vertex, PredominantOrientation Orientation)
@@ -324,12 +314,12 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 		auto V1 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 0]] * VoxelDiameter;
 		auto V2 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 1]] * VoxelDiameter;
 		auto V3 = EdgeVertex[TriangleConnectionTable[VertexMask][3 * i + 2]] * VoxelDiameter;
-		
-		
+
+
 		auto Normal = FVector::CrossProduct(V2 - V1, V3 - V1);
 
 		PredominantOrientation Orientation = GetPredominantOrientation(Normal);
-		
+
 		//Compute UVs
 		auto UV1 = ComputeUV(V1, Orientation);
 		auto UV2 = ComputeUV(V2, Orientation);
@@ -366,12 +356,10 @@ void AMarchingChunkTerrain::March(int X, int Y, int Z, const float Cube[8])
 
 		VertexCount += 3;
 	}
-	
 }
 
 void AMarchingChunkTerrain::ApplyMesh() const
 {
-	
 	Mesh->CreateMeshSection(
 		0,
 		MeshData.Vertices,
@@ -398,4 +386,31 @@ int AMarchingChunkTerrain::GetVoxelIndex(int X, int Y, int Z) const
 	return Z * (VoxelsPerSide + 1) * (VoxelsPerSide + 1) + Y * (VoxelsPerSide + 1) + X;
 }
 
-
+void AMarchingChunkTerrain::ShowDebug()
+{
+	if (bDebugChunk)
+	{
+		FVector halfSize = FVector(ChunkSize / 2.0, ChunkSize / 2.0, ChunkSize / 2.0);
+		DrawDebugBox(GetWorld(), ChunkPosition + halfSize.X, halfSize, FColor::Silver, false, -1, 0, 2.0f);
+	}
+	if (bDebugVoxels && !Voxels.IsEmpty())
+	{
+		FVector voxelPosition = FVector::ZeroVector;
+		// For each Voxel, show the position and the SDF value as a color. 
+		for (double x = 0; x <= VoxelsPerSide; ++x)
+		{
+			for (double y = 0; y <= VoxelsPerSide; ++y)
+			{
+				for (double z = 0; z <= VoxelsPerSide; ++z)
+				{
+					int VoxelValue = (Voxels[GetVoxelIndex(x, y, z)]) * 255;
+					const float VoxelSign = VoxelValue > 0 ? 1.0f : 0.10f;
+					VoxelValue = abs(VoxelValue);
+					FColor Color = FColor(VoxelValue * (1 - VoxelSign), VoxelValue * VoxelSign, 0, VoxelValue);
+					voxelPosition = FVector(x * VoxelDiameter, y * VoxelDiameter, z * VoxelDiameter) + ChunkPosition;
+					DrawDebugSphere(GetWorld(), voxelPosition, 12.0f, 4, Color, false, -1, 0, 2.0f);
+				}
+			}
+		}
+	}
+}

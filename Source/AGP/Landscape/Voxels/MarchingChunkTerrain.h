@@ -11,7 +11,6 @@
 #include "MarchingChunkTerrain.generated.h"
 
 
-
 UCLASS()
 class AGP_API AMarchingChunkTerrain : public AActor
 {
@@ -21,6 +20,7 @@ public:
 	// Sets default values for this actor's properties
 	AMarchingChunkTerrain();
 	virtual bool ShouldTickIfViewportsOnly() const override;
+
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
 	int LevelSize = 1000;
 	UPROPERTY(VisibleAnywhere, Category="Inputs")
@@ -43,13 +43,12 @@ public:
 
 	FVector Position = FVector::ZeroVector;
 
-	FVector CornerPosition = FVector(+ChunkSize / 2.0,
-	                                 +ChunkSize / 2.0,
-	                                 +ChunkSize / 2.0);
+	FVector CornerPosition = FVector(ChunkPosition.X + ChunkSize / 2.0,
+	                                 ChunkPosition.X + ChunkSize / 2.0,
+	                                 ChunkPosition.X + ChunkSize / 2.0);
 	bool bInterpolate = true;
 
-	//For noise
-	float Frequency;
+
 
 	//Marching Cube specific
 	FastNoiseLite* Noise;
@@ -66,17 +65,19 @@ public:
 	void ClearMesh();
 
 	//Noise
-	float NoiseRatio = 0.7f;
+	float NoiseRatio = 0.55f;
+	float Frequency;
+	FNoiseParams* NoiseParams;
 
 	//Debugging
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool DebugChunk = true;
+	bool bDebugChunk = true;
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool DebugVoxels = true;
+	bool bDebugVoxels = true;
 	void ShowDebug();
-	
+
 	UPROPERTY(EditAnywhere, Category="Settings")
-	bool bDebugInvertSolids = true;
+	bool bDebugInvertSolids = false;
 	float InverseMultiplier;
 
 protected:
@@ -112,7 +113,6 @@ private:
 	int GetVoxelIndex(int X, int Y, int Z) const;
 
 	void ApplyMesh() const;
-
 
 	float GetInterpolationOffset(float V1, float V2) const;
 
