@@ -398,7 +398,7 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 	return Offset;
 }
 
-/**
+/*
  * @brief Creates a tunnel and adds it to the tunnel array
  * @param StartBox 
  * @param TargetBox 
