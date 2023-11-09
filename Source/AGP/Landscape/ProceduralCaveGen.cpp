@@ -3,11 +3,14 @@
 
 #include "ProceduralCaveGen.h"
 
+#include <wrl/internal.h>
+
 
 #include "Algo/RandomShuffle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 #include "EngineUtils.h"
+#include "PhysicsAssetRenderUtils.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
@@ -69,7 +72,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		DebugShow();
 	}
 
-	if (!RoomNodes.IsEmpty() && bDebugNavNodes)
+	if (!RoomNodes.IsEmpty() || !WalkNodes.IsEmpty() && bDebugNavNodes)
 	{
 		DebugShowNavNodes();
 	}
@@ -119,7 +122,10 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 			FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
 			FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
 			FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)),
+		FQuat::Identity,
+		TArray<ANavigationNode*>(),
 		EBoxType::Start
+		
 	};
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
@@ -144,7 +150,9 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 					StartBox.Size.X / 4,
 					StartBox.Size.Y / 4,
 					StartBox.Size.Z / 4),
-				EBoxType::Normal, SunDirection.ToOrientationQuat()
+				SunDirection.ToOrientationQuat(),
+				TArray<ANavigationNode*>(),
+				EBoxType::Normal,
 			};
 			boxes.Add(Entrance);
 
@@ -208,7 +216,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	}
 
 	//End Box
-	FLevelBox EndBox{End, FVector(0, 0, 0), EBoxType::End};
+	FLevelBox EndBox{End, FVector(0, 0, 0), FQuat::Identity, TArray<ANavigationNode*>(), EBoxType::End};
 	EndBox.Size = FVector
 	(
 		FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
@@ -225,7 +233,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 		FLevelBox lastBox = Paths[i].Path[Paths[i].Path.Num() - 1];
 		CreateTunnel(lastBox, EndBox);
 	}
-
 
 	return boxes;
 }
@@ -264,13 +271,13 @@ void AProceduralCaveGen::GenerateMesh()
 				                                z * ChunkSize - ChunkSize / 2);
 				//Check if chunk intersects with any boxes - if not, skip it
 				//ChunkSize is doubled to be safe
-				FLevelBox ChunkBox{
+				FBoxBase ChunkBox{
 					ChunkPosition + ChunkOffset, FVector(ChunkSize * 1.2, ChunkSize * 1.2, ChunkSize * 1.2),
-					EBoxType::Normal
+					FQuat::Identity, TArray<ANavigationNode*>()
 				};
 
 				//Pass all level features to the chunk - Marching Cubes will handle the rest
-				for (FLevelBox Object : AllObjects)
+				for (FBoxBase Object : AllObjects)
 				{
 					if (BoxesIntersect(ChunkBox, Object))
 					{
@@ -310,6 +317,8 @@ void AProceduralCaveGen::GenerateMesh()
 		}
 	}
 }
+
+
 
 
 /**
@@ -360,6 +369,7 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		Light->SetBrightness(20000.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
+		Light->PointLightComponent->SetCastVolumetricShadow(true);
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
 		ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
@@ -368,7 +378,87 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		RoomNodes.Add(Box.RoomNode);
 		RoomNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
+
+	GenerateWalkableNodes(Box);
 }
+
+void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
+{
+	//These will go to the header
+	float ShrinkAmount = 80.0f;
+	float NodeDensity = 70.0f;
+
+	//Create a rect that has the same size as the box x/y and is rotated to match
+	FVector2D RectSize = FVector2D(Box.Size.X - ShrinkAmount, Box.Size.Y - ShrinkAmount);
+	FVector2d RectSizeInNodes = FVector2d(RectSize.X / NodeDensity, RectSize.Y / NodeDensity);
+	
+
+	//Place the rect centered on the box
+	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z/2.0f + ShrinkAmount);
+	FVector size3d = FVector(RectSize.X/2.0f, RectSize.Y/2.0f, 5.0f);
+
+	//DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
+
+	int RectY = StaticCast<int>(RectSizeInNodes.Y);
+	int RectX = StaticCast<int>(RectSizeInNodes.X);
+
+	//Add NavNodes
+	for (int Y = 0 ; Y < RectY ; Y++)
+	{
+		for (int X = 0 ; X < RectX; X++)
+		{
+			// Calculate local position within the rectangle
+			FVector NodePositionLocal = FVector(X * NodeDensity, Y * NodeDensity, 0.0f) - FVector(RectSize.X / 2.0f, RectSize.Y / 2.0f, 0.0f);
+        
+			// Convert local position to world space, taking into account the rotation and the true center of the box
+			FVector NodePositionWorld = Box.Rotation.RotateVector(NodePositionLocal) + RectCenter;
+			
+
+			//Spawn a NavNode at that position
+			if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
+			ANavigationNode::StaticClass(), NodePositionWorld, FRotator::ZeroRotator))
+			{
+				Box.WalkNodes.Add(NavNode);
+				WalkNodes.Add(NavNode);
+				NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+			}
+			
+		}
+	}
+	
+	for (int Y = 0 ; Y < RectY - 1  ; Y++)
+	{
+		for (int X = 0 ; X < RectX - 1 ; X++)
+		{
+			// Define the indices of the four vertices of the current quad
+			int32 BottomRight = X + Y * RectX;
+			int32 BottomLeft = (X + 1) + Y * RectX;
+			int32 TopRight = X + (Y + 1) * RectX;
+			int32 TopLeft = (X + 1) + (Y + 1) * RectX;
+
+			//Define the 4 NavNode vertices
+			ANavigationNode* BottomRightNode = Box.WalkNodes[BottomRight];
+			ANavigationNode* BottomLeftNode = Box.WalkNodes[BottomLeft];
+			ANavigationNode* TopRightNode = Box.WalkNodes[TopRight];
+			ANavigationNode* TopLeftNode = Box.WalkNodes[TopLeft];
+
+			TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
+
+			for (ANavigationNode* Node : QuadNodes)
+			{
+				for (ANavigationNode* OtherNode : QuadNodes)
+				{
+					if (Node != OtherNode && !Node->GetConnectedNodes().Contains(OtherNode))
+					{
+						Node->SetConnectedNodes(OtherNode);
+					}
+				}
+			}
+		}
+	}
+}
+
+
 
 /**
  * @brief Calculates an offset from the center of the box, towards the wall. This is the point a tunnel will spawn at
@@ -411,11 +501,13 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 
 	FVector Direction = (TargetBox.Position - StartBox.Position).GetSafeNormal();
 	FVector StartOffset = CalculateBoxOffset(StartBox, Direction);
-	FVector EndOffset = CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
+	FVector EndOffset =  CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
 
 	FVector Start = StartBox.Position + StartOffset;
 	FVector End = TargetBox.Position + EndOffset;
 
+	
+	//Update direction now that we offset the start/end points
 	Direction = (End - Start).GetSafeNormal();
 
 	Tunnel.Position = (Start + End) / 2;
@@ -424,19 +516,103 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 
 	Tunnels.Add(Tunnel);
 
+	GenerateWalkableNodes(Tunnel);
+
+	//Generate NavNodes at start and end of tunnel
+	ANavigationNode* StartNode = GetWorld()->SpawnActor<ANavigationNode>(
+		ANavigationNode::StaticClass(), Start, FRotator::ZeroRotator);
+	ANavigationNode* EndNode = GetWorld()->SpawnActor<ANavigationNode>(
+		ANavigationNode::StaticClass(), End, FRotator::ZeroRotator);
+
+	MeshRoomNodes(StartNode, StartBox);
+	MeshRoomNodes(EndNode, TargetBox);
+	
+	InsertNode(EndNode, Tunnel);
+	InsertNode(StartNode, Tunnel);
+	
+
+	//Connect Start/End Nodes to the closest node in the room
+	/*ANavigationNode* ClosestNode = nullptr;
+	float ClosestDistance = MAX_FLT;
+	for (ANavigationNode* Node : StartBox.WalkNodes)
+	{
+		float Distance = FVector::Distance(Node->GetActorLocation(), Start);
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = Node;
+		}
+		StartNode->SetConnectedNodes(Node);
+		Node->SetConnectedNodes(StartNode);
+	}
+	ClosestNode = nullptr;
+	ClosestDistance = MAX_FLT;
+	for (ANavigationNode* Node : TargetBox.WalkNodes)
+	{
+		float Distance = FVector::Distance(Node->GetActorLocation(), End);
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = Node;
+		}
+		StartNode->SetConnectedNodes(Node);
+		Node->SetConnectedNodes(StartNode);
+	}
+
+	Tunnel.WalkNodes.Add(StartNode);
+	Tunnel.WalkNodes.Add(EndNode);*/
+
+
 	//CreateNavNode connections reciprocally
 	//Add both start node and end node to an array
-	TArray<ANavigationNode*> Nodes = {StartBox.RoomNode, TargetBox.RoomNode};
+	//TArray<ANavigationNode*> Nodes = {StartBox.RoomNode, TargetBox.RoomNode};
 
 	//Unrolled loop to connect both nodes to each other
-	if (!StartBox.RoomNode->GetConnectedNodes().Contains(TargetBox.RoomNode))
+	/*if (!StartBox.RoomNode->GetConnectedNodes().Contains(TargetBox.RoomNode))
 	{
 		StartBox.RoomNode->SetConnectedNodes(TargetBox.RoomNode);
 	}
 	if (!TargetBox.RoomNode->GetConnectedNodes().Contains(StartBox.RoomNode))
 	{
 		TargetBox.RoomNode->SetConnectedNodes(StartBox.RoomNode);
+	}*/
+}
+
+void AProceduralCaveGen::InsertNode(ANavigationNode* Node, FBoxBase& Box)
+{
+	ANavigationNode* ClosestNode = nullptr;
+	float ClosestDistance = MAX_FLT;
+	for (ANavigationNode* BoxNode : Box.WalkNodes)
+	{
+		float Distance = FVector::Distance(BoxNode->GetActorLocation(), Node->GetActorLocation());
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = BoxNode;
+		}
 	}
+	Node->SetConnectedNodes(ClosestNode);
+	ClosestNode->SetConnectedNodes(Node);
+
+	Box.WalkNodes.Add(Node);
+	WalkNodes.Add(Node);
+}
+
+void AProceduralCaveGen::MeshRoomNodes(ANavigationNode* JoiningNode, FLevelBox& Box)
+{
+	ANavigationNode* ClosestNode = nullptr;
+	float ClosestDistance = MAX_FLT;
+	for (ANavigationNode* BoxNode : Box.WalkNodes)
+	{
+		float Distance = FVector::Distance(BoxNode->GetActorLocation(), JoiningNode->GetActorLocation());
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = BoxNode;
+		}
+	}
+	JoiningNode->SetConnectedNodes(ClosestNode);
+	ClosestNode->SetConnectedNodes(JoiningNode);
 }
 
 /**
@@ -449,8 +625,7 @@ void AProceduralCaveGen::AddAllObjects()
 	//ToDo Overlap Checks for rotated boxes
 	for (FTunnel Tunnel : Tunnels)
 	{
-		FLevelBox TempBox{Tunnel.Position, Tunnel.Size, EBoxType::Normal, Tunnel.Rotation};
-		AllObjects.Add(TempBox);
+		AllObjects.Add(Tunnel);
 	}
 }
 
@@ -517,6 +692,7 @@ void AProceduralCaveGen::ClearMap()
 	Tunnels.Empty();
 	AllObjects.Empty();
 	RoomNodes.Empty();
+	WalkNodes.Empty();
 	if (!Paths.IsEmpty())
 	{
 		for (FInnerArray& Path : Paths)
@@ -641,7 +817,14 @@ void AProceduralCaveGen::DebugShowNavNodes()
 	{
 		for (ANavigationNode* RoomNode : RoomNodes)
 		{
-			RoomNode->DebugSetVisibility(true);
+			RoomNode->DebugSetVisibility(bDebugNavNodes);
+		}
+	}
+	if (!WalkNodes.IsEmpty())
+	{
+		for (ANavigationNode* WalkNode : WalkNodes)
+		{
+			WalkNode->DebugSetVisibility(bDebugNavNodes);
 		}
 	}
 }
@@ -649,7 +832,7 @@ void AProceduralCaveGen::DebugShowNavNodes()
 
 //Box intersection functions follow below - I may switch to UE's functions but these are pretty fast
 //They check if box intersects box incl rotation over XYZ. 
-TArray<FVector> CalculateBoxCorners(const FLevelBox& Box)
+TArray<FVector> CalculateBoxCorners(const FBoxBase& Box)
 {
 	TArray<FVector> Corners;
 
@@ -694,7 +877,7 @@ TArray<FVector> GetOrientationVectors(const FQuat& Rotation)
 	return Orientation;
 }
 
-TArray<FVector> FindAxesToTest(const FLevelBox& BoxA, const FLevelBox& BoxB)
+TArray<FVector> FindAxesToTest(const FBoxBase& BoxA, const FBoxBase& BoxB)
 {
 	TArray<FVector> Axes;
 
@@ -764,7 +947,7 @@ bool ProjectionsOverlap(const FVector2D& ProjectionA, const FVector2D& Projectio
  * @param BoxB Other FLevelBox
  * @return True if boxes intersect, false otherwise
  */
-bool AProceduralCaveGen::BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB)
+bool AProceduralCaveGen::BoxesIntersect(const FBoxBase& BoxA, const FBoxBase& BoxB)
 {
 	// Step 1: Calculate the corners of each box.
 	TArray<FVector> BoxACorners = CalculateBoxCorners(BoxA);

@@ -21,19 +21,29 @@ enum class EBoxType : uint8
 	End
 };
 
-/**
- * @brief Level box struct contains Position, Size, Type (Start, Normal, End), Rotation (optional)
- */
 USTRUCT(BlueprintType)
-struct FLevelBox
+struct FBoxBase
 {
 	GENERATED_BODY()
 
 public:
 	FVector Position;
 	FVector Size;
-	EBoxType Type;
 	FQuat Rotation = FQuat::Identity;
+	UPROPERTY()
+	TArray<ANavigationNode*> WalkNodes;
+};
+
+/**
+ * @brief Level box struct contains Position, Size, Type (Start, Normal, End), Rotation (optional)
+ */
+USTRUCT(BlueprintType)
+struct FLevelBox : public FBoxBase
+{
+	GENERATED_BODY()
+
+public:
+	EBoxType Type;
 	UPROPERTY(EditInstanceOnly)
 	ANavigationNode* RoomNode = nullptr;
 };
@@ -42,16 +52,13 @@ public:
  * @brief Tunnel Strut behaves like a level box but also includes a start and end box
  */
 USTRUCT(BlueprintType)
-struct FTunnel
+struct FTunnel : public FBoxBase
 {
 	GENERATED_BODY()
 
 public:
 	const FLevelBox* StartBox;
 	const FLevelBox* EndBox;
-	FVector Position;
-	FVector Size;
-	FQuat Rotation = FQuat::Identity;
 	//UPROPERTY(EditInstanceOnly)
 	//ANavigationNode* TunnelNode = nullptr;
 };
@@ -151,11 +158,16 @@ protected:
 	void ClearMap();
 	void GenerateMesh();
 
+	//NavigationNodes
+	void GenerateWalkableNodes(FBoxBase& Box);
+	void InsertNode(ANavigationNode* Node, FBoxBase& Box);
+	void MeshRoomNodes(ANavigationNode* JoiningNode, FLevelBox& Box);
+
 
 	//Helper Functions
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
 	bool BoxesIntersect2D(const FLevelBox& BoxA, const FLevelBox& BoxB);
-	static bool BoxesIntersect(const FLevelBox& BoxA, const FLevelBox& BoxB);
+	static bool BoxesIntersect(const FBoxBase& BoxA, const FBoxBase& BoxB);
 	void DebugShow();
 	void DebugShowNavNodes();
 	void AddPlayerStartAtLocation(const FVector& Location);
@@ -196,12 +208,14 @@ protected:
 	//Navigation Nodes
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> RoomNodes;
+	UPROPERTY(EditAnywhere)
+	TArray<ANavigationNode*> WalkNodes;
 
 	//Debug Boxes and Tunnels
 	UPROPERTY(EditAnywhere)
 	bool bDebugView = true;
 	UPROPERTY(EditAnywhere)
-	bool bDebugNavNodes = true;
+	bool bDebugNavNodes = false;
 
 	/**
 	 * @brief Disable to render the whole level, enable to render only the first section of it
@@ -213,7 +227,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 	TArray<FTunnel> Tunnels;
 	UPROPERTY()
-	TArray<FLevelBox> AllObjects;
+	TArray<FBoxBase> AllObjects;
 
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 	TArray<FInnerArray> Paths;
