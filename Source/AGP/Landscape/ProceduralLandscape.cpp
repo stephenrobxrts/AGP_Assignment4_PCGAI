@@ -39,24 +39,19 @@ void AProceduralLandscape::DebugShowNavNodes()
 
 void AProceduralLandscape::GenerateLandscape()
 {
-	//Set Perlin Offset
-	PerlinOffset = FMath::RandRange(-1'000'0.0f, 1'000'0.0f);
-
 	//Add the vertices, UV Coords and Tris to the arrays
 	for (int32 Y = 0; Y < Height; Y++)
 	{
 		for (int32 X = 0; X < Width; X++)
 		{
-			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing,
-			                     FMath::PerlinNoise2D(FVector2d(X * PerlinRoughness + PerlinOffset,
-			                                                    Y * PerlinRoughness + PerlinOffset)) * PerlinScale));
+			Vertices.Add(FVector(X * VertexSpacing, Y * VertexSpacing, 0.0f));
 	
 			UVCoords.Add(FVector2d(static_cast<float>(X), static_cast<float>(Y)));
 		}
 	}
 
 	//Add NavNodes
-	for (FVector& Vertex : Vertices)
+	/*for (FVector& Vertex : Vertices)
 	{
 		if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
 			ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator))
@@ -64,7 +59,7 @@ void AProceduralLandscape::GenerateLandscape()
 			Nodes.Add(NavNode);
 			NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 		}
-	}
+	}*/
 
 	// Define the triangles and NavNode Connections
 	for (int32 Y = 0; Y < Height - 1; Y++)
@@ -78,14 +73,14 @@ void AProceduralLandscape::GenerateLandscape()
 			int32 TopLeft = (X + 1) + (Y + 1) * Width;
 
 			//Define the 4 NavNode vertices
-			ANavigationNode* BottomRightNode = Nodes[BottomRight];
+			/*ANavigationNode* BottomRightNode = Nodes[BottomRight];
 			ANavigationNode* BottomLeftNode = Nodes[BottomLeft];
 			ANavigationNode* TopRightNode = Nodes[TopRight];
-			ANavigationNode* TopLeftNode = Nodes[TopLeft];
+			ANavigationNode* TopLeftNode = Nodes[TopLeft];*/
 
-			TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
+			//TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
 
-			for (ANavigationNode* Node : QuadNodes)
+			/*for (ANavigationNode* Node : QuadNodes)
 			{
 				for (ANavigationNode* OtherNode : QuadNodes)
 				{
@@ -94,7 +89,7 @@ void AProceduralLandscape::GenerateLandscape()
 						Node->SetConnectedNodes(OtherNode);
 					}
 				}
-			}
+			}*/
 			// Define the two triangles for this quad
 			// Triangle 1: 
 			Triangles.Add(BottomRight);
@@ -155,12 +150,6 @@ void AProceduralLandscape::CreateSimplePlane()
 	Vertices.Add(Vector2);
 	Vertices.Add(Vector3);
 	Vertices.Add(Vector4);
-
-	// Randomize Z-Height of each vertex
-	for (FVector& Vertex : Vertices)
-	{
-		Vertex.Z = FMath::RandRange(-500.0f, 500.0f);
-	}
 
 	// Add the specified integers to the Triangles array
 	Triangles.Add(0);

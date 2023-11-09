@@ -25,6 +25,9 @@ public:
 
 	TArray<FVector> GetWaypointPositions();
 
+	float GetPathLength(const FVector& StartLocation, const FVector& TargetLocation);
+	ANavigationNode* FindNearestNode(const FVector& TargetLocation);
+
 protected:
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> Nodes;
@@ -32,7 +35,6 @@ protected:
 private:
 	void PopulateNodes();
 	ANavigationNode* GetRandomNode();
-	ANavigationNode* FindNearestNode(const FVector& TargetLocation);
 	ANavigationNode* FindFurthestNode(const FVector& TargetLocation);
 	TArray<FVector> GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode);
 

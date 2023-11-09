@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 
 #include "../Pickups/WeaponPickup.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -13,6 +14,36 @@ ABaseCharacter::ABaseCharacter()
 	BulletStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("BulletStartPosition"));
 	BulletStartPosition->SetupAttachment(GetRootComponent());
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	GetCharacterMovement()->MaxWalkSpeed = 750.0f;
+}
+
+void ABaseCharacter::SetCurrentRoom(AActor* NewRoom)
+{
+	CurrentRoom = NewRoom;
+}
+
+AActor* ABaseCharacter::GetCurrentRoom()
+{
+	return CurrentRoom;
+}
+
+bool ABaseCharacter::IsPlayerMoving()
+{
+	if (Controller)
+	{
+		// Get the player character's velocity
+		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
+		// Small moving threshold
+		const float MovingThreshold = 10.0f;
+		// Check if the character's velocity magnitude is above the threshold
+		if (CharacterVelocity.SizeSquared() > FMath::Square(MovingThreshold))
+		{
+			// Player is moving
+			return true;
+		}
+	}
+	// Player is not moving
+	return false;
 }
 
 // Called when the game starts or when spawned

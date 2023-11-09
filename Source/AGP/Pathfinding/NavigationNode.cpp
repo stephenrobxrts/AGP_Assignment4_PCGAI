@@ -3,6 +3,8 @@
 
 #include "NavigationNode.h"
 
+#include "AGP/Pickups/RoomOverlap.h"
+
 // Sets default values
 ANavigationNode::ANavigationNode()
 {
@@ -15,6 +17,26 @@ ANavigationNode::ANavigationNode()
 bool ANavigationNode::ShouldTickIfViewportsOnly() const
 {
 	return true;
+}
+
+void ANavigationNode::SetRoom(ARoomOverlap* NewRoom)
+{
+	Room = NewRoom;
+}
+
+void ANavigationNode::SetRoomName(FString NewRoomName)
+{
+	RoomName = NewRoomName;
+}
+
+ARoomOverlap* ANavigationNode::GetRoom()
+{
+	return Room;
+}
+
+FString ANavigationNode::GetRoomName()
+{
+	return RoomName;
 }
 
 void ANavigationNode::DebugSetVisibility(const bool bNewVisibility)
@@ -55,13 +77,13 @@ void ANavigationNode::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (bDebugVisible)
 	{
-		if (ConnectedNodes.Num() == 0){
-			DrawDebugSphere(GetWorld(), GetActorLocation(), 25.0f, 4, FColor::Red, false, -1.0f, 0, 1.0f);
-		}
-		if(ConnectedNodes.Num() > 0)
-		{
-			DrawDebugSphere(GetWorld(), GetActorLocation(), 25.0f, 4, FColor::Green, false, -1.0f, 0, 1.0f);
-		}
+		//if (ConnectedNodes.Num() == 0){
+		//	DrawDebugSphere(GetWorld(), GetActorLocation(), 25.0f, 4, FColor::Red, false, -1.0f, 0, 1.0f);
+		//}
+		//if(ConnectedNodes.Num() > 0)
+		//{
+			DrawDebugSphere(GetWorld(), GetActorLocation(), 25.0f, 4, FColor::Blue, false, -1.0f, 0, 1.0f);
+		//}
 
 		//Draw lines, red if not reciprocated
 		for (int i = 0; i < ConnectedNodes.Num(); i++)

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AGP/Pickups/RoomOverlap.h"
 #include "GameFramework/Actor.h"
 #include "NavigationNode.generated.h"
 
@@ -16,11 +17,19 @@ public:
 	ANavigationNode();
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
+	void SetRoom(ARoomOverlap* NewRoom);
+	void SetRoomName(FString NewRoomName);
+	ARoomOverlap* GetRoom();
+	FString GetRoomName();
+
+	
 	float GScore;
 	float HScore;
 	float FScore = 0;
 	UPROPERTY()
 	ANavigationNode* ParentNode;
+
+
 
 	void DebugSetVisibility(const bool bNewVisibility);
 
@@ -29,6 +38,13 @@ public:
 	void DestroyNode();
 
 protected:
+
+	UPROPERTY()
+	ARoomOverlap* Room = nullptr;
+	UPROPERTY(VisibleAnywhere)
+	FString RoomName = "";
+
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere)

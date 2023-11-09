@@ -3,6 +3,8 @@
 
 #include "PathfindingSubsystem.h"
 
+#include "NavigationSystem.h"
+
 
 void UPathfindingSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
@@ -124,10 +126,10 @@ ANavigationNode* UPathfindingSubsystem::FindFurthestNode(const FVector& TargetLo
 TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode)
 {
 	//Use A* to find path
-	TArray<FVector> Path;
 	TArray<ANavigationNode*> OpenSet;
 	OpenSet.Add(StartNode);
 
+	TArray<FVector> Path;
 	// Set all Gscores to infinity and the HScores to correct heuristic
 	for (int i = 0; i < Nodes.Num(); i++)
 	{
@@ -195,6 +197,18 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 	return Path;
 }
 
+
+/**
+ * @brief Get number of nodes required to go from A->B
+ * @param StartLocation 
+ * @param TargetLocation 
+ * @return float num of nodes in path - not currently distance between each node on path
+ */
+float UPathfindingSubsystem::GetPathLength(const FVector& StartLocation, const FVector& TargetLocation)
+{
+	return GetPath(FindNearestNode(StartLocation), FindNearestNode(TargetLocation)).Num();
+
+}
 
 TArray<FVector> UPathfindingSubsystem::ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode)
 {
