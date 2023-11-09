@@ -124,7 +124,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	};
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
-	GenerateWalkableNodes(StartBox);
 
 	//Log Start box position and size
 	UE_LOG(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
@@ -372,13 +371,15 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		RoomNodes.Add(Box.RoomNode);
 		RoomNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
+
+	GenerateWalkableNodes(Box);
 }
 
 void AProceduralCaveGen::GenerateWalkableNodes(FLevelBox& Box)
 {
 	//These will go to the header
 	float ShrinkAmount = 80.0f;
-	float NodeDensity = 50.0f;
+	float NodeDensity = 70.0f;
 
 	//Create a rect that has the same size as the box x/y and is rotated to match
 	FVector2D RectSize = FVector2D(Box.Size.X - ShrinkAmount, Box.Size.Y - ShrinkAmount);
@@ -390,12 +391,14 @@ void AProceduralCaveGen::GenerateWalkableNodes(FLevelBox& Box)
 	FVector size3d = FVector(RectSize.X/2.0f, RectSize.Y/2.0f, 5.0f);
 
 	DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
-	
+
+	int RectY = StaticCast<int>(RectSizeInNodes.Y);
+	int RectX = StaticCast<int>(RectSizeInNodes.X);
 
 	//Add NavNodes
-	for (int Y = 0 ; Y < RectSizeInNodes.Y ; Y++)
+	for (int Y = 0 ; Y < RectY ; Y++)
 	{
-		for (int X = 0 ; X < RectSizeInNodes.X; X++)
+		for (int X = 0 ; X < RectX; X++)
 		{
 			// Calculate local position within the rectangle
 			FVector NodePositionLocal = FVector(X * NodeDensity, Y * NodeDensity, 0.0f) - FVector(RectSize.X / 2.0f, RectSize.Y / 2.0f, 0.0f);
@@ -417,15 +420,15 @@ void AProceduralCaveGen::GenerateWalkableNodes(FLevelBox& Box)
 		}
 	}
 	
-	for (int Y = 0 ; Y < RectSizeInNodes.Y - 1  ; Y++)
+	for (int Y = 0 ; Y < RectY - 1  ; Y++)
 	{
-		for (int X = 0 ; X < RectSizeInNodes.X - 1 ; X++)
+		for (int X = 0 ; X < RectX - 1 ; X++)
 		{
 			// Define the indices of the four vertices of the current quad
-			int32 BottomRight = X + Y * RectSizeInNodes.X;
-			int32 BottomLeft = (X + 1) + Y * RectSizeInNodes.X;
-			int32 TopRight = X + (Y + 1) * RectSizeInNodes.X;
-			int32 TopLeft = (X + 1) + (Y + 1) * RectSizeInNodes.X;
+			int32 BottomRight = X + Y * RectX;
+			int32 BottomLeft = (X + 1) + Y * RectX;
+			int32 TopRight = X + (Y + 1) * RectX;
+			int32 TopLeft = (X + 1) + (Y + 1) * RectX;
 
 			//Define the 4 NavNode vertices
 			ANavigationNode* BottomRightNode = Box.WalkNodes[BottomRight];
@@ -459,13 +462,13 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 {
 	FVector Offset;
 
-	/*Offset.X = (Direction.X > 0) ? Box.Size.X / 2 : (Direction.X < 0) ? -Box.Size.X / 2 : 0;
+	Offset.X = (Direction.X > 0) ? Box.Size.X / 2 : (Direction.X < 0) ? -Box.Size.X / 2 : 0;
 	Offset.Y = (Direction.Y > 0) ? Box.Size.Y / 2 : (Direction.Y < 0) ? -Box.Size.Y / 2 : 0;
-	Offset.Z = (Direction.Z > 0) ? Box.Size.Z / 2 : (Direction.Z < 0) ? -Box.Size.Z / 2 : 0;*/
+	Offset.Z = (Direction.Z > 0) ? Box.Size.Z / 2 : (Direction.Z < 0) ? -Box.Size.Z / 2 : 0;
 
 	//Move XY offset points towards the center of the box by the tunnelSize
-	/*Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? 150 / 2 : 0;
-	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? 150 / 2 : 0;*/
+	Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? 150 / 2 : 0;
+	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? 150 / 2 : 0;
 
 
 	// Adjust for Z position to be closer to the ground
