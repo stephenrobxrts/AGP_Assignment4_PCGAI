@@ -379,10 +379,10 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		RoomNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
 
-	GenerateWalkableNodes(static_cast<FBoxBase>(Box));
+	GenerateWalkableNodes(Box);
 }
 
-void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase Box)
+void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 {
 	//These will go to the header
 	float ShrinkAmount = 80.0f;
@@ -458,6 +458,8 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase Box)
 	}
 }
 
+
+
 /**
  * @brief Calculates an offset from the center of the box, towards the wall. This is the point a tunnel will spawn at
  * @param Box - The box to calculate the offset from
@@ -514,7 +516,52 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 
 	Tunnels.Add(Tunnel);
 
-	GenerateWalkableNodes(static_cast<FBoxBase>(Tunnel));
+	GenerateWalkableNodes(Tunnel);
+
+	//Generate NavNodes at start and end of tunnel
+	ANavigationNode* StartNode = GetWorld()->SpawnActor<ANavigationNode>(
+		ANavigationNode::StaticClass(), Start, FRotator::ZeroRotator);
+	ANavigationNode* EndNode = GetWorld()->SpawnActor<ANavigationNode>(
+		ANavigationNode::StaticClass(), End, FRotator::ZeroRotator);
+
+	MeshRoomNodes(StartNode, StartBox);
+	MeshRoomNodes(EndNode, TargetBox);
+	
+	InsertNode(EndNode, Tunnel);
+	InsertNode(StartNode, Tunnel);
+	
+
+	//Connect Start/End Nodes to the closest node in the room
+	/*ANavigationNode* ClosestNode = nullptr;
+	float ClosestDistance = MAX_FLT;
+	for (ANavigationNode* Node : StartBox.WalkNodes)
+	{
+		float Distance = FVector::Distance(Node->GetActorLocation(), Start);
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = Node;
+		}
+		StartNode->SetConnectedNodes(Node);
+		Node->SetConnectedNodes(StartNode);
+	}
+	ClosestNode = nullptr;
+	ClosestDistance = MAX_FLT;
+	for (ANavigationNode* Node : TargetBox.WalkNodes)
+	{
+		float Distance = FVector::Distance(Node->GetActorLocation(), End);
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = Node;
+		}
+		StartNode->SetConnectedNodes(Node);
+		Node->SetConnectedNodes(StartNode);
+	}
+
+	Tunnel.WalkNodes.Add(StartNode);
+	Tunnel.WalkNodes.Add(EndNode);*/
+
 
 	//CreateNavNode connections reciprocally
 	//Add both start node and end node to an array
@@ -529,6 +576,43 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 	{
 		TargetBox.RoomNode->SetConnectedNodes(StartBox.RoomNode);
 	}*/
+}
+
+void AProceduralCaveGen::InsertNode(ANavigationNode* Node, FBoxBase& Box)
+{
+	ANavigationNode* ClosestNode = nullptr;
+	float ClosestDistance = MAX_FLT;
+	for (ANavigationNode* BoxNode : Box.WalkNodes)
+	{
+		float Distance = FVector::Distance(BoxNode->GetActorLocation(), Node->GetActorLocation());
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = BoxNode;
+		}
+	}
+	Node->SetConnectedNodes(ClosestNode);
+	ClosestNode->SetConnectedNodes(Node);
+
+	Box.WalkNodes.Add(Node);
+	WalkNodes.Add(Node);
+}
+
+void AProceduralCaveGen::MeshRoomNodes(ANavigationNode* JoiningNode, FLevelBox& Box)
+{
+	ANavigationNode* ClosestNode = nullptr;
+	float ClosestDistance = MAX_FLT;
+	for (ANavigationNode* BoxNode : Box.WalkNodes)
+	{
+		float Distance = FVector::Distance(BoxNode->GetActorLocation(), JoiningNode->GetActorLocation());
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestNode = BoxNode;
+		}
+	}
+	JoiningNode->SetConnectedNodes(ClosestNode);
+	ClosestNode->SetConnectedNodes(JoiningNode);
 }
 
 /**

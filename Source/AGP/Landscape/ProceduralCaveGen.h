@@ -159,7 +159,9 @@ protected:
 	void GenerateMesh();
 
 	//NavigationNodes
-	void GenerateWalkableNodes(FBoxBase Box);
+	void GenerateWalkableNodes(FBoxBase& Box);
+	void InsertNode(ANavigationNode* Node, FBoxBase& Box);
+	void MeshRoomNodes(ANavigationNode* JoiningNode, FLevelBox& Box);
 
 
 	//Helper Functions
