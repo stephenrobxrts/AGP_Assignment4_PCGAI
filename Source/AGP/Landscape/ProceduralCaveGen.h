@@ -151,6 +151,9 @@ protected:
 	void ClearMap();
 	void GenerateMesh();
 
+	//NavigationNodes
+	void GenerateWalkableNodes(FLevelBox& Box);
+
 
 	//Helper Functions
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
@@ -196,6 +199,8 @@ protected:
 	//Navigation Nodes
 	UPROPERTY(EditAnywhere)
 	TArray<ANavigationNode*> RoomNodes;
+	UPROPERTY(EditAnywhere)
+	TArray<ANavigationNode*> WalkNodes;
 
 	//Debug Boxes and Tunnels
 	UPROPERTY(EditAnywhere)

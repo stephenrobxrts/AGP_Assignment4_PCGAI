@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 #include "EngineUtils.h"
+#include "PhysicsAssetRenderUtils.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
@@ -123,6 +124,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	};
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
+	GenerateWalkableNodes(StartBox);
 
 	//Log Start box position and size
 	UE_LOG(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
@@ -312,6 +314,8 @@ void AProceduralCaveGen::GenerateMesh()
 }
 
 
+
+
 /**
  * @brief Creates tunnels between boxes with the same i \n
  * Uses the Paths and Connectedness (0->1) to determine how many tunnels to create \n
@@ -371,6 +375,62 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 	}
 }
 
+void AProceduralCaveGen::GenerateWalkableNodes(FLevelBox& Box)
+{
+	//Create a rect that has the same size as the box x/y and is rotated to match
+	float ShrinkAmount = 80.0f;
+	FVector2D RectSize = FVector2D(Box.Size.X - ShrinkAmount, Box.Size.Y - ShrinkAmount);
+
+	//Rotate the rect to match the box rotation
+	FVector2D RotatedRectSize = RectSize.GetRotated(Box.Rotation.Euler().Z);
+
+	//Place the rect centered on the box
+	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z/2.0f + ShrinkAmount);
+	FVector size3d = FVector(RectSize.X/2.0f, RectSize.Y/2.0f, 5.0f);
+
+	DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
+
+	//Add NavNodes
+	/*for (FVector& Vertex : Vertices)
+	{
+		if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
+			ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator))
+		{
+			Nodes.Add(NavNode);
+			NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+		}
+	}
+
+	for (int32 Y = 0; Y < RectSize.Y - 1; Y++)
+	{
+		for (int32 X = 0; X < RectSize.X - 1; X++)
+		{
+			// Define the indices of the four vertices of the current quad
+			int32 BottomRight = X + Y * RectSize.X;
+			int32 BottomLeft = (X + 1) + Y * RectSize.X;
+			int32 TopRight = X + (Y + 1) * RectSize.X;
+			int32 TopLeft = (X + 1) + (Y + 1) * RectSize.X;
+
+			//Define the 4 NavNode vertices
+			ANavigationNode* BottomRightNode = Nodes[BottomRight];
+			ANavigationNode* BottomLeftNode = Nodes[BottomLeft];
+			ANavigationNode* TopRightNode = Nodes[TopRight];
+			ANavigationNode* TopLeftNode = Nodes[TopLeft];
+
+			TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
+
+			for (ANavigationNode* Node : QuadNodes)
+			{
+				for (ANavigationNode* OtherNode : QuadNodes)
+				{
+					if (Node != OtherNode && !Node->GetConnectedNodes().Contains(OtherNode))
+					{
+						Node->SetConnectedNodes(OtherNode);
+					}
+				}
+			}*/
+}
+
 /**
  * @brief Calculates an offset from the center of the box, towards the wall. This is the point a tunnel will spawn at
  * @param Box - The box to calculate the offset from
@@ -426,6 +486,9 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 	Tunnel.Rotation = FQuat::FindBetweenNormals(FVector::ForwardVector, Direction);
 
 	Tunnels.Add(Tunnel);
+
+	FLevelBox tempTunnelBox = FLevelBox{Tunnel.Position, Tunnel.Size, EBoxType::Normal, Tunnel.Rotation};
+	GenerateWalkableNodes(tempTunnelBox);
 
 	//CreateNavNode connections reciprocally
 	//Add both start node and end node to an array
