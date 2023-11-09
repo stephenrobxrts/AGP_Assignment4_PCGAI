@@ -132,9 +132,9 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 
 					//If the value is more internal, take it
 					//Stricter adherence to tunnels *3
-					if (TempSDF < TunnelSDF * 3.0)
+					if (TempSDF < TunnelSDF)
 					{
-						TunnelSDF = TempSDF * 3.0;
+						TunnelSDF = TempSDF;
 					}
 				}
 

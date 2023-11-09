@@ -360,6 +360,7 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		Light->SetBrightness(20000.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
+		Light->PointLightComponent->SetCastVolumetricShadow(true);
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
 		ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
@@ -380,13 +381,13 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 {
 	FVector Offset;
 
-	Offset.X = (Direction.X > 0) ? Box.Size.X / 2 : (Direction.X < 0) ? -Box.Size.X / 2 : 0;
+	/*Offset.X = (Direction.X > 0) ? Box.Size.X / 2 : (Direction.X < 0) ? -Box.Size.X / 2 : 0;
 	Offset.Y = (Direction.Y > 0) ? Box.Size.Y / 2 : (Direction.Y < 0) ? -Box.Size.Y / 2 : 0;
-	Offset.Z = (Direction.Z > 0) ? Box.Size.Z / 2 : (Direction.Z < 0) ? -Box.Size.Z / 2 : 0;
+	Offset.Z = (Direction.Z > 0) ? Box.Size.Z / 2 : (Direction.Z < 0) ? -Box.Size.Z / 2 : 0;*/
 
 	//Move XY offset points towards the center of the box by the tunnelSize
-	Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? 150 / 2 : 0;
-	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? 150 / 2 : 0;
+	/*Offset.X += (Direction.X > 0) ? -TunnelSize / 2 : (Direction.X < 0) ? 150 / 2 : 0;
+	Offset.Y += (Direction.Y > 0) ? -TunnelSize / 2 : (Direction.Y < 0) ? 150 / 2 : 0;*/
 
 
 	// Adjust for Z position to be closer to the ground
@@ -411,11 +412,13 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 
 	FVector Direction = (TargetBox.Position - StartBox.Position).GetSafeNormal();
 	FVector StartOffset = CalculateBoxOffset(StartBox, Direction);
-	FVector EndOffset = CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
+	FVector EndOffset =  CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
 
 	FVector Start = StartBox.Position + StartOffset;
 	FVector End = TargetBox.Position + EndOffset;
 
+	
+	//Update direction now that we offset the start/end points
 	Direction = (End - Start).GetSafeNormal();
 
 	Tunnel.Position = (Start + End) / 2;
