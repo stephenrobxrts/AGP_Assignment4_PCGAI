@@ -70,7 +70,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		DebugShow();
 	}
 
-	if (!RoomNodes.IsEmpty() && bDebugNavNodes)
+	if (!RoomNodes.IsEmpty() || !WalkNodes.IsEmpty() && bDebugNavNodes)
 	{
 		DebugShowNavNodes();
 	}
@@ -228,7 +228,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 		CreateTunnel(lastBox, EndBox);
 	}
 
-
 	return boxes;
 }
 
@@ -377,45 +376,62 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 
 void AProceduralCaveGen::GenerateWalkableNodes(FLevelBox& Box)
 {
-	//Create a rect that has the same size as the box x/y and is rotated to match
+	//These will go to the header
 	float ShrinkAmount = 80.0f;
-	FVector2D RectSize = FVector2D(Box.Size.X - ShrinkAmount, Box.Size.Y - ShrinkAmount);
+	float NodeDensity = 50.0f;
 
-	//Rotate the rect to match the box rotation
-	FVector2D RotatedRectSize = RectSize.GetRotated(Box.Rotation.Euler().Z);
+	//Create a rect that has the same size as the box x/y and is rotated to match
+	FVector2D RectSize = FVector2D(Box.Size.X - ShrinkAmount, Box.Size.Y - ShrinkAmount);
+	FVector2d RectSizeInNodes = FVector2d(RectSize.X / NodeDensity, RectSize.Y / NodeDensity);
+	
 
 	//Place the rect centered on the box
 	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z/2.0f + ShrinkAmount);
 	FVector size3d = FVector(RectSize.X/2.0f, RectSize.Y/2.0f, 5.0f);
 
 	DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
+	
 
 	//Add NavNodes
-	/*for (FVector& Vertex : Vertices)
+	for (int Y = 0 ; Y < RectSizeInNodes.Y ; Y++)
 	{
-		if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
-			ANavigationNode::StaticClass(), Vertex, FRotator::ZeroRotator))
+		for (int X = 0 ; X < RectSizeInNodes.X; X++)
 		{
-			Nodes.Add(NavNode);
-			NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+			// Calculate local position within the rectangle
+			FVector NodePositionLocal = FVector(X * NodeDensity, Y * NodeDensity, 0.0f) - FVector(RectSize.X / 2.0f, RectSize.Y / 2.0f, 0.0f);
+        
+			// Convert local position to world space, taking into account the rotation and the true center of the box
+			FVector NodePositionWorld = Box.Rotation.RotateVector(NodePositionLocal) + RectCenter;
+			
+
+			//Spawn a NavNode at that position
+			if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
+			ANavigationNode::StaticClass(), NodePositionWorld, FRotator::ZeroRotator))
+			{
+				Box.WalkNodes.Add(NavNode);
+				WalkNodes.Add(NavNode);
+				NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+				
+			}
+			
 		}
 	}
-
-	for (int32 Y = 0; Y < RectSize.Y - 1; Y++)
+	
+	for (int Y = 0 ; Y < RectSizeInNodes.Y - 1  ; Y++)
 	{
-		for (int32 X = 0; X < RectSize.X - 1; X++)
+		for (int X = 0 ; X < RectSizeInNodes.X - 1 ; X++)
 		{
 			// Define the indices of the four vertices of the current quad
-			int32 BottomRight = X + Y * RectSize.X;
-			int32 BottomLeft = (X + 1) + Y * RectSize.X;
-			int32 TopRight = X + (Y + 1) * RectSize.X;
-			int32 TopLeft = (X + 1) + (Y + 1) * RectSize.X;
+			int32 BottomRight = X + Y * RectSizeInNodes.X;
+			int32 BottomLeft = (X + 1) + Y * RectSizeInNodes.X;
+			int32 TopRight = X + (Y + 1) * RectSizeInNodes.X;
+			int32 TopLeft = (X + 1) + (Y + 1) * RectSizeInNodes.X;
 
 			//Define the 4 NavNode vertices
-			ANavigationNode* BottomRightNode = Nodes[BottomRight];
-			ANavigationNode* BottomLeftNode = Nodes[BottomLeft];
-			ANavigationNode* TopRightNode = Nodes[TopRight];
-			ANavigationNode* TopLeftNode = Nodes[TopLeft];
+			ANavigationNode* BottomRightNode = Box.WalkNodes[BottomRight];
+			ANavigationNode* BottomLeftNode = Box.WalkNodes[BottomLeft];
+			ANavigationNode* TopRightNode = Box.WalkNodes[TopRight];
+			ANavigationNode* TopLeftNode = Box.WalkNodes[TopLeft];
 
 			TArray<ANavigationNode*> QuadNodes = {BottomRightNode, BottomLeftNode, TopRightNode, TopLeftNode};
 
@@ -428,7 +444,9 @@ void AProceduralCaveGen::GenerateWalkableNodes(FLevelBox& Box)
 						Node->SetConnectedNodes(OtherNode);
 					}
 				}
-			}*/
+			}
+		}
+	}
 }
 
 /**
@@ -488,6 +506,7 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 	Tunnels.Add(Tunnel);
 
 	FLevelBox tempTunnelBox = FLevelBox{Tunnel.Position, Tunnel.Size, EBoxType::Normal, Tunnel.Rotation};
+
 	GenerateWalkableNodes(tempTunnelBox);
 
 	//CreateNavNode connections reciprocally
@@ -583,6 +602,7 @@ void AProceduralCaveGen::ClearMap()
 	Tunnels.Empty();
 	AllObjects.Empty();
 	RoomNodes.Empty();
+	WalkNodes.Empty();
 	if (!Paths.IsEmpty())
 	{
 		for (FInnerArray& Path : Paths)
@@ -708,6 +728,13 @@ void AProceduralCaveGen::DebugShowNavNodes()
 		for (ANavigationNode* RoomNode : RoomNodes)
 		{
 			RoomNode->DebugSetVisibility(true);
+		}
+	}
+	if (!WalkNodes.IsEmpty())
+	{
+		for (ANavigationNode* WalkNode : WalkNodes)
+		{
+			WalkNode->DebugSetVisibility(true);
 		}
 	}
 }

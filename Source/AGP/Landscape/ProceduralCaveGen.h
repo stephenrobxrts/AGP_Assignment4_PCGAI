@@ -36,6 +36,7 @@ public:
 	FQuat Rotation = FQuat::Identity;
 	UPROPERTY(EditInstanceOnly)
 	ANavigationNode* RoomNode = nullptr;
+	TArray<ANavigationNode*> WalkNodes;
 };
 
 /**
@@ -52,6 +53,7 @@ public:
 	FVector Position;
 	FVector Size;
 	FQuat Rotation = FQuat::Identity;
+	TArray<ANavigationNode*> WalkNodes;
 	//UPROPERTY(EditInstanceOnly)
 	//ANavigationNode* TunnelNode = nullptr;
 };
