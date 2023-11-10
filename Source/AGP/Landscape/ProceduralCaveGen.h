@@ -9,7 +9,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "ProceduralCaveGen.generated.h"
 
-
+class ATorchPickup;
 /**
  * @brief Box type enum
  */
@@ -46,6 +46,8 @@ public:
 	EBoxType Type;
 	UPROPERTY(EditInstanceOnly)
 	ANavigationNode* RoomNode = nullptr;
+	UPROPERTY(EditInstanceOnly)
+	ATorchPickup* Torch = nullptr;
 };
 
 /**
@@ -279,6 +281,9 @@ protected:
 	UPROPERTY()
 	FNoiseParams NoiseParams;
 
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ATorchPickup> TorchBP;
 
 
 

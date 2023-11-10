@@ -14,6 +14,7 @@
 #include "Components/PointLightComponent.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
+#include "../Pickups/TorchPickup.h"
 
 // Sets default values
 AProceduralCaveGen::AProceduralCaveGen()
@@ -363,13 +364,19 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 {
 	if (UWorld* World = GetWorld())
 	{
-		APointLight* Light = World->SpawnActor<APointLight>(Box.Position, FRotator::ZeroRotator);
+		/*APointLight* Light = World->SpawnActor<APointLight>(Box.Position, FRotator::ZeroRotator);
 		Light->PointLightComponent->AttenuationRadius = 1500.0f;
 		Light->PointLightComponent->SetAttenuationRadius(2000.0f);
 		Light->SetBrightness(400.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
-		Light->PointLightComponent->SetCastVolumetricShadow(true);
+		Light->PointLightComponent->SetCastVolumetricShadow(true);*/ 
+
+
+		Box.Torch = World->SpawnActor<ATorchPickup>(TorchBP, Box.Position, FRotator::ZeroRotator);
+		//Set torch lit based on random boolean (50%)
+		Box.Torch->SetTorchLit(FMath::RandBool());
+	
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
 		ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
@@ -722,6 +729,14 @@ void AProceduralCaveGen::ClearMap()
 		if (*It)
 		{
 			(*It)->ClearMesh();
+			(*It)->Destroy();
+		}
+	}
+
+	for (TActorIterator<ATorchPickup> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
 			(*It)->Destroy();
 		}
 	}
