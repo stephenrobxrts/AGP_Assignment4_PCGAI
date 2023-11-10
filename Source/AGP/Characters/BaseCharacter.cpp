@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 
 #include "../Pickups/WeaponPickup.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -52,6 +53,12 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABaseCharacter, WeaponComponent);
+}
+
 bool ABaseCharacter::HasWeapon()
 {
 	if (WeaponComponent)
@@ -63,19 +70,28 @@ bool ABaseCharacter::HasWeapon()
 
 void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity)
 {
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		EquipWeaponImplementation(bEquipWeapon, WeaponStats, WeaponRarity);
+		MulticastEquipWeapon(bEquipWeapon, WeaponRarity);
+	}
+}
+
+void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats,
+	const EWeaponRarity WeaponRarity)
+{
 	//Picking up Weapon - create weapon component and apply stats, materials
 	if (bEquipWeapon && !HasWeapon())
 	{
 		WeaponComponent = NewObject<UWeaponComponent>(this);
 		WeaponComponent->RegisterComponent();
 		WeaponComponent->ApplyWeaponStats(WeaponStats);
-		EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
+		
 	}
 	//Changing Weapon - change stats and material 
 	else if (bEquipWeapon && HasWeapon())
 	{
 		WeaponComponent->ApplyWeaponStats(WeaponStats);
-		EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
 	}
 	//Dropping Weapon
 	else if (!bEquipWeapon && HasWeapon())
@@ -83,6 +99,8 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 		WeaponComponent->UnregisterComponent();
 		WeaponComponent = nullptr;
 	}
+
+	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
 
 	if (bEquipWeapon)
 	{
@@ -92,6 +110,12 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 	{
 		UE_LOG(LogTemp, Display, TEXT("Player has unequipped weapon"))
 	}
+}
+
+void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
+{
+	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
+	//EquipWeaponImplementation(bEquipWeapon, WeaponStats, WeaponRarity);
 }
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
