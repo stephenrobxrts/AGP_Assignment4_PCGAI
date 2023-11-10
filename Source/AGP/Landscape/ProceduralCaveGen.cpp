@@ -364,9 +364,9 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 	if (UWorld* World = GetWorld())
 	{
 		APointLight* Light = World->SpawnActor<APointLight>(Box.Position, FRotator::ZeroRotator);
-		Light->PointLightComponent->AttenuationRadius = 2000.0f;
+		Light->PointLightComponent->AttenuationRadius = 1500.0f;
 		Light->PointLightComponent->SetAttenuationRadius(2000.0f);
-		Light->SetBrightness(20000.0f);
+		Light->SetBrightness(400.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
 		Light->PointLightComponent->SetCastVolumetricShadow(true);
