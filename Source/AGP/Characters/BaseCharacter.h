@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AGP/Pickups/WeaponPickup.h"
 #include "Components/HealthComponent.h"
 #include "Components/WeaponComponent.h"
 #include "GameFramework/Character.h"
@@ -54,16 +55,23 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+
 	/**
  * @brief Is automatically called by the EquipWeapon function and should be overriden in a blueprint derived
  * class to drive any graphical changes that are needed when equipping or un-equipping a weapon.
  * @param bEquipWeapon Whether a weapon is being equipped (true) or un-equipped (false).
  */
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	UWeaponComponent* WeaponComponent = nullptr;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
+	void EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats = FWeaponStats(), const EWeaponRarity WeaponRarity = EWeaponRarity::Common);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
 
 	bool Fire(const FVector& FireAtLocation);
