@@ -372,9 +372,26 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		Light->PointLightComponent->SetTemperature(2500);
 		Light->PointLightComponent->SetCastVolumetricShadow(true);*/ 
 
-
+		// Log box type
+		UE_LOG(LogTemp, Warning, TEXT("Box Type is %s"), *UEnum::GetValueAsString(Box.Type));
 		Box.Torch = World->SpawnActor<ATorchPickup>(TorchBP, Box.Position, FRotator::ZeroRotator);
 		//Set torch lit based on random boolean (50%)
+		if (Box.Type == EBoxType::Normal)
+		{
+			bool bIsLit = true;
+			float LitPerc = FMath::FRandRange(0.0f, 1.0f);
+			if (LitPerc < 0.25f)
+			{
+				bIsLit = false;
+			}
+			Box.Torch->SetTorchLit(bIsLit);
+			
+			UE_LOG(LogTemp, Warning, TEXT("Torch Lit is %s"), Box.Torch->bIsLit ? TEXT("True") : TEXT("False"));
+		}
+		else
+		{
+			Box.Torch->SetTorchLit(true);
+		}
 		Box.Torch->SetTorchLit(FMath::RandBool());
 	
 	}
@@ -779,6 +796,9 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 
 		APlayerStart* NewPlayerStart = GetWorld()->SpawnActor<APlayerStart>(
 			APlayerStart::StaticClass(), Location, FRotator(0, 0, 0), SpawnParams);
+
+		APlayerStart* NewPlayer2Start = GetWorld()->SpawnActor<APlayerStart>(
+		APlayerStart::StaticClass(), FVector(Location.X, Location.Y + 100.0f, Location.Z), FRotator(0, 0, 0), SpawnParams);
 
 		if (NewPlayerStart)
 		{
