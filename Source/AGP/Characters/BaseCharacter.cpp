@@ -112,6 +112,8 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 	}
 }
 
+
+
 void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
 {
 	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);

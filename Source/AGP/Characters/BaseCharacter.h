@@ -37,6 +37,10 @@ public:
 	 */
 	void EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity);
 
+
+
+
+	
 protected:
 	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
 	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
@@ -70,6 +74,9 @@ protected:
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
 	void EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats = FWeaponStats(), const EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
+
+
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
