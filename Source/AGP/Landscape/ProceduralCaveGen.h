@@ -173,6 +173,7 @@ protected:
 	void DebugShow();
 	void DebugShowNavNodes();
 	void AddPlayerStartAtLocation(const FVector& Location);
+	void AttachTorchToWalls();
 
 
 	UPROPERTY(EditAnywhere)

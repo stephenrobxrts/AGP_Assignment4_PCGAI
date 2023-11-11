@@ -12,6 +12,7 @@
 #include "EngineUtils.h"
 #include "PhysicsAssetRenderUtils.h"
 #include "Components/PointLightComponent.h"
+#include "NiagaraComponent.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
 #include "../Pickups/TorchPickup.h"
@@ -65,6 +66,8 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		//Spawn Meshes
 		GenerateMesh();
 		bShouldRegenerate = false;
+		
+		AttachTorchToWalls();
 	}
 
 	//Debug to visualize boxes
@@ -244,7 +247,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 void AProceduralCaveGen::GenerateMesh()
 {
 	//For loop for X/Y/Z chunks within levelSize
-	int ChunkAmounts = (LevelSize) / ChunkSize;
+	int ChunkAmounts = (LevelSize + 0.2f*LevelSize) / ChunkSize;
 
 	int StartChunkXY = -ChunkAmounts / 2;
 	int StartChunkZ = -ChunkAmounts / 2;
@@ -373,8 +376,47 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		Light->PointLightComponent->SetCastVolumetricShadow(true);*/ 
 
 		// Log box type
-		UE_LOG(LogTemp, Warning, TEXT("Box Type is %s"), *UEnum::GetValueAsString(Box.Type));
-		Box.Torch = World->SpawnActor<ATorchPickup>(TorchBP, Box.Position, FRotator::ZeroRotator);
+		FVector SpawnPos = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - 0.5* Box.Size.Z + 100.0f);
+
+		int rngDirection = FMath::RandRange(0, 3);
+		FVector SpawnOffset = FVector(0.0f, 0.0f, 0.0f);
+		//switch case on RNG direction to spawn torch +X, +Y, -x, -Y
+		switch (rngDirection)
+		{
+			case 0:
+				SpawnOffset.X += Box.Size.X / 2 - 30.0f;
+				break;
+			case 1: 
+				SpawnOffset.Y += Box.Size.Y / 2 - 30.0f;
+				break;
+			case 2:
+				SpawnOffset.X -= Box.Size.X / 2 - 30.0f;
+				break;
+			case 3:
+				SpawnOffset.Y -= Box.Size.Y / 2 - 30.0f;
+				break;
+			default:
+				break;
+		}
+		SpawnPos += SpawnOffset;
+
+		//The torch is vertical, angle it towards the center of the room
+		FRotator SpawnRot = FRotator(0.0f, 0.0f, 0.0f);
+		SpawnRot.Yaw = FMath::Atan2(-SpawnOffset.Y, -SpawnOffset.X) * 180.0f / PI;
+
+		//Now that it points towards the center of the room, tilt it 45degrees in that direction
+		SpawnRot.Pitch = -45.0f;
+
+
+		
+		
+		
+		Box.Torch = World->SpawnActor<ATorchPickup>(TorchBP, SpawnPos, SpawnRot);
+
+		
+
+
+		
 		//Set torch lit based on random boolean (50%)
 		if (Box.Type == EBoxType::Normal)
 		{
@@ -392,7 +434,6 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		{
 			Box.Torch->SetTorchLit(true);
 		}
-		Box.Torch->SetTorchLit(FMath::RandBool());
 	
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
@@ -803,6 +844,44 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 		if (NewPlayerStart)
 		{
 			// Optionally, you can set any other properties on NewPlayerStart
+		}
+	}
+}
+
+void AProceduralCaveGen::AttachTorchToWalls()
+{
+	for (FLevelBox& Box : Boxes)
+	{
+		if (Box.Torch)
+		{
+			FHitResult HitResult;
+			const FVector StartLocation = Box.Torch->GetActorLocation();
+
+			//Fire direction to be random direction in XY plane
+			const FVector FireDirection = (FVector(FMath::RandRange(-1.0f, 1.0f), FMath::RandRange(-1.0f, 1.0f),
+									   0.0f)).GetSafeNormal();
+
+			//End location is max of box size X/Y/Z away in direction
+			const FVector EndLocation = StartLocation + (FireDirection * Box.Size.GetMax());
+
+			//Log trace length
+			UE_LOG(LogTemp, Warning, TEXT("Trace Length is %f"), Box.Size.GetMax());
+		
+			FCollisionQueryParams QueryParams;
+			//Log trace and owner
+			//UE_LOG(LogTemp, Warning, TEXT("Tracing, Owner is %s"), *GetOwner()->GetName());
+			QueryParams.AddIgnoredActor(Box.Torch);
+
+			GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_WorldStatic, QueryParams);
+
+			UE_LOG(LogTemp, Display, TEXT("Trace for torch"));
+			DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, 1.0f, 0, 1.0f);
+			if (AActor* HitActor = HitResult.GetActor())
+			{
+				//Show debug of object type hit
+				UE_LOG(LogTemp, Warning, TEXT("Hit Actor is %s"), *HitActor->GetName());
+				UE_LOG(LogTemp, Warning, TEXT("Hit Actor is %s"), *HitActor->GetClass()->GetName());
+			}
 		}
 	}
 }

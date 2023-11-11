@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraComponent.h"
+#include "Engine/PointLight.h"
 #include "Components/ActorComponent.h"
 
 #include "TorchComponent.generated.h"
@@ -19,7 +21,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* TorchMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APointLight* Light = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraEmitter* TorchParticle = nullptr;
 
+	UNiagaraComponent* TorchParticleComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Speed = 1.0f;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//UNiagaraComponent* TorchParticle;	
 	
@@ -31,6 +41,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	
 
 public:
 	// Called every frame
