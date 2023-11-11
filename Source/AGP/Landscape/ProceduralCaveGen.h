@@ -146,6 +146,7 @@ protected:
 
 	//Box placement logic
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
+	TArray<FLevelBox> GenerateLadderPathBoxes();
 	void GenerateInterconnects();
 	void CreateBox(FLevelBox& Box);
 
@@ -191,7 +192,7 @@ protected:
 	float HeightDifference = 400.0f;
 
 	UPROPERTY(VisibleAnywhere)
-	FVector MinBoxSize = FVector(300.0f, 300.0f, 200.0f);
+	FVector MinBoxSize = FVector(300.0f, 300.0f, 400.0f);
 	UPROPERTY(EditAnywhere)
 	FVector MaxBoxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	UPROPERTY(VisibleAnywhere)

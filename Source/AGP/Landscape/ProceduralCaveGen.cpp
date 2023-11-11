@@ -58,7 +58,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		ClearMap();
 
 		//Level Generation
-		Boxes = GenerateGuaranteedPathBoxes();
+		Boxes = GenerateLadderPathBoxes();
 		GenerateInterconnects();
 
 		//Add All generated items to an array for chunk check
@@ -241,6 +241,131 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	return boxes;
 }
 
+TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
+{
+	//create start room
+	FVector Start = FVector(GetActorLocation());
+	AddPlayerStartAtLocation(Start);
+	FVector End = FVector(LevelSize, 0, FMath::RandRange(-HeightDifference, 0.0f));
+
+	TArray<FLevelBox> boxes;
+
+	//Start Box
+	FLevelBox StartBox
+	{
+		Start,
+		FVector(
+			FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+			FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+			FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z)),
+		FQuat::Identity,
+		TArray<ANavigationNode*>(),
+		EBoxType::Start
+		
+	};
+	boxes.Add(StartBox);
+	CreateBox(StartBox);
+
+	//Get direction and distance between start and end
+	FVector Direction = (End - Start).GetSafeNormal();
+	float Distance = (End - Start).Size();
+
+	//Create a box at the end of the path
+	FLevelBox EndBox
+	{
+		End,
+		FVector(
+			500.0f,
+			500.0f,
+			500.0f),
+		FQuat::Identity,
+		TArray<ANavigationNode*>(),
+		EBoxType::End
+	};
+	boxes.Add(EndBox);
+	CreateBox(EndBox);
+
+	//Find average tunnel length by dividing distance by number of boxes per path
+	float AvgTunnelLength = Distance / (NumBoxesPerPath + 1);
+
+	//Find the angle from start -> leftmost path first box such that the tunnel length
+	// between leftmost path Box1 and second path Box1 is equal to the average tunnel length
+	//So leftmost box will be NumPaths/2 * AvgTunnelLength away from the centerline
+	//And leftmost box will be avgTunnelLength away from StartBox
+	float Angle = FMath::Atan2((NumPaths - 1.0f ) / 2.0f * AvgTunnelLength, AvgTunnelLength);
+	float LeftmostPathY = -((NumPaths - 1.0f)/2.0f * AvgTunnelLength);
+
+	
+	for (int i = 0; i < NumPaths; i++)
+	{
+		FInnerArray Path;
+		Paths.Add(Path);
+		
+		float PathY = LeftmostPathY + i * AvgTunnelLength;
+		FVector PathStart = Start + FVector(0, PathY, 0);
+		FVector PathEnd = End + FVector(0, PathY, 0);
+		FVector PathDirection = (PathEnd - PathStart).GetSafeNormal();
+		//for each box in NumBoxesPerPath - create a box avgPathLength away in X from previous box
+		for (int j = 0; j < NumBoxesPerPath; j++)
+		{
+			FLevelBox Box;
+			Box.Position = PathStart + PathDirection * AvgTunnelLength * (j+1);
+			Box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+			                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+			                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
+			Box.Type = EBoxType::Normal;
+			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
+			
+			boxes.Add(Box);
+			CreateBox(Box);
+
+			Paths[i].Path.Add(Box);
+			CreateTunnel(lastBox, Box);
+		}
+	}
+
+	//Join Paths to end box
+	for (int i = 0; i < NumPaths; i++)
+	{
+		FLevelBox lastBox = Paths[i].Path[Paths[i].Path.Num() - 1];
+		CreateTunnel(lastBox, EndBox);
+	}
+	/*//Travel along that angle to place first box in that path
+	FVector FirstBoxPosition = Start + Direction.RotateAngleAxis(FMath::RadiansToDegrees(Angle), FVector::UpVector) * AvgTunnelLength;
+	
+	//Create boxes on that path going forward in X with each successive box
+	//being avgTunnelLength away from the previous box
+	for (int i = 0; i < NumBoxesPerPath; i++)
+	{
+		FLevelBox box;
+		box.Position = FirstBoxPosition + FVector(AvgTunnelLength * i, 0, 0);
+		box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
+		                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
+		                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
+		box.Type = EBoxType::Normal;
+
+		FLevelBox lastBox = (i == 0) ? StartBox : boxes[boxes.Num() - 1];
+
+		//If box doesn't collide with any other boxes AND Gradient not too steep
+		//Add it to the list of boxes	
+		if (BoxPositionValid(box, boxes) && FMath::Abs(CalculateGradient(box, lastBox)) <= 0.3)
+		{
+			boxes.Add(box);
+			CreateBox(box);
+
+			CreateTunnel(lastBox, box);
+		}
+		else
+		{
+			i--;
+		}
+	}*/
+
+	return boxes;
+	
+	
+}
+
 /**
  * @brief Generate Mesh using MarchingChunkTerrain
  */
@@ -336,24 +461,37 @@ void AProceduralCaveGen::GenerateInterconnects()
 	{
 		return;
 	}
-	const int MaxInterconnects = Paths[0].Path.Num() * PathInterconnectedness;
-	TArray<int> InterconnectIndices;
-	for (int i = 0; i < Paths[0].Path.Num(); i++)
+
+	//At 1.0 it will be Paths - 1 interconnects per box on the path
+	const int MaxInterconnects = (Paths.Num() - 1) * Paths[0].Path.Num() * PathInterconnectedness;
+	TArray<TArray<int>> InterconnectIndices;
+
+	//Shuffle the "box number in path" so that the interconnects are random
+	for (int i = 0; i < Paths.Num() - 1; i++)
 	{
-		InterconnectIndices.Add(i);
+		InterconnectIndices.Add(TArray<int>());
+		for (int j = 0 ; j < Paths[0].Path.Num() ; j++)
+		{
+			InterconnectIndices[i].Add(j);
+		}
+		Algo::RandomShuffle(InterconnectIndices[i]);
 	}
-	Algo::RandomShuffle(InterconnectIndices);
+
+	//Create tunnels between boxes on different paths with the same indices
 	int NumInterconnects = 0;
 	int AttemptNum = 0;
-	while (AttemptNum < Paths[0].Path.Num() && NumInterconnects < MaxInterconnects)
+	while (AttemptNum < Paths[0].Path.Num()  && NumInterconnects < MaxInterconnects)
 	{
-		FLevelBox& BoxA = Paths[0].Path[InterconnectIndices[AttemptNum]];
-		FLevelBox& BoxB = Paths[1].Path[InterconnectIndices[AttemptNum]];
-
-		if (FMath::Abs(CalculateGradient(BoxA, BoxB)) <= 0.3) // 30% gradient or 0.3 in decimal form
+		//For each box on the path, interconnect based on the shuffled indices
+		for (int i = 0 ; i < Paths.Num() - 1 ; i++)
 		{
+			FLevelBox& BoxA = Paths[i].Path[InterconnectIndices[i][AttemptNum]];
+			FLevelBox& BoxB = Paths[i+1].Path[InterconnectIndices[i][AttemptNum]];
+			
 			NumInterconnects++;
 			CreateTunnel(BoxA, BoxB);
+
+			
 		}
 		AttemptNum++;
 	}
