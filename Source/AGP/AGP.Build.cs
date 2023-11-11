@@ -8,7 +8,7 @@ public class AGP : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "InputCore", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new[] { "EnhancedInput", "AIModule", "ProceduralMeshComponent", "UnrealEd" });
 

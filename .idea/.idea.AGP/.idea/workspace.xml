@@ -8,12 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ead3c164-1b55-4746-8835-f6448298bd01" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/AGP/Characters/Components/TorchComponent.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AGP/Characters/Components/TorchComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/3DModels/Torches/TorchSMSRepack/Torch.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/3DModels/Torches/TorchSMSRepack/Torch.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/AGP.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/AGP.Build.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,6 +172,17 @@
         <entry key="MAIN">
           <value>
             <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/PlayerUI" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
               <option name="LONG_EDGES_VISIBLE" value="true" />
             </State>
           </value>
