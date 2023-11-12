@@ -36,7 +36,6 @@ void ATorchPickup::BeginPlay()
 		//UELOG this actor's Collision Stats
 		UE_LOG(LogTemp, Warning, TEXT("TorchPickup: %s"), *this->GetName());
 		//Set collision to ignore all
-		
 	}
 
 	
@@ -45,19 +44,47 @@ void ATorchPickup::BeginPlay()
 void ATorchPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    
 	DOREPLIFETIME(ATorchPickup, bIsLit);
 }
 
+void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
+{
+	if (HasAuthority())
+	{
+		OnPickedUp(BaseCharacter);
+	}
+	else
+	{
+		ServerAttemptPickup(BaseCharacter);
+	}
+
+	/*UE_LOG(LogTemp, Warning, TEXT("TorchPickup: %s"), *BaseCharacter->GetActorLabel());
+	BaseCharacter->EquipTorch(true, bIsLit);*/
+	
+}
+
+void ATorchPickup::ServerAttemptPickup_Implementation(ABaseCharacter* BaseCharacter)
+{
+	OnPickedUp(BaseCharacter);
+	
+}
+
+bool ATorchPickup::ServerAttemptPickup_Validate(ABaseCharacter* BaseCharacter)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Serverside TorchPickup: %s"), *BaseCharacter->GetActorLabel());
+	return true;
+}
 void ATorchPickup::OnPickedUp(ABaseCharacter* BaseCharacter)
 {
 	if (bIsHeld)
 	{
 		return;
 	}
+
 	BaseCharacter->EquipTorch(true, bIsLit);
 	this->Destroy();
 }
+
 
 void ATorchPickup::OnInteract()
 {
@@ -100,6 +127,9 @@ void ATorchPickup::OnProximityExit(UPrimitiveComponent* OverlappedComponent, AAc
 {
 	
 }
+
+
+
 
 // Called every frame
 void ATorchPickup::Tick(float DeltaTime)

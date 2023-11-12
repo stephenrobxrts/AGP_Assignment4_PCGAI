@@ -97,11 +97,10 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 
 void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 {
-	if (GetLocalRole() == ROLE_Authority)
-	{
+
 		EquipTorchImplementation(bEquipTorch,  bIsLit);
 		MulticastEquipTorch(bEquipTorch, bIsLit);
-	}
+
 }
 
 void ABaseCharacter::InteractWithSelf()
@@ -263,12 +262,13 @@ bool ABaseCharacter::Pickup()
 	{
 		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
 		{
-			UE_LOG(LogTemp, Display, TEXT("Player is picking up torch: %s"), *GetName());
+			UE_LOG(LogTemp, Display, TEXT("Player is picking up torch: %s"), *this->GetActorLabel());
 			// Call a method on the pickup object to handle being picked up
-			PickupObject->OnPickedUp(this);
+			PickupObject->AttemptPickUp(this);
+			//EquipTorch(true, PickupObject->bIsLit);
 		}
 	}
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
 

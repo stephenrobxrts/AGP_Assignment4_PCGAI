@@ -94,7 +94,13 @@ protected:
 	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
-
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void InteractGraphical(bool bIsLit);
+	void InteractImplementation(bool bIsLit);
+	UFUNCTION(BlueprintImplementableEvent)
+	void MulticastInteract(bool bIsLit);
+	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);
 	void InteractSelfImplementation(bool bIsLit);

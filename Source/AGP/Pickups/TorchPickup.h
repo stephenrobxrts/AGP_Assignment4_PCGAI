@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "PickupBase.h"
+#include "AGP/Characters/PlayerCharacter.h"
+
 #include "TorchPickup.generated.h"
+
+
 class ABaseCharacter;
 
 UCLASS()
@@ -25,7 +29,9 @@ public:
 	bool bIsHeld = false;
 
 
-	void OnPickedUp(ABaseCharacter* BaseCharacter);
+	void AttemptPickUp(ABaseCharacter* BaseCharacter);
+	
+	
 
 	void OnInteract();
 
@@ -42,6 +48,11 @@ protected:
 	UFUNCTION()
 	void OnProximityExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerAttemptPickup(ABaseCharacter* BaseCharacter);
+
+	void OnPickedUp(ABaseCharacter* BaseCharacter);
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
