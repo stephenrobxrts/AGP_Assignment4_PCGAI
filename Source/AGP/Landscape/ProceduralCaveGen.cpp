@@ -3,9 +3,6 @@
 
 #include "ProceduralCaveGen.h"
 
-#include <wrl/internal.h>
-
-
 #include "Algo/RandomShuffle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
