@@ -10,6 +10,8 @@ ATorchPickup::ATorchPickup()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+
 }
 
 bool ATorchPickup::ShouldTickIfViewportsOnly() const
@@ -29,10 +31,31 @@ void ATorchPickup::BeginPlay()
 	
 }
 
-void ATorchPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ATorchPickup::OnPickedUp(ABaseCharacter* BaseCharacter)
 {
-	if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(OtherActor))
+	if (bIsHeld)
+	{
+		return;
+	}
+	BaseCharacter->EquipTorch(true, bIsLit);
+	this->Destroy();
+}
+
+void ATorchPickup::OnInteract()
+{
+	if (bIsHeld)
+	{
+		return;
+	}
+	bIsLit ? bIsLit = false : bIsLit = true;
+}
+
+
+void ATorchPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                   UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	/*if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(OtherActor))
 	{
 		//If this is a child actor, don't do anything
 		if (this->IsChildActor())
@@ -40,12 +63,24 @@ void ATorchPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 			return;
 		}
 		
-		if (!BaseCharacter->HasTorch() && !BaseCharacter->bEquipTorchAction)
+		if (!BaseCharacter->HasTorch())
 		{
+			BaseCharacter->SetIsOverlappingPickup(true);
 			BaseCharacter->EquipTorch(true, bIsLit);
 			this->Destroy();
 		}
-	}
+
+		/*if (BaseCharacter->ToggleTorchAction)
+		{
+			bIsLit = false;
+		}#1#
+	}*/
+}
+
+void ATorchPickup::OnProximityExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	
 }
 
 // Called every frame

@@ -32,6 +32,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool HasTorch();
+
+	void SetIsOverlappingPickup(bool bIsOverlapping);
+	TSubclassOf<APickupBase>* PickupActor;
+	
 	
 	/**
 	 * @brief Will either equip or un-equip a weapon on this player.
@@ -42,6 +46,8 @@ public:
 	void EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity);
 
 	void EquipTorch(bool bEquipTorch, bool bIsLit);
+
+	void InteractWithSelf();
 
 	bool bEquipTorchAction = false;
 
@@ -66,6 +72,7 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
+	bool bIsOverlappingPickup;
 
 	/**
  * @brief Is automatically called by the EquipWeapon function and should be overriden in a blueprint derived
@@ -78,20 +85,26 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
 	void EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats = FWeaponStats(), const EWeaponRarity WeaponRarity = EWeaponRarity::Common);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void EquipTorchGraphical(bool bEquipTorch, bool bIsLit);
-	
-	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
-
-	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void EquipTorchGraphical(bool bEquipTorch, bool bIsLit);
+	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
 
+	/*UFUNCTION(BlueprintImplementableEvent)
+	void InteractSelfGraphical(bool bIsLit);
+	void InteractSelfImplementation(bool bIsLit);
+	UFUNCTION(BlueprintImplementableEvent)
+	void MulticastInteractSelf(bool bIsLit);*/
+	
 
+
+
+	
 	
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();

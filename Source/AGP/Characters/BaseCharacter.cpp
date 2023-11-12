@@ -4,8 +4,11 @@
 #include "BaseCharacter.h"
 
 #include "../Pickups/WeaponPickup.h"
+#include "AGP/Pickups/TorchPickup.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -73,6 +76,16 @@ bool ABaseCharacter::HasTorch()
 	return bHasTorch;
 }
 
+void ABaseCharacter::SetIsOverlappingPickup(bool bIsOverlapping)
+{
+	if (bIsOverlappingPickup == bIsOverlapping)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Display, TEXT("Player is overlapping pickup: %s"), *GetName());
+	bIsOverlappingPickup = bIsOverlapping;
+}
+
 void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity)
 {
 	if (GetLocalRole() == ROLE_Authority)
@@ -88,6 +101,14 @@ void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 	{
 		EquipTorchImplementation(bEquipTorch,  bIsLit);
 		MulticastEquipTorch(bEquipTorch, bIsLit);
+	}
+}
+
+void ABaseCharacter::InteractWithSelf()
+{
+	if (bHasTorch)
+	{
+		
 	}
 }
 
@@ -143,6 +164,10 @@ void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool b
 	EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
+/*void ABaseCharacter::InteractSelfImplementation(bool bIsLit)
+{
+}*/
+
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
 	if (HasWeapon())
@@ -178,11 +203,71 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 bool ABaseCharacter::Interact()
 {
-	return false;
+	FVector CameraPosition;
+	FRotator CameraRotation;
+	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
+	
+	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
+	FVector ForwardVector = GetActorForwardVector();
+	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
+	FVector End = ((CameraForward * 100.f) + Start); // Change 1000.f to your desired distance
+
+	FHitResult HitResult;
+
+	// Setup the query parameters
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(GetOwner()); // Ignore the player
+	CollisionParams.AddIgnoredActors(GetOwner()->Children);
+
+	// Perform the line trace
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
+
+	if (bIsHit)
+	{
+		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with torch: %s"), *GetName());
+			// Call a method on the pickup object to handle being picked up
+			PickupObject->OnInteract();
+		}
+	}
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+	return true;
 }
 
 bool ABaseCharacter::Pickup()
 {
+	FVector CameraPosition;
+	FRotator CameraRotation;
+	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
+	
+	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
+	FVector ForwardVector = GetActorForwardVector();
+	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
+	FVector End = ((CameraForward * 100.f) + Start); // Change 1000.f to your desired distance
+
+	FHitResult HitResult;
+
+	// Setup the query parameters
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(GetOwner()); // Ignore the player
+	CollisionParams.AddIgnoredActors(GetOwner()->Children);
+
+	// Perform the line trace
+	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
+
+	if (bIsHit)
+	{
+		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is picking up torch: %s"), *GetName());
+			// Call a method on the pickup object to handle being picked up
+			PickupObject->OnPickedUp(this);
+		}
+	}
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
 
@@ -200,4 +285,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 		}
 		TimeSinceReload += DeltaTime;
 	}
+
+
 }

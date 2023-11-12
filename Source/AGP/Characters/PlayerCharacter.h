@@ -41,12 +41,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UInputAction* InteractAction;
 	UPROPERTY(EditDefaultsOnly)
+	UInputAction* InteractSelfAction;
+	UPROPERTY(EditDefaultsOnly)
 	UInputAction* PickupAction;
 	
 	UPROPERTY(EditDefaultsOnly)
 	UInputMappingContext* InputMappingContext;
 
 
+	
 	UPROPERTY(EditDefaultsOnly)
 	float LookSensitivity = 0.5f;
 
@@ -61,5 +64,6 @@ private:
 	void ReloadWeapon(const FInputActionValue& Value);
 
 	void InteractObj(const FInputActionValue& Value);
+	void InteractSelf(const FInputActionValue& Value);
 	void PickupObj(const FInputActionValue& Value);
 };
