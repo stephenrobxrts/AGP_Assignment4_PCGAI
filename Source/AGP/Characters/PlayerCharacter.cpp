@@ -49,6 +49,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		Input->BindAction(FireAction, ETriggerEvent::Triggered, this, &APlayerCharacter::FireWeapon);
+		Input->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractObj);
+		Input->BindAction(InteractSelfAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InteractSelf);
+		Input->BindAction(PickupAction, ETriggerEvent::Triggered, this, &APlayerCharacter::PickupObj);
 		Input->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ReloadWeapon);
 	}
 }
@@ -85,4 +88,19 @@ void APlayerCharacter::FireWeapon(const FInputActionValue& Value)
 void APlayerCharacter::ReloadWeapon(const FInputActionValue& Value)
 {
 	Reload();
+}
+
+void APlayerCharacter::InteractObj(const FInputActionValue& Value)
+{
+	Interact();
+}
+
+void APlayerCharacter::InteractSelf(const FInputActionValue& Value)
+{
+	InteractWithSelf();
+}
+
+void APlayerCharacter::PickupObj(const FInputActionValue& Value)
+{
+	Pickup();
 }
