@@ -151,6 +151,14 @@ void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
 	EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
+void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
+{
+	if (TorchPickup)
+	{
+		TorchPickup->AttemptPickUp(this);
+	}
+}
+
 
 void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
 {
@@ -229,11 +237,14 @@ bool ABaseCharacter::Interact()
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with torch: %s"), *GetName());
 			// Call a method on the pickup object to handle being picked up
 			PickupObject->OnInteract();
+			//ServerEquipTorch(PickupObject);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
+
+
 
 bool ABaseCharacter::Pickup()
 {
@@ -264,7 +275,8 @@ bool ABaseCharacter::Pickup()
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is picking up torch: %s"), *this->GetActorLabel());
 			// Call a method on the pickup object to handle being picked up
-			PickupObject->AttemptPickUp(this);
+			ServerEquipTorch(PickupObject);
+			//PickupObject->AttemptPickUp(this);
 			//EquipTorch(true, PickupObject->bIsLit);
 		}
 	}

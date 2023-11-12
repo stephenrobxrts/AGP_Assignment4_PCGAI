@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AGP/Pickups/TorchPickup.h"
 #include "AGP/Pickups/WeaponPickup.h"
 #include "Components/HealthComponent.h"
 #include "Components/WeaponComponent.h"
@@ -94,12 +95,15 @@ protected:
 	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
+	UFUNCTION(Server, Reliable)
+	void ServerEquipTorch(ATorchPickup* TorchPickup);
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void InteractGraphical(bool bIsLit);
 	void InteractImplementation(bool bIsLit);
 	UFUNCTION(BlueprintImplementableEvent)
 	void MulticastInteract(bool bIsLit);
+
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);
@@ -120,6 +124,7 @@ protected:
 	bool bHasTorch = false;
 
 	bool Interact();
+
 	bool Pickup();
 
 public:

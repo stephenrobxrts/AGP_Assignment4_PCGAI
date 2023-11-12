@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "PickupBase.h"
-#include "AGP/Characters/PlayerCharacter.h"
 
 #include "TorchPickup.generated.h"
 
@@ -27,11 +26,8 @@ public:
 	void SetTorchLit(bool bLit);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsHeld = false;
-
-
+	
 	void AttemptPickUp(ABaseCharacter* BaseCharacter);
-	
-	
 
 	void OnInteract();
 
