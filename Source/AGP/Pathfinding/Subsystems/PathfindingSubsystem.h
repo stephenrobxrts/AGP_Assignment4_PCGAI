@@ -30,7 +30,10 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere)
-	TArray<ANavigationNode*> Nodes;
+	TArray<ANavigationNode*> WalkableNodes;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<ANavigationNode*> RoomNodes;
 
 private:
 	void PopulateNodes();

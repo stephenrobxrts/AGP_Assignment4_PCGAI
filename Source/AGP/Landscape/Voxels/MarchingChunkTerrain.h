@@ -49,7 +49,6 @@ public:
 	bool bInterpolate = true;
 
 
-
 	//Marching Cube specific
 	FastNoiseLite* Noise;
 	UPROPERTY(EditDefaultsOnly, Category="Marching Cubes")

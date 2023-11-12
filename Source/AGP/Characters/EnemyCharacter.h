@@ -8,6 +8,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "GameFramework/Character.h"
 #include "../Pathfinding/Subsystems/PathfindingSubsystem.h"
+#include "../Landscape/ProceduralCaveGen.h"
 #include "EnemyCharacter.generated.h"
 
 UENUM(BlueprintType) // Allows us to use this enum in blueprints.

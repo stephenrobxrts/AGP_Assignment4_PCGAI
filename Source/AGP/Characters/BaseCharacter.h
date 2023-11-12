@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AGP/Pickups/TorchPickup.h"
 #include "AGP/Pickups/WeaponPickup.h"
 #include "Components/HealthComponent.h"
 #include "Components/WeaponComponent.h"
@@ -29,6 +30,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasWeapon();
 
+
+	UFUNCTION(BlueprintCallable)
+	bool HasTorch();
+
+	void SetIsOverlappingPickup(bool bIsOverlapping);
+	TSubclassOf<APickupBase>* PickupActor;
+	
+	
 	/**
 	 * @brief Will either equip or un-equip a weapon on this player.
 	 * @param bEquipWeapon Whether to equip (true) or un-equip (false)
@@ -37,10 +46,11 @@ public:
 	 */
 	void EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity);
 
+	void EquipTorch(bool bEquipTorch, bool bIsLit);
+
+	void InteractWithSelf();
 
 
-
-	
 protected:
 	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
 	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
@@ -61,6 +71,7 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 
+	bool bIsOverlappingPickup;
 
 	/**
  * @brief Is automatically called by the EquipWeapon function and should be overriden in a blueprint derived
@@ -73,18 +84,48 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
 	void EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats = FWeaponStats(), const EWeaponRarity WeaponRarity = EWeaponRarity::Common);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
+
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void EquipTorchGraphical(bool bEquipTorch, bool bIsLit);
+	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
+	UFUNCTION(Server, Reliable)
+	void ServerEquipTorch(ATorchPickup* TorchPickup);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ToggleOwnTorch();
+	UFUNCTION(Server, Reliable)
+	void ServerInteractTorch(ATorchPickup* TorchPickup);
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteractSelf();
+	
+	
+	/*UFUNCTION(BlueprintImplementableEvent)
+	void InteractSelfGraphical(bool bIsLit);
+	void InteractSelfImplementation(bool bIsLit);
+	UFUNCTION(BlueprintImplementableEvent)
+	void MulticastInteractSelf(bool bIsLit);*/
+	
 
 
 
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
-
-
+	
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();
 	bool bIsReloading;
 	float TimeSinceReload;
+
+	bool bHasTorch = false;
+
+	bool Interact();
+
+	bool Pickup();
 
 public:
 	// Called every frame

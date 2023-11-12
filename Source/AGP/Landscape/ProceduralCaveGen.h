@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Voxels/VoxelUtils/FastNoiseLite.h" 
+#include "Voxels/VoxelUtils/FastNoiseLite.h"
 #include "../Pathfinding/NavigationNode.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerStart.h"
@@ -61,6 +61,8 @@ struct FTunnel : public FBoxBase
 public:
 	const FLevelBox* StartBox;
 	const FLevelBox* EndBox;
+	UPROPERTY(EditInstanceOnly)
+	ANavigationNode* TunnelNode = nullptr;
 	//UPROPERTY(EditInstanceOnly)
 	//ANavigationNode* TunnelNode = nullptr;
 };
@@ -113,7 +115,8 @@ struct FNoiseParams
 	float mPingPongStength = 2.0f;
 
 public:
-	void SetParams(ENoiseType _NoiseType, float _NoiseRatio, EFractalType _FractalType, int _mOctaves, float _mLacunarity, float _mGain, float _mWeightedStrength, float _mPingPongStength)
+	void SetParams(ENoiseType _NoiseType, float _NoiseRatio, EFractalType _FractalType, int _mOctaves,
+	               float _mLacunarity, float _mGain, float _mWeightedStrength, float _mPingPongStength)
 	{
 		this->NoiseType = _NoiseType;
 		this->NoiseRatio = _NoiseRatio;
@@ -146,6 +149,7 @@ protected:
 
 	//Box placement logic
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
+	TArray<FLevelBox> GenerateLadderPathBoxes();
 	void GenerateInterconnects();
 	void CreateBox(FLevelBox& Box);
 
@@ -191,7 +195,7 @@ protected:
 	float HeightDifference = 400.0f;
 
 	UPROPERTY(VisibleAnywhere)
-	FVector MinBoxSize = FVector(300.0f, 300.0f, 200.0f);
+	FVector MinBoxSize = FVector(300.0f, 300.0f, 400.0f);
 	UPROPERTY(EditAnywhere)
 	FVector MaxBoxSize = FVector(1000.0f, 1000.0f, 600.0f);
 	UPROPERTY(VisibleAnywhere)
@@ -285,8 +289,6 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ATorchPickup> TorchBP;
-
-
 
 public:
 	// Called every frame
