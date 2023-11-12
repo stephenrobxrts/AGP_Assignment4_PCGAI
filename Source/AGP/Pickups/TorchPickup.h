@@ -18,7 +18,7 @@ public:
 
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bIsLit = true;
 	void SetTorchLit(bool bLit);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -33,7 +33,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual void OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 							 UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
 							 const FHitResult& SweepResult) override;

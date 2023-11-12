@@ -255,6 +255,7 @@ bool ABaseCharacter::Pickup()
 	CollisionParams.AddIgnoredActor(GetOwner()); // Ignore the player
 	CollisionParams.AddIgnoredActors(GetOwner()->Children);
 
+
 	// Perform the line trace
 	bool bIsHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams);
 

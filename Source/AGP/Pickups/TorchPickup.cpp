@@ -3,6 +3,7 @@
 
 #include "TorchPickup.h"
 #include "AGP/Characters/PlayerCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -10,7 +11,8 @@ ATorchPickup::ATorchPickup()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	bReplicates = true;  // Enable replication for this actor
+	bAlwaysRelevant = true;  // Make sure it's always sent to clients
 
 }
 
@@ -28,7 +30,23 @@ void ATorchPickup::SetTorchLit(bool bLit)
 void ATorchPickup::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (bIsHeld)
+	{
+		//UELOG this actor's Collision Stats
+		UE_LOG(LogTemp, Warning, TEXT("TorchPickup: %s"), *this->GetName());
+		//Set collision to ignore all
+		
+	}
+
 	
+}
+
+void ATorchPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    
+	DOREPLIFETIME(ATorchPickup, bIsLit);
 }
 
 void ATorchPickup::OnPickedUp(ABaseCharacter* BaseCharacter)
