@@ -97,18 +97,20 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 
 void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 {
-
-		EquipTorchImplementation(bEquipTorch,  bIsLit);
-		MulticastEquipTorch(bEquipTorch, bIsLit);
-
+	EquipTorchImplementation(bEquipTorch, bIsLit);
+	MulticastEquipTorch(bEquipTorch, bIsLit);
 }
+
 
 void ABaseCharacter::InteractWithSelf()
 {
-	if (bHasTorch)
+	UE_LOG(LogTemp, Display, TEXT("Player is interacting with self: %s"), *GetName());
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		
+		ToggleOwnTorch();
+		bHasTorch = true;
 	}
+	ServerInteractSelf();
 }
 
 void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats,
@@ -120,7 +122,6 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 		WeaponComponent = NewObject<UWeaponComponent>(this);
 		WeaponComponent->RegisterComponent();
 		WeaponComponent->ApplyWeaponStats(WeaponStats);
-		
 	}
 	//Changing Weapon - change stats and material 
 	else if (bEquipWeapon && HasWeapon())
@@ -148,7 +149,7 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 
 void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
 {
-	EquipTorchGraphical(bEquipTorch, bIsLit);
+	//EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
 void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
@@ -156,6 +157,7 @@ void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
 	if (TorchPickup)
 	{
 		TorchPickup->AttemptPickUp(this);
+		bHasTorch = true;
 	}
 }
 
@@ -174,6 +176,27 @@ void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool b
 /*void ABaseCharacter::InteractSelfImplementation(bool bIsLit)
 {
 }*/
+
+void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
+{
+	TorchPickup->OnInteract();
+
+}
+
+void ABaseCharacter::ServerInteractSelf_Implementation()
+{
+	UE_LOG(LogTemp, Display, TEXT("ServerAck interacting with self: %s"), *GetName());
+	if (bHasTorch)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
+		ToggleOwnTorch();
+	}
+}
+
+void ABaseCharacter::MulticastToggleTorch_Implementation(bool bEquipTorch, bool bIsLit)
+{
+	ToggleTorchGraphical();
+}
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
@@ -214,7 +237,7 @@ bool ABaseCharacter::Interact()
 	FRotator CameraRotation;
 	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
-	
+
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
@@ -236,14 +259,12 @@ bool ABaseCharacter::Interact()
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with torch: %s"), *GetName());
 			// Call a method on the pickup object to handle being picked up
-			PickupObject->OnInteract();
-			//ServerEquipTorch(PickupObject);
+			ServerInteractTorch(PickupObject);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
-
 
 
 bool ABaseCharacter::Pickup()
@@ -252,7 +273,7 @@ bool ABaseCharacter::Pickup()
 	FRotator CameraRotation;
 	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
-	
+
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
@@ -298,6 +319,4 @@ void ABaseCharacter::Tick(float DeltaTime)
 		}
 		TimeSinceReload += DeltaTime;
 	}
-
-
 }

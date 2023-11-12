@@ -65,13 +65,15 @@ void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
 
 void ATorchPickup::ServerAttemptPickup_Implementation(ABaseCharacter* BaseCharacter)
 {
+	if (bIsHeld)
+	{
+		return;
+	}
 	OnPickedUp(BaseCharacter);
-	
 }
 
 bool ATorchPickup::ServerAttemptPickup_Validate(ABaseCharacter* BaseCharacter)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Serverside TorchPickup: %s"), *BaseCharacter->GetActorLabel());
 	return true;
 }
 void ATorchPickup::OnPickedUp(ABaseCharacter* BaseCharacter)

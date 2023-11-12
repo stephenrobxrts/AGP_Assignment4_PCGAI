@@ -50,9 +50,7 @@ public:
 
 	void InteractWithSelf();
 
-	bool bEquipTorchAction = false;
 
-	
 protected:
 	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
 	// in some enum instead of just a boolean. Or alternatively, you could attach what is called a Child Actor Component
@@ -97,12 +95,22 @@ protected:
 	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
 	UFUNCTION(Server, Reliable)
 	void ServerEquipTorch(ATorchPickup* TorchPickup);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ToggleOwnTorch();
+	UFUNCTION(Server, Reliable)
+	void ServerInteractTorch(ATorchPickup* TorchPickup);
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteractSelf();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastToggleTorch(bool bEquipTorch, bool bIsLit);
+	void ToggleTorchGraphical();
+
 	
-	UFUNCTION(BlueprintImplementableEvent)
-	void InteractGraphical(bool bIsLit);
-	void InteractImplementation(bool bIsLit);
-	UFUNCTION(BlueprintImplementableEvent)
-	void MulticastInteract(bool bIsLit);
+
+	
 
 	
 	/*UFUNCTION(BlueprintImplementableEvent)

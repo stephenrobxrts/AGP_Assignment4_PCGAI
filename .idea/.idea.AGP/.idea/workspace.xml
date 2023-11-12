@@ -45,6 +45,8 @@
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/AGP/Pickups/ArtefactPickup.cpp" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -146,7 +148,7 @@
       <option name="presentableId" value="Default" />
       <updated>1699697110686</updated>
       <workItem from="1699697112287" duration="1584000" />
-      <workItem from="1699738532538" duration="27982000" />
+      <workItem from="1699738532538" duration="28993000" />
     </task>
     <servers />
   </component>
