@@ -66,7 +66,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		//Spawn Meshes
 		GenerateMesh();
 		bShouldRegenerate = false;
-		
+
 		AttachTorchToWalls();
 	}
 
@@ -129,7 +129,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 		FQuat::Identity,
 		TArray<ANavigationNode*>(),
 		EBoxType::Start
-		
+
 	};
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
@@ -261,7 +261,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 		FQuat::Identity,
 		TArray<ANavigationNode*>(),
 		EBoxType::Start
-		
+
 	};
 	boxes.Add(StartBox);
 	CreateBox(StartBox);
@@ -292,15 +292,15 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 	// between leftmost path Box1 and second path Box1 is equal to the average tunnel length
 	//So leftmost box will be NumPaths/2 * AvgTunnelLength away from the centerline
 	//And leftmost box will be avgTunnelLength away from StartBox
-	float Angle = FMath::Atan2((NumPaths - 1.0f ) / 2.0f * AvgTunnelLength, AvgTunnelLength);
-	float LeftmostPathY = -((NumPaths - 1.0f)/2.0f * AvgTunnelLength);
+	float Angle = FMath::Atan2((NumPaths - 1.0f) / 2.0f * AvgTunnelLength, AvgTunnelLength);
+	float LeftmostPathY = -((NumPaths - 1.0f) / 2.0f * AvgTunnelLength);
 
-	
+
 	for (int i = 0; i < NumPaths; i++)
 	{
 		FInnerArray Path;
 		Paths.Add(Path);
-		
+
 		float PathY = LeftmostPathY + i * AvgTunnelLength;
 		FVector PathStart = Start + FVector(0, PathY, 0);
 		FVector PathEnd = End + FVector(0, PathY, 0);
@@ -309,13 +309,13 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 		for (int j = 0; j < NumBoxesPerPath; j++)
 		{
 			FLevelBox Box;
-			Box.Position = PathStart + PathDirection * AvgTunnelLength * (j+1);
+			Box.Position = PathStart + PathDirection * AvgTunnelLength * (j + 1);
 			Box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
 			                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
 			                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
 			Box.Type = EBoxType::Normal;
 			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
-			
+
 			boxes.Add(Box);
 			CreateBox(Box);
 
@@ -362,8 +362,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 	}*/
 
 	return boxes;
-	
-	
 }
 
 /**
@@ -372,7 +370,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 void AProceduralCaveGen::GenerateMesh()
 {
 	//For loop for X/Y/Z chunks within levelSize
-	int ChunkAmounts = (LevelSize + 0.2f*LevelSize) / ChunkSize;
+	int ChunkAmounts = (LevelSize + 0.2f * LevelSize) / ChunkSize;
 
 	int StartChunkXY = -ChunkAmounts / 2;
 	int StartChunkZ = -ChunkAmounts / 2;
@@ -383,9 +381,10 @@ void AProceduralCaveGen::GenerateMesh()
 		StartChunkZ = 0;
 	}
 	//OffsetChunkStart = FVector(-ChunkAmounts, -ChunkAmounts, -ChunkAmounts) * ChunkSize;
-	
-	
-	NoiseParams.SetParams(NoiseType, NoiseRatio, FractalType, mOctaves, mLacunarity, mGain, mWeightedStrength, mPingPongStength);
+
+
+	NoiseParams.SetParams(NoiseType, NoiseRatio, FractalType, mOctaves, mLacunarity, mGain, mWeightedStrength,
+	                      mPingPongStength);
 
 	//Spawn chunks
 	for (int x = StartChunkXY; x <= ChunkAmounts; x++)
@@ -448,8 +447,6 @@ void AProceduralCaveGen::GenerateMesh()
 }
 
 
-
-
 /**
  * @brief Creates tunnels between boxes with the same i \n
  * Uses the Paths and Connectedness (0->1) to determine how many tunnels to create \n
@@ -470,7 +467,7 @@ void AProceduralCaveGen::GenerateInterconnects()
 	for (int i = 0; i < Paths.Num() - 1; i++)
 	{
 		InterconnectIndices.Add(TArray<int>());
-		for (int j = 0 ; j < Paths[0].Path.Num() ; j++)
+		for (int j = 0; j < Paths[0].Path.Num(); j++)
 		{
 			InterconnectIndices[i].Add(j);
 		}
@@ -480,18 +477,16 @@ void AProceduralCaveGen::GenerateInterconnects()
 	//Create tunnels between boxes on different paths with the same indices
 	int NumInterconnects = 0;
 	int AttemptNum = 0;
-	while (AttemptNum < Paths[0].Path.Num()  && NumInterconnects < MaxInterconnects)
+	while (AttemptNum < Paths[0].Path.Num() && NumInterconnects < MaxInterconnects)
 	{
 		//For each box on the path, interconnect based on the shuffled indices
-		for (int i = 0 ; i < Paths.Num() - 1 ; i++)
+		for (int i = 0; i < Paths.Num() - 1; i++)
 		{
 			FLevelBox& BoxA = Paths[i].Path[InterconnectIndices[i][AttemptNum]];
-			FLevelBox& BoxB = Paths[i+1].Path[InterconnectIndices[i][AttemptNum]];
-			
+			FLevelBox& BoxB = Paths[i + 1].Path[InterconnectIndices[i][AttemptNum]];
+
 			NumInterconnects++;
 			CreateTunnel(BoxA, BoxB);
-
-			
 		}
 		AttemptNum++;
 	}
@@ -511,30 +506,30 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		Light->SetBrightness(400.0f);
 		Light->PointLightComponent->bUseTemperature = 1.0;
 		Light->PointLightComponent->SetTemperature(2500);
-		Light->PointLightComponent->SetCastVolumetricShadow(true);*/ 
+		Light->PointLightComponent->SetCastVolumetricShadow(true);*/
 
 		// Log box type
-		FVector SpawnPos = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - 0.5* Box.Size.Z + 100.0f);
+		FVector SpawnPos = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - 0.5 * Box.Size.Z + 100.0f);
 
 		int rngDirection = FMath::RandRange(0, 3);
 		FVector SpawnOffset = FVector(0.0f, 0.0f, 0.0f);
 		//switch case on RNG direction to spawn torch +X, +Y, -x, -Y
 		switch (rngDirection)
 		{
-			case 0:
-				SpawnOffset.X += Box.Size.X / 2 - 30.0f;
-				break;
-			case 1: 
-				SpawnOffset.Y += Box.Size.Y / 2 - 30.0f;
-				break;
-			case 2:
-				SpawnOffset.X -= Box.Size.X / 2 - 30.0f;
-				break;
-			case 3:
-				SpawnOffset.Y -= Box.Size.Y / 2 - 30.0f;
-				break;
-			default:
-				break;
+		case 0:
+			SpawnOffset.X += Box.Size.X / 2 - 30.0f;
+			break;
+		case 1:
+			SpawnOffset.Y += Box.Size.Y / 2 - 30.0f;
+			break;
+		case 2:
+			SpawnOffset.X -= Box.Size.X / 2 - 30.0f;
+			break;
+		case 3:
+			SpawnOffset.Y -= Box.Size.Y / 2 - 30.0f;
+			break;
+		default:
+			break;
 		}
 		SpawnPos += SpawnOffset;
 
@@ -545,16 +540,8 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		//Now that it points towards the center of the room, tilt it 45degrees in that direction
 		SpawnRot.Pitch = -45.0f;
 
-
-		
-		
-		
 		Box.Torch = World->SpawnActor<ATorchPickup>(TorchBP, SpawnPos, SpawnRot);
 
-		
-
-
-		
 		//Set torch lit based on random boolean (50%)
 		if (Box.Type == EBoxType::Normal)
 		{
@@ -565,19 +552,19 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 				bIsLit = false;
 			}
 			Box.Torch->SetTorchLit(bIsLit);
-			
+
 			UE_LOG(LogTemp, Warning, TEXT("Torch Lit is %s"), Box.Torch->bIsLit ? TEXT("True") : TEXT("False"));
 		}
 		else
 		{
 			Box.Torch->SetTorchLit(true);
 		}
-	
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
 		ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
 	{
 		Box.RoomNode = RoomNode;
+		RoomNode->IsWalkable = false;
 		RoomNodes.Add(Box.RoomNode);
 		RoomNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
@@ -594,11 +581,11 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 	//Create a rect that has the same size as the box x/y and is rotated to match
 	FVector2D RectSize = FVector2D(Box.Size.X - ShrinkAmount, Box.Size.Y - ShrinkAmount);
 	FVector2d RectSizeInNodes = FVector2d(RectSize.X / NodeDensity, RectSize.Y / NodeDensity);
-	
+
 
 	//Place the rect centered on the box
-	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z/2.0f + ShrinkAmount);
-	FVector size3d = FVector(RectSize.X/2.0f, RectSize.Y/2.0f, 5.0f);
+	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z / 2.0f + ShrinkAmount);
+	FVector size3d = FVector(RectSize.X / 2.0f, RectSize.Y / 2.0f, 5.0f);
 
 	//DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
 
@@ -606,32 +593,32 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 	int RectX = StaticCast<int>(RectSizeInNodes.X);
 
 	//Add NavNodes
-	for (int Y = 0 ; Y < RectY ; Y++)
+	for (int Y = 0; Y < RectY; Y++)
 	{
-		for (int X = 0 ; X < RectX; X++)
+		for (int X = 0; X < RectX; X++)
 		{
 			// Calculate local position within the rectangle
-			FVector NodePositionLocal = FVector(X * NodeDensity, Y * NodeDensity, 0.0f) - FVector(RectSize.X / 2.0f, RectSize.Y / 2.0f, 0.0f);
-        
+			FVector NodePositionLocal = FVector(X * NodeDensity, Y * NodeDensity, 0.0f) - FVector(
+				RectSize.X / 2.0f, RectSize.Y / 2.0f, 0.0f);
+
 			// Convert local position to world space, taking into account the rotation and the true center of the box
 			FVector NodePositionWorld = Box.Rotation.RotateVector(NodePositionLocal) + RectCenter;
-			
+
 
 			//Spawn a NavNode at that position
 			if (ANavigationNode* NavNode = GetWorld()->SpawnActor<ANavigationNode>(
-			ANavigationNode::StaticClass(), NodePositionWorld, FRotator::ZeroRotator))
+				ANavigationNode::StaticClass(), NodePositionWorld, FRotator::ZeroRotator))
 			{
 				Box.WalkNodes.Add(NavNode);
 				WalkNodes.Add(NavNode);
 				NavNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 			}
-			
 		}
 	}
-	
-	for (int Y = 0 ; Y < RectY - 1  ; Y++)
+
+	for (int Y = 0; Y < RectY - 1; Y++)
 	{
-		for (int X = 0 ; X < RectX - 1 ; X++)
+		for (int X = 0; X < RectX - 1; X++)
 		{
 			// Define the indices of the four vertices of the current quad
 			int32 BottomRight = X + Y * RectX;
@@ -660,7 +647,6 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 		}
 	}
 }
-
 
 
 /**
@@ -704,12 +690,12 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 
 	FVector Direction = (TargetBox.Position - StartBox.Position).GetSafeNormal();
 	FVector StartOffset = CalculateBoxOffset(StartBox, Direction);
-	FVector EndOffset =  CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
+	FVector EndOffset = CalculateBoxOffset(TargetBox, -Direction); // Notice the direction is negated
 
 	FVector Start = StartBox.Position + StartOffset;
 	FVector End = TargetBox.Position + EndOffset;
 
-	
+
 	//Update direction now that we offset the start/end points
 	Direction = (End - Start).GetSafeNormal();
 
@@ -729,56 +715,35 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 
 	MeshRoomNodes(StartNode, StartBox);
 	MeshRoomNodes(EndNode, TargetBox);
-	
+
 	InsertNode(EndNode, Tunnel);
 	InsertNode(StartNode, Tunnel);
-	
 
-	//Connect Start/End Nodes to the closest node in the room
-	/*ANavigationNode* ClosestNode = nullptr;
-	float ClosestDistance = MAX_FLT;
-	for (ANavigationNode* Node : StartBox.WalkNodes)
+	if (ANavigationNode* TunnelNode = GetWorld()->SpawnActor<ANavigationNode>(
+		ANavigationNode::StaticClass(), Tunnel.Position, FRotator::ZeroRotator))
 	{
-		float Distance = FVector::Distance(Node->GetActorLocation(), Start);
-		if (Distance < ClosestDistance)
-		{
-			ClosestDistance = Distance;
-			ClosestNode = Node;
-		}
-		StartNode->SetConnectedNodes(Node);
-		Node->SetConnectedNodes(StartNode);
-	}
-	ClosestNode = nullptr;
-	ClosestDistance = MAX_FLT;
-	for (ANavigationNode* Node : TargetBox.WalkNodes)
-	{
-		float Distance = FVector::Distance(Node->GetActorLocation(), End);
-		if (Distance < ClosestDistance)
-		{
-			ClosestDistance = Distance;
-			ClosestNode = Node;
-		}
-		StartNode->SetConnectedNodes(Node);
-		Node->SetConnectedNodes(StartNode);
+		Tunnel.TunnelNode = TunnelNode;
+		TunnelNode->IsWalkable = false;
+		TunnelNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
 
-	Tunnel.WalkNodes.Add(StartNode);
-	Tunnel.WalkNodes.Add(EndNode);*/
-
-
-	//CreateNavNode connections reciprocally
-	//Add both start node and end node to an array
-	//TArray<ANavigationNode*> Nodes = {StartBox.RoomNode, TargetBox.RoomNode};
-
-	//Unrolled loop to connect both nodes to each other
-	/*if (!StartBox.RoomNode->GetConnectedNodes().Contains(TargetBox.RoomNode))
+	//Unrolled loop to connect both room nodes to tunnel node
+	if (!StartBox.RoomNode->GetConnectedNodes().Contains(Tunnel.TunnelNode))
 	{
-		StartBox.RoomNode->SetConnectedNodes(TargetBox.RoomNode);
+		StartBox.RoomNode->SetConnectedNodes(Tunnel.TunnelNode);
 	}
-	if (!TargetBox.RoomNode->GetConnectedNodes().Contains(StartBox.RoomNode))
+	if (!TargetBox.RoomNode->GetConnectedNodes().Contains(Tunnel.TunnelNode))
 	{
-		TargetBox.RoomNode->SetConnectedNodes(StartBox.RoomNode);
-	}*/
+		TargetBox.RoomNode->SetConnectedNodes(Tunnel.TunnelNode);
+	}
+	if (!Tunnel.TunnelNode->GetConnectedNodes().Contains(StartBox.RoomNode))
+	{
+		Tunnel.TunnelNode->SetConnectedNodes(StartBox.RoomNode);
+	}
+	if (!Tunnel.TunnelNode->GetConnectedNodes().Contains(TargetBox.RoomNode))
+	{
+		Tunnel.TunnelNode->SetConnectedNodes(TargetBox.RoomNode);
+	}
 }
 
 void AProceduralCaveGen::InsertNode(ANavigationNode* Node, FBoxBase& Box)
@@ -977,7 +942,8 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 			APlayerStart::StaticClass(), Location, FRotator(0, 0, 0), SpawnParams);
 
 		APlayerStart* NewPlayer2Start = GetWorld()->SpawnActor<APlayerStart>(
-		APlayerStart::StaticClass(), FVector(Location.X, Location.Y + 100.0f, Location.Z), FRotator(0, 0, 0), SpawnParams);
+			APlayerStart::StaticClass(), FVector(Location.X, Location.Y + 100.0f, Location.Z), FRotator(0, 0, 0),
+			SpawnParams);
 
 		if (NewPlayerStart)
 		{
@@ -997,14 +963,14 @@ void AProceduralCaveGen::AttachTorchToWalls()
 
 			//Fire direction to be random direction in XY plane
 			const FVector FireDirection = (FVector(FMath::RandRange(-1.0f, 1.0f), FMath::RandRange(-1.0f, 1.0f),
-									   0.0f)).GetSafeNormal();
+			                                       0.0f)).GetSafeNormal();
 
 			//End location is max of box size X/Y/Z away in direction
 			const FVector EndLocation = StartLocation + (FireDirection * Box.Size.GetMax());
 
 			//Log trace length
 			UE_LOG(LogTemp, Warning, TEXT("Trace Length is %f"), Box.Size.GetMax());
-		
+
 			FCollisionQueryParams QueryParams;
 			//Log trace and owner
 			//UE_LOG(LogTemp, Warning, TEXT("Tracing, Owner is %s"), *GetOwner()->GetName());

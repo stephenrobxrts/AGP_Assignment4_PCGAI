@@ -103,15 +103,7 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerInteractSelf();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastToggleTorch(bool bEquipTorch, bool bIsLit);
-	void ToggleTorchGraphical();
-
 	
-
-	
-
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);

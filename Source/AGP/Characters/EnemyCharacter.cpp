@@ -40,6 +40,7 @@ void AEnemyCharacter::BeginPlay()
 	{
 		PawnSensingComponent->OnSeePawn.AddDynamic(this, &AEnemyCharacter::OnSensedPawn);
 	}
+	
 }
 
 void AEnemyCharacter::TickPatrol()

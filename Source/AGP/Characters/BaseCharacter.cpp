@@ -173,9 +173,6 @@ void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool b
 	EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
-/*void ABaseCharacter::InteractSelfImplementation(bool bIsLit)
-{
-}*/
 
 void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
 {
@@ -185,18 +182,14 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 
 void ABaseCharacter::ServerInteractSelf_Implementation()
 {
-	UE_LOG(LogTemp, Display, TEXT("ServerAck interacting with self: %s"), *GetName());
+	//UE_LOG(LogTemp, Display, TEXT("ServerAck interacting with self: %s"), *GetName());
 	if (bHasTorch)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
+		//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
 		ToggleOwnTorch();
 	}
 }
 
-void ABaseCharacter::MulticastToggleTorch_Implementation(bool bEquipTorch, bool bIsLit)
-{
-	ToggleTorchGraphical();
-}
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {

@@ -161,7 +161,7 @@ void AMarchingChunkTerrain::GenerateHeightMap()
 				                                 (VoxelDiameter * z + ChunkPosition.Z));
 				NoiseVal *= NoiseRatio * InverseMultiplier;
 				float NoiseDifference = VoxelSDF - NoiseVal;
-				Voxels[GetVoxelIndex(x, y, z)] = VoxelSDF + NoiseRatio*NoiseDifference;
+				Voxels[GetVoxelIndex(x, y, z)] = VoxelSDF + NoiseRatio * NoiseDifference;
 			}
 		}
 	}

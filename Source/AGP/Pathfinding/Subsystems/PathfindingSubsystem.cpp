@@ -51,9 +51,9 @@ TArray<FVector> UPathfindingSubsystem::GetWaypointPositions()
 {
 	//Return an array of all the nodes' locations
 	TArray<FVector> WaypointPositions;
-	for (int i = 0; i < Nodes.Num(); i++)
+	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
-		WaypointPositions.Add(Nodes[i]->GetActorLocation());
+		WaypointPositions.Add(WalkableNodes[i]->GetActorLocation());
 	}
 	return WaypointPositions;
 }
@@ -61,29 +61,29 @@ TArray<FVector> UPathfindingSubsystem::GetWaypointPositions()
 void UPathfindingSubsystem::PopulateNodes()
 {
 	//empty the node array
-	Nodes.Empty();
+	WalkableNodes.Empty();
 
 	//Find all ANavigationNode actors add them to the array
 	for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)
 	{
-		Nodes.Add(*It);
+		(*It)->IsWalkable ? WalkableNodes.Add(*It) : RoomNodes.Add(*It);
 	}
 
 	//debug text for each node
-	for (int i = 0; i < Nodes.Num(); i++)
+	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
 		//Debug - show node locations
-		UE_LOG(LogTemp, Warning, TEXT("Node: %s"), *Nodes[i]->GetActorLocation().ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Node: %s"), *WalkableNodes[i]->GetActorLocation().ToString());
 		///Debug
 	}
 }
 
 ANavigationNode* UPathfindingSubsystem::GetRandomNode()
 {
-	if (Nodes.Num() > 0)
+	if (WalkableNodes.Num() > 0)
 	{
-		int RandomIndex = FMath::RandRange(0, Nodes.Num() - 1);
-		return Nodes[RandomIndex];
+		int RandomIndex = FMath::RandRange(0, WalkableNodes.Num() - 1);
+		return WalkableNodes[RandomIndex];
 	}
 	return nullptr;
 }
@@ -93,14 +93,14 @@ ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLoc
 	//Loop through nodes, get node with minimum distance from target
 	float MinDistance = UE_MAX_FLT;
 	ANavigationNode* NearestNode = nullptr;
-	for (int i = 0; i < Nodes.Num(); i++)
+	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
-		FVector NodeLocation = Nodes[i]->GetActorLocation();
+		FVector NodeLocation = WalkableNodes[i]->GetActorLocation();
 		float Distance = FVector::Dist(TargetLocation, NodeLocation);
 		if (Distance < MinDistance)
 		{
 			MinDistance = Distance;
-			NearestNode = Nodes[i];
+			NearestNode = WalkableNodes[i];
 		}
 	}
 	return NearestNode;
@@ -111,13 +111,13 @@ ANavigationNode* UPathfindingSubsystem::FindFurthestNode(const FVector& TargetLo
 	//Loop through nodes, get node with minimum distance from target
 	float MaxDistance = 0.0f;
 	ANavigationNode* FurthestNode = nullptr;
-	for (int i = 0; i < Nodes.Num(); i++)
+	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
-		float Distance = FVector::Dist(TargetLocation, Nodes[i]->GetActorLocation());
+		float Distance = FVector::Dist(TargetLocation, WalkableNodes[i]->GetActorLocation());
 		if (Distance > MaxDistance)
 		{
 			MaxDistance = Distance;
-			FurthestNode = Nodes[i];
+			FurthestNode = WalkableNodes[i];
 		}
 	}
 	return FurthestNode;
@@ -131,20 +131,20 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 
 	TArray<FVector> Path;
 	// Set all Gscores to infinity and the HScores to correct heuristic
-	for (int i = 0; i < Nodes.Num(); i++)
+	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
-		Nodes[i]->GScore = UE_MAX_FLT - 1;
-		Nodes[i]->HScore = FVector::Dist(Nodes[i]->GetActorLocation(), EndNode->GetActorLocation());
-		Nodes[i]->FScore = Nodes[i]->GScore + Nodes[i]->HScore;
+		WalkableNodes[i]->GScore = UE_MAX_FLT - 1;
+		WalkableNodes[i]->HScore = FVector::Dist(WalkableNodes[i]->GetActorLocation(), EndNode->GetActorLocation());
+		WalkableNodes[i]->FScore = WalkableNodes[i]->GScore + WalkableNodes[i]->HScore;
 	}
 
 	//Set the startNode GScore to 0
-	for (int i = 0; i < Nodes.Num(); i++)
+	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
-		if (Nodes[i] == StartNode)
+		if (WalkableNodes[i] == StartNode)
 		{
-			Nodes[i]->GScore = 0;
-			Nodes[i]->FScore = Nodes[i]->GScore + Nodes[i]->HScore;
+			WalkableNodes[i]->GScore = 0;
+			WalkableNodes[i]->FScore = WalkableNodes[i]->GScore + WalkableNodes[i]->HScore;
 		}
 	}
 

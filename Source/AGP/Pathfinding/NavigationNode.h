@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "NavigationNode.generated.h"
 
+
+
 UCLASS()
 class AGP_API ANavigationNode : public AActor
 {
@@ -28,9 +30,10 @@ public:
 	float FScore = 0;
 	UPROPERTY()
 	ANavigationNode* ParentNode;
-
-
-
+	
+	UPROPERTY()
+	bool IsWalkable = true;
+	
 	void DebugSetVisibility(const bool bNewVisibility);
 
 	TArray<ANavigationNode*> GetConnectedNodes();
