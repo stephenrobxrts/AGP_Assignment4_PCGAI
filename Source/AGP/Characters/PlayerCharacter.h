@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
+#include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -38,6 +39,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UInputAction* ReloadAction;
 	UPROPERTY(EditDefaultsOnly)
+	UInputAction* InteractAction;
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* PickupAction;
+	
+	UPROPERTY(EditDefaultsOnly)
 	UInputMappingContext* InputMappingContext;
 
 
@@ -53,4 +59,7 @@ private:
 	void Look(const FInputActionValue& Value);
 	void FireWeapon(const FInputActionValue& Value);
 	void ReloadWeapon(const FInputActionValue& Value);
+
+	void InteractObj(const FInputActionValue& Value);
+	void PickupObj(const FInputActionValue& Value);
 };

@@ -20,10 +20,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsLit = true;
 	void SetTorchLit(bool bLit);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsHeld = false;
+
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+							 UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
+							 const FHitResult& SweepResult) override;
 
 public:
 	// Called every frame

@@ -68,6 +68,11 @@ bool ABaseCharacter::HasWeapon()
 	return false;
 }
 
+bool ABaseCharacter::HasTorch()
+{
+	return bHasTorch;
+}
+
 void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity)
 {
 	if (GetLocalRole() == ROLE_Authority)
@@ -77,8 +82,17 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 	}
 }
 
+void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		EquipTorchImplementation(bEquipTorch,  bIsLit);
+		MulticastEquipTorch(bEquipTorch, bIsLit);
+	}
+}
+
 void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats,
-	const EWeaponRarity WeaponRarity)
+                                               const EWeaponRarity WeaponRarity)
 {
 	//Picking up Weapon - create weapon component and apply stats, materials
 	if (bEquipWeapon && !HasWeapon())
@@ -112,12 +126,21 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 	}
 }
 
+void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
+{
+	EquipTorchGraphical(bEquipTorch, bIsLit);
+}
 
 
 void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
 {
 	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
 	//EquipWeaponImplementation(bEquipWeapon, WeaponStats, WeaponRarity);
+}
+
+void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
+{
+	EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
@@ -151,6 +174,16 @@ bool ABaseCharacter::Reload()
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+bool ABaseCharacter::Interact()
+{
+	return false;
+}
+
+bool ABaseCharacter::Pickup()
+{
+	return true;
 }
 
 // Called every frame

@@ -395,7 +395,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	}
 
 	//// DEBUG LOGS ////
-	UE_LOG(LogTemp, Display, TEXT("Enemy State is currently: %s"), *UEnum::GetValueAsString(CurrentState));
+	/*UE_LOG(LogTemp, Display, TEXT("Enemy State is currently: %s"), *UEnum::GetValueAsString(CurrentState));
 	UE_LOG(LogTemp, Display, TEXT("Player and enemy node distance:        %f"), PathfindingSubsystem->GetPathLength(GetActorLocation(), Player->GetActorLocation()))
 	UE_LOG(LogTemp, Display, TEXT("Enemy to end room node distance:       %f"), PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation()))
 	UE_LOG(LogTemp, Display, TEXT("Player to end room node distance:      %f"), PathfindingSubsystem->GetPathLength(Player->GetActorLocation(), EndNode->GetActorLocation()))
@@ -406,7 +406,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 	else
 	{
 		UE_LOG(LogTemp, Display, TEXT("Player is not moving"));
-	}
+	}*/
 }
 
 void AEnemyCharacter::MoveAlongPath()

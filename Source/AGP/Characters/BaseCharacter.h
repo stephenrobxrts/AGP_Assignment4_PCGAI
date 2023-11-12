@@ -29,6 +29,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasWeapon();
 
+
+	UFUNCTION(BlueprintCallable)
+	bool HasTorch();
+	
 	/**
 	 * @brief Will either equip or un-equip a weapon on this player.
 	 * @param bEquipWeapon Whether to equip (true) or un-equip (false)
@@ -37,8 +41,9 @@ public:
 	 */
 	void EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity);
 
+	void EquipTorch(bool bEquipTorch, bool bIsLit);
 
-
+	bool bEquipTorchAction = false;
 
 	
 protected:
@@ -74,17 +79,29 @@ protected:
 	void EquipWeaponGraphical(bool bEquipWeapon, EWeaponRarity WeaponRarity);
 	void EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats = FWeaponStats(), const EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void EquipTorchGraphical(bool bEquipTorch, bool bIsLit);
+	
+	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
 
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
 
+
+	
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();
 	bool bIsReloading;
 	float TimeSinceReload;
+
+	bool bHasTorch = false;
+
+	bool Interact();
+	bool Pickup();
 
 public:
 	// Called every frame
