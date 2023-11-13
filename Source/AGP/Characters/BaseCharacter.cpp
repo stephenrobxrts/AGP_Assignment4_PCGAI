@@ -201,6 +201,9 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 	//Toggle torch pickup is lit
 	if (TorchPickup)
 	{
+		bool IsHeld = TorchPickup->bIsHeld;
+		//Log whether the torch is held
+		UE_LOG(LogTemp, Display, TEXT("Torch is held: %s"), IsHeld ? TEXT("True") : TEXT("False"));
 		TorchPickup->SetTorchLit(!TorchPickup->bIsLit);
 	}
 }

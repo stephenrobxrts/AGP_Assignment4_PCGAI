@@ -136,7 +136,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	CreateBox(StartBox);
 
 	//Log Start box position and size
-	UE_LOG(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
+	//(LogTemp, Warning, TEXT("Start Box Position is %s"), *StartBox.Position.ToString());
 
 	//Optional entrance sunlight - if DirectionalLight Present Get Direction of sunlight. Point box towards sun
 	FVector SunDirection = FVector::ZeroVector;
@@ -558,7 +558,7 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 			}
 			Box.Torch->SetTorchLit(bIsLit);
 
-			UE_LOG(LogTemp, Warning, TEXT("Torch Lit is %s"), Box.Torch->bIsLit ? TEXT("True") : TEXT("False"));
+			//UE_LOG(LogTemp, Warning, TEXT("Torch Lit is %s"), Box.Torch->bIsLit ? TEXT("True") : TEXT("False"));
 		}
 		// If start room or end room set torch lit and spawn artefacts temp
 		else
@@ -999,7 +999,7 @@ void AProceduralCaveGen::AttachTorchToWalls()
 			const FVector EndLocation = StartLocation + (FireDirection * Box.Size.GetMax());
 
 			//Log trace length
-			UE_LOG(LogTemp, Warning, TEXT("Trace Length is %f"), Box.Size.GetMax());
+			//UE_LOG(LogTemp, Warning, TEXT("Trace Length is %f"), Box.Size.GetMax());
 
 			FCollisionQueryParams QueryParams;
 			//Log trace and owner
