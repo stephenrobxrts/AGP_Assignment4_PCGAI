@@ -21,8 +21,14 @@ public:
 
 	void AttemptPickUp(ABaseCharacter* BaseCharacter);
 
+	//Int between 1 and 4 for ArtefactID
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	int ArtefactID = 1;
+
 	int GetArtefactID();
 	void SetArtefactID(int ID);
+
+	void DestroyArtefact();
 
 protected:
 
@@ -31,11 +37,11 @@ protected:
 						 const FHitResult& SweepResult) override;
 
 
+	UFUNCTION(Server, Reliable)
+	void ServerDestroyArtefact(AArtefactPickup* ArtefactPickup);
+	
 	void OnPickedUp(ABaseCharacter* BaseCharacter);
 
-	//Int between 1 and 4 for ArtefactID
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	int ArtefactID = 1;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	

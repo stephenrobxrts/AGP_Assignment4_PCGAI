@@ -323,7 +323,6 @@ bool ABaseCharacter::Pickup()
 			UE_LOG(LogTemp, Display, TEXT("Player is picking up artefact: %s"), *this->GetActorLabel());
 			// Call a method on the pickup object to handle being picked up
 			ServerPickupArtefact(ArtefactPickup);
-			
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);

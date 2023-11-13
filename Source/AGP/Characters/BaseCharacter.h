@@ -109,8 +109,6 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
-
-
 	
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
