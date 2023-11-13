@@ -53,10 +53,10 @@ void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
 	{
 		OnPickedUp(BaseCharacter);
 	}
-	else
+	/*else
 	{
 		ServerAttemptPickup(BaseCharacter);
-	}
+	}*/
 
 	/*UE_LOG(LogTemp, Warning, TEXT("TorchPickup: %s"), *BaseCharacter->GetActorLabel());
 	BaseCharacter->EquipTorch(true, bIsLit);*/
