@@ -95,11 +95,6 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 	}
 }
 
-void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
-{
-	EquipTorchImplementation(bEquipTorch, bIsLit);
-	MulticastEquipTorch(bEquipTorch, bIsLit);
-}
 
 
 void ABaseCharacter::InteractWithSelf()
@@ -147,6 +142,19 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 	}
 }
 
+void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
+{
+	//EquipTorchImplementation(bEquipTorch, bIsLit);
+	//if locally controlled
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		//EquipTorchGraphical(bEquipTorch, bIsLit);
+		MulticastEquipTorch(bEquipTorch, bIsLit);
+	}
+	
+}
+
+
 void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
 {
 	//EquipTorchGraphical(bEquipTorch, bIsLit);
@@ -164,13 +172,20 @@ void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
 
 void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
 {
+
+
 	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
+
+	
 	//EquipWeaponImplementation(bEquipWeapon, WeaponStats, WeaponRarity);
 }
 
 void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
 {
-	EquipTorchGraphical(bEquipTorch, bIsLit);
+	if (GetLocalRole() != ROLE_Authority)
+	{
+		EquipTorchGraphical(bEquipTorch, bIsLit);
+	}
 }
 
 
