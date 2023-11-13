@@ -97,8 +97,36 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 
 void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 {
-	EquipTorchImplementation(bEquipTorch, bIsLit);
-	MulticastEquipTorch(bEquipTorch, bIsLit);
+	//EquipTorchImplementation(bEquipTorch, bIsLit);
+	//if locally controlled
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		//EquipTorchGraphical(bEquipTorch, bIsLit);
+		MulticastEquipTorch(bEquipTorch, bIsLit);
+	}
+	
+}
+
+
+void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
+{
+	//EquipTorchGraphical(bEquipTorch, bIsLit);
+}
+
+void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
+{
+	if (TorchPickup)
+	{
+		TorchPickup->AttemptPickUp(this);
+		bHasTorch = true;
+	}
+}
+void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
+{
+	if (GetLocalRole() != ROLE_Authority)
+	{
+		EquipTorchGraphical(bEquipTorch, bIsLit);
+	}
 }
 
 
@@ -147,38 +175,13 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 	}
 }
 
-void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
-{
-	//EquipTorchGraphical(bEquipTorch, bIsLit);
-}
-
-void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
-{
-	if (TorchPickup)
-	{
-		TorchPickup->AttemptPickUp(this);
-		bHasTorch = true;
-	}
-}
-
-
 void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
 {
 	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
 	//EquipWeaponImplementation(bEquipWeapon, WeaponStats, WeaponRarity);
 }
 
-void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
-{
-	EquipTorchGraphical(bEquipTorch, bIsLit);
-}
 
-
-void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
-{
-	TorchPickup->OnInteract();
-
-}
 
 void ABaseCharacter::ServerInteractSelf_Implementation()
 {
@@ -189,6 +192,14 @@ void ABaseCharacter::ServerInteractSelf_Implementation()
 }
 
 
+void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
+{
+	//Toggle torch pickup is lit
+	if (TorchPickup)
+	{
+		TorchPickup->SetTorchLit(!TorchPickup->bIsLit);
+	}
+}
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {

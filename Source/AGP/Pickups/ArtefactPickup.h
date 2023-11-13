@@ -6,6 +6,8 @@
 #include "PickupBase.h"
 #include "ArtefactPickup.generated.h"
 
+
+class ABaseCharacter;
 /**
  * 
  */
@@ -16,6 +18,17 @@ class AGP_API AArtefactPickup : public APickupBase
 
 public:
 	AArtefactPickup();
+
+	void AttemptPickUp(ABaseCharacter* BaseCharacter);
 	
+
+protected:
+
+	virtual void OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+						 UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
+						 const FHitResult& SweepResult) override;
+
+
+	void OnPickedUp(ABaseCharacter* BaseCharacter);
 	
 };

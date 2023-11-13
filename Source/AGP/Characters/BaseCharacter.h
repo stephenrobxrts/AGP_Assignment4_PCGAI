@@ -48,6 +48,8 @@ public:
 
 	void EquipTorch(bool bEquipTorch, bool bIsLit);
 
+	void EquipArtefact(int ArtefactID);
+
 	void InteractWithSelf();
 
 
