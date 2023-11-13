@@ -5,6 +5,7 @@
 
 #include "../Pickups/WeaponPickup.h"
 #include "AGP/Pickups/ArtefactPickup.h"
+#include "AGP/Pickups/PedestalInteract.h"
 #include "AGP/Pickups/TorchPickup.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -254,7 +255,6 @@ bool ABaseCharacter::Interact()
 {
 	FVector CameraPosition;
 	FRotator CameraRotation;
-	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
 
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
@@ -277,8 +277,13 @@ bool ABaseCharacter::Interact()
 		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with torch: %s"), *GetName());
-			// Call a method on the pickup object to handle being picked up
+			// Call a method on the InteractionObject to handle being interacted with
 			ServerInteractTorch(PickupObject);
+		}
+		if (APedestalInteract* PedestalObject = Cast<APedestalInteract>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with Pedestal: %s"), *GetName());
+			//ServerInteractPedestal(PedestalInteract);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
@@ -290,7 +295,6 @@ bool ABaseCharacter::Pickup()
 {
 	FVector CameraPosition;
 	FRotator CameraRotation;
-	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
 
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);

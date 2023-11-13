@@ -28,6 +28,14 @@ public:
 	int GetArtefactID();
 	void SetArtefactID(int ID);
 
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsPickup(bool bPickup);
+	
+	//Int between 1 and 4 for ArtefactID
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool bIsPickup = true;
+	
 	void DestroyArtefact();
 
 protected:

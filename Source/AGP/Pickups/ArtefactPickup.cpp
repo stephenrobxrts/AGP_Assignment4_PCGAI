@@ -23,6 +23,11 @@ void AArtefactPickup::SetArtefactID(int ID)
 	ArtefactID = ID;
 }
 
+void AArtefactPickup::SetIsPickup(bool bPickup)
+{
+	bIsPickup = bPickup;
+}
+
 void AArtefactPickup::DestroyArtefact()
 {
 	ServerDestroyArtefact(this);
@@ -30,7 +35,7 @@ void AArtefactPickup::DestroyArtefact()
 
 void AArtefactPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
 {
-	if (HasAuthority())
+	if (HasAuthority() && bIsPickup)
 	{
 		OnPickedUp(BaseCharacter);
 	}
