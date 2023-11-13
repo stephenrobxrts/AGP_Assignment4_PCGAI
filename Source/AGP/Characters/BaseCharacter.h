@@ -103,6 +103,7 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerInteractSelf();
+
 	
 	
 	/*UFUNCTION(BlueprintImplementableEvent)

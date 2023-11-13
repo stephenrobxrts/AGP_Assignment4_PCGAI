@@ -105,11 +105,11 @@ void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 void ABaseCharacter::InteractWithSelf()
 {
 	UE_LOG(LogTemp, Display, TEXT("Player is interacting with self: %s"), *GetName());
-	if (GetLocalRole() == ROLE_Authority)
+	/*if (GetLocalRole() == ROLE_Authority)
 	{
 		ToggleOwnTorch();
 		bHasTorch = true;
-	}
+	}*/
 	ServerInteractSelf();
 }
 
@@ -182,13 +182,12 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 
 void ABaseCharacter::ServerInteractSelf_Implementation()
 {
-	//UE_LOG(LogTemp, Display, TEXT("ServerAck interacting with self: %s"), *GetName());
-	if (bHasTorch)
-	{
-		//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
-		ToggleOwnTorch();
-	}
+
+	//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
+	ToggleOwnTorch();
+
 }
+
 
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
