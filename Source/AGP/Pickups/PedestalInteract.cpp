@@ -25,15 +25,20 @@ void APedestalInteract::BeginPlay()
 
 void APedestalInteract::PlaceArtefacts(TArray<bool> NewArtefacts)
 {
-	// If the artefact is not placed, place it
-	for (int i = 0 ; i < NewArtefacts.Num() ; i++)
+	if (HasAuthority())
 	{
-		if (ArtefactsPlaced[i] == false)
+		// If the artefact is not placed, place it
+		for (int i = 0 ; i < NewArtefacts.Num() ; i++)
 		{
-			ArtefactsPlaced[i] = NewArtefacts[i];
+			if (ArtefactsPlaced[i] == false)
+			{
+				ArtefactsPlaced[i] = NewArtefacts[i];
+			}
 		}
+		UpdateVisibility();
 	}
-	UpdateVisibility();
+
+	
 }
 
 bool APedestalInteract::HasAllArtefacts()
@@ -54,6 +59,17 @@ TArray<bool> APedestalInteract::GetArtefactsPlaced()
 	return ArtefactsPlaced;
 }
 
+void APedestalInteract::OnRep_UpdateArtefacts()
+{
+	UpdateVisibility();
+}
+
+
+void APedestalInteract::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	return;
+}
 
 // Called every frame
 void APedestalInteract::Tick(float DeltaTime)

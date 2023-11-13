@@ -45,6 +45,7 @@ void ATorchPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATorchPickup, bIsLit);
+	DOREPLIFETIME(ATorchPickup, bIsHeld);
 }
 
 void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
@@ -74,12 +75,14 @@ void ATorchPickup::OnInteract()
 		return;
 	}
 	bIsLit ? bIsLit = false : bIsLit = true;
+	
 }
 
 
 void ATorchPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                    UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	return;
 }
 
 

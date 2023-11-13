@@ -24,13 +24,19 @@ protected:
 
 
 	bool HasAllArtefacts();
+
+	UFUNCTION()
+	void OnRep_UpdateArtefacts();
 	
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(ReplicatedUsing=OnRep_UpdateArtefacts, EditAnywhere, BlueprintReadWrite)
 	TArray<bool> ArtefactsPlaced = {false, false, false, false};
 
 	UFUNCTION(BlueprintCallable)
 	TArray<bool> GetArtefactsPlaced();
 
+
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsHeld = false;
@@ -40,6 +46,11 @@ protected:
 
 	TSubclassOf<APickupBase>* PickupActor;
 
+
+	virtual void OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+						 UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
+						 const FHitResult& SweepResult) override;
+	
 	/*UFUNCTION(BlueprintCallable)
 	void SetGoldenEgg(bool bCompleteSet);*/
 	
@@ -47,5 +58,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 };

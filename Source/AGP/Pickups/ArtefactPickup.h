@@ -32,7 +32,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetIsPickup(bool bPickup);
 
-	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	//Int between 1 and 4 for ArtefactID
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
@@ -53,6 +53,6 @@ protected:
 	void OnPickedUp(ABaseCharacter* BaseCharacter);
 
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	
 };

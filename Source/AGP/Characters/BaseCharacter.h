@@ -104,18 +104,17 @@ protected:
 	void ToggleOwnTorch();
 	UFUNCTION(Server, Reliable)
 	void ServerInteractTorch(ATorchPickup* TorchPickup);
-
+	
+	UFUNCTION(Server, Reliable)
+	void ServerInteractSelf();
+	
 	UFUNCTION(Server, Reliable)
 	void ServerInteractPedestal(APedestalInteract* PedestalInteract);
 
 	UFUNCTION(Server, Reliable)
-	void ServerInteractSelf();
-
-	UFUNCTION(Server, Reliable)
 	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastInteractPedestal(APedestalInteract* PedestalInteract);
+
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);

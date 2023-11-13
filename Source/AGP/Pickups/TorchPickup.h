@@ -24,7 +24,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bIsLit = true;
 	void SetTorchLit(bool bLit);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bIsHeld = false;
 	
 	void AttemptPickUp(ABaseCharacter* BaseCharacter);

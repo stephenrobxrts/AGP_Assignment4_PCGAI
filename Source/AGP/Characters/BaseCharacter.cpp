@@ -224,15 +224,9 @@ void ABaseCharacter::ServerInteractPedestal_Implementation(APedestalInteract* Pe
 	{
 		PedestalInteract->PlaceArtefacts(ArtefactsCarried);
 	}
+	ArtefactsCarried = {false, false, false, false};
 }
 
-void ABaseCharacter::MulticastInteractPedestal_Implementation(APedestalInteract* PedestalInteract)
-{
-	if (PedestalInteract)
-	{
-		PedestalInteract->PlaceArtefacts(ArtefactsCarried);
-	}
-}
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
@@ -276,7 +270,7 @@ bool ABaseCharacter::Interact()
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector End = ((CameraForward * 100.f) + Start); // Change 1000.f to your desired distance
+	FVector End = ((CameraForward * 200.f) + Start); // Change 1000.f to your desired distance
 
 	FHitResult HitResult;
 
@@ -299,7 +293,7 @@ bool ABaseCharacter::Interact()
 		if (APedestalInteract* PedestalObject = Cast<APedestalInteract>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with Pedestal: %s"), *GetName());
-			MulticastInteractPedestal(PedestalObject);
+			ServerInteractPedestal(PedestalObject);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
@@ -316,7 +310,7 @@ bool ABaseCharacter::Pickup()
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector End = ((CameraForward * 100.f) + Start); // Change 1000.f to your desired distance
+	FVector End = ((CameraForward * 200.f) + Start); // Change 1000.f to your desired distance
 
 	FHitResult HitResult;
 
