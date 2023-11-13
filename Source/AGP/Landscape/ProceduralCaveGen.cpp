@@ -73,7 +73,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		DebugShow();
 	}
 
-	if (!RoomNodes.IsEmpty() || !WalkNodes.IsEmpty() && bDebugNavNodes)
+	if ((!RoomNodes.IsEmpty() || !WalkNodes.IsEmpty()) && bDebugNavNodes)
 	{
 		DebugShowNavNodes();
 	}
@@ -721,6 +721,7 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 	{
 		Tunnel.TunnelNode = TunnelNode;
 		TunnelNode->IsWalkable = false;
+		RoomNodes.Add(TunnelNode);
 		TunnelNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
 
