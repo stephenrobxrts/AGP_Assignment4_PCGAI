@@ -26,6 +26,9 @@ public:
 	void SetTorchLit(bool bLit);
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	bool bIsHeld = false;
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsHeld();
 	
 	void AttemptPickUp(ABaseCharacter* BaseCharacter);
 

@@ -47,8 +47,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	UInputMappingContext* InputMappingContext;
-
-
 	
 	UPROPERTY(EditDefaultsOnly)
 	float LookSensitivity = 0.5f;

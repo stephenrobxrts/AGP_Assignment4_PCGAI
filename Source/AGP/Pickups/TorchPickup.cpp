@@ -48,6 +48,11 @@ void ATorchPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ATorchPickup, bIsHeld);
 }
 
+bool ATorchPickup::GetIsHeld()
+{
+	return bIsHeld;
+}
+
 void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
 {
 	if (HasAuthority())
