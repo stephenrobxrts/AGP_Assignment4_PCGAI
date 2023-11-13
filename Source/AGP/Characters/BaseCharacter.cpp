@@ -4,6 +4,8 @@
 #include "BaseCharacter.h"
 
 #include "../Pickups/WeaponPickup.h"
+#include "AGP/Pickups/ArtefactPickup.h"
+#include "AGP/Pickups/PedestalInteract.h"
 #include "AGP/Pickups/TorchPickup.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -54,12 +56,14 @@ bool ABaseCharacter::IsPlayerMoving()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	ArtefactsCarried = {false, false, false, false};
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABaseCharacter, WeaponComponent);
+	DOREPLIFETIME(ABaseCharacter, ArtefactsCarried);
 }
 
 bool ABaseCharacter::HasWeapon()
@@ -97,19 +101,47 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 
 void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 {
-	EquipTorchImplementation(bEquipTorch, bIsLit);
-	MulticastEquipTorch(bEquipTorch, bIsLit);
+	//EquipTorchImplementation(bEquipTorch, bIsLit);
+	//if locally controlled
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		//EquipTorchGraphical(bEquipTorch, bIsLit);
+		MulticastEquipTorch(bEquipTorch, bIsLit);
+	}
+	
+}
+
+
+void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
+{
+	//EquipTorchGraphical(bEquipTorch, bIsLit);
+}
+
+void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
+{
+	if (TorchPickup)
+	{
+		TorchPickup->AttemptPickUp(this);
+		bHasTorch = true;
+	}
+}
+void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
+{
+	if (GetLocalRole() != ROLE_Authority)
+	{
+		EquipTorchGraphical(bEquipTorch, bIsLit);
+	}
 }
 
 
 void ABaseCharacter::InteractWithSelf()
 {
 	UE_LOG(LogTemp, Display, TEXT("Player is interacting with self: %s"), *GetName());
-	if (GetLocalRole() == ROLE_Authority)
+	/*if (GetLocalRole() == ROLE_Authority)
 	{
 		ToggleOwnTorch();
 		bHasTorch = true;
-	}
+	}*/
 	ServerInteractSelf();
 }
 
@@ -147,47 +179,55 @@ void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponS
 	}
 }
 
-void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
-{
-	//EquipTorchGraphical(bEquipTorch, bIsLit);
-}
-
-void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
-{
-	if (TorchPickup)
-	{
-		TorchPickup->AttemptPickUp(this);
-		bHasTorch = true;
-	}
-}
-
-
 void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWeaponRarity WeaponRarity)
 {
 	EquipWeaponGraphical(bEquipWeapon, WeaponRarity);
 	//EquipWeaponImplementation(bEquipWeapon, WeaponStats, WeaponRarity);
 }
 
-void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
+
+
+void ABaseCharacter::ServerInteractSelf_Implementation()
 {
-	EquipTorchGraphical(bEquipTorch, bIsLit);
+
+	//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
+	ToggleOwnTorch();
+
 }
 
 
 void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
 {
-	TorchPickup->OnInteract();
-
+	//Toggle torch pickup is lit
+	if (TorchPickup)
+	{
+		bool IsHeld = TorchPickup->bIsHeld;
+		//Log whether the torch is held
+		UE_LOG(LogTemp, Display, TEXT("Torch is held: %s"), IsHeld ? TEXT("True") : TEXT("False"));
+		TorchPickup->SetTorchLit(!TorchPickup->bIsLit);
+	}
 }
 
-void ABaseCharacter::ServerInteractSelf_Implementation()
+void ABaseCharacter::PickupArtefact(int ID)
 {
-	//UE_LOG(LogTemp, Display, TEXT("ServerAck interacting with self: %s"), *GetName());
-	if (bHasTorch)
+	ArtefactsCarried[ID] = true;
+}
+
+void ABaseCharacter::ServerPickupArtefact_Implementation(AArtefactPickup* ArtefactPickup)
+{
+	if (ArtefactPickup)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
-		ToggleOwnTorch();
+		ArtefactPickup->AttemptPickUp(this);
 	}
+}
+
+void ABaseCharacter::ServerInteractPedestal_Implementation(APedestalInteract* PedestalInteract)
+{
+	if (PedestalInteract)
+	{
+		PedestalInteract->PlaceArtefacts(ArtefactsCarried);
+	}
+	ArtefactsCarried = {false, false, false, false};
 }
 
 
@@ -228,13 +268,12 @@ bool ABaseCharacter::Interact()
 {
 	FVector CameraPosition;
 	FRotator CameraRotation;
-	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
 
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector End = ((CameraForward * 100.f) + Start); // Change 1000.f to your desired distance
+	FVector End = ((CameraForward * 200.f) + Start); // Change 1000.f to your desired distance
 
 	FHitResult HitResult;
 
@@ -251,8 +290,13 @@ bool ABaseCharacter::Interact()
 		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with torch: %s"), *GetName());
-			// Call a method on the pickup object to handle being picked up
+			// Call a method on the InteractionObject to handle being interacted with
 			ServerInteractTorch(PickupObject);
+		}
+		if (APedestalInteract* PedestalObject = Cast<APedestalInteract>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with Pedestal: %s"), *GetName());
+			ServerInteractPedestal(PedestalObject);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
@@ -264,13 +308,12 @@ bool ABaseCharacter::Pickup()
 {
 	FVector CameraPosition;
 	FRotator CameraRotation;
-	//GetActorEyesViewPoint(CameraPosition, CameraRotation);
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(CameraPosition, CameraRotation);
 
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector End = ((CameraForward * 100.f) + Start); // Change 1000.f to your desired distance
+	FVector End = ((CameraForward * 200.f) + Start); // Change 1000.f to your desired distance
 
 	FHitResult HitResult;
 
@@ -285,13 +328,18 @@ bool ABaseCharacter::Pickup()
 
 	if (bIsHit)
 	{
-		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
+		if (ATorchPickup* TorchPickup = Cast<ATorchPickup>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is picking up torch: %s"), *this->GetActorLabel());
 			// Call a method on the pickup object to handle being picked up
-			ServerEquipTorch(PickupObject);
-			//PickupObject->AttemptPickUp(this);
-			//EquipTorch(true, PickupObject->bIsLit);
+			ServerEquipTorch(TorchPickup);
+		}
+		//if it is AArtefactPickup
+		else if (AArtefactPickup* ArtefactPickup = Cast<AArtefactPickup>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is picking up artefact: %s"), *this->GetActorLabel());
+			// Call a method on the pickup object to handle being picked up
+			ServerPickupArtefact(ArtefactPickup);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Voxels/VoxelUtils/FastNoiseLite.h"
 #include "../Pathfinding/NavigationNode.h"
+#include "AGP/Pickups/ArtefactPickup.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerStart.h"
 #include "ProceduralCaveGen.generated.h"
@@ -289,6 +290,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ATorchPickup> TorchBP;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AArtefactPickup> ArtefactBP;
+
+	UPROPERTY()
+	TArray<AArtefactPickup*> Artefacts;
 
 public:
 	// Called every frame

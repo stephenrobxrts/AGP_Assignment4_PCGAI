@@ -73,7 +73,7 @@ void UPathfindingSubsystem::PopulateNodes()
 	for (int i = 0; i < WalkableNodes.Num(); i++)
 	{
 		//Debug - show node locations
-		UE_LOG(LogTemp, Warning, TEXT("Node: %s"), *WalkableNodes[i]->GetActorLocation().ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Node: %s"), *WalkableNodes[i]->GetActorLocation().ToString());
 		///Debug
 	}
 }

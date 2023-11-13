@@ -45,6 +45,7 @@ void ATorchPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATorchPickup, bIsLit);
+	DOREPLIFETIME(ATorchPickup, bIsHeld);
 }
 
 void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
@@ -53,29 +54,8 @@ void ATorchPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
 	{
 		OnPickedUp(BaseCharacter);
 	}
-	else
-	{
-		ServerAttemptPickup(BaseCharacter);
-	}
-
-	/*UE_LOG(LogTemp, Warning, TEXT("TorchPickup: %s"), *BaseCharacter->GetActorLabel());
-	BaseCharacter->EquipTorch(true, bIsLit);*/
-	
 }
 
-void ATorchPickup::ServerAttemptPickup_Implementation(ABaseCharacter* BaseCharacter)
-{
-	if (bIsHeld)
-	{
-		return;
-	}
-	OnPickedUp(BaseCharacter);
-}
-
-bool ATorchPickup::ServerAttemptPickup_Validate(ABaseCharacter* BaseCharacter)
-{
-	return true;
-}
 void ATorchPickup::OnPickedUp(ABaseCharacter* BaseCharacter)
 {
 	if (bIsHeld)
@@ -95,47 +75,14 @@ void ATorchPickup::OnInteract()
 		return;
 	}
 	bIsLit ? bIsLit = false : bIsLit = true;
+	
 }
 
 
 void ATorchPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                    UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-	/*if (ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(OtherActor))
-	{
-		//If this is a child actor, don't do anything
-		if (this->IsChildActor())
-		{
-			return;
-		}
-		
-		if (!BaseCharacter->HasTorch())
-		{
-			BaseCharacter->SetIsOverlappingPickup(true);
-			BaseCharacter->EquipTorch(true, bIsLit);
-			this->Destroy();
-		}
-
-		/*if (BaseCharacter->ToggleTorchAction)
-		{
-			bIsLit = false;
-		}#1#
-	}*/
+	return;
 }
 
-void ATorchPickup::OnProximityExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	
-}
-
-
-
-
-// Called every frame
-void ATorchPickup::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
 

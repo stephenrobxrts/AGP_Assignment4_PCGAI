@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AGP/Pickups/ArtefactPickup.h"
+#include "AGP/Pickups/PedestalInteract.h"
 #include "AGP/Pickups/TorchPickup.h"
 #include "AGP/Pickups/WeaponPickup.h"
 #include "Components/HealthComponent.h"
@@ -47,6 +49,8 @@ public:
 	void EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponStats, const EWeaponRarity WeaponRarity);
 
 	void EquipTorch(bool bEquipTorch, bool bIsLit);
+
+	void PickupArtefact(int ArtefactID);
 
 	void InteractWithSelf();
 
@@ -100,10 +104,17 @@ protected:
 	void ToggleOwnTorch();
 	UFUNCTION(Server, Reliable)
 	void ServerInteractTorch(ATorchPickup* TorchPickup);
-
+	
 	UFUNCTION(Server, Reliable)
 	void ServerInteractSelf();
 	
+	UFUNCTION(Server, Reliable)
+	void ServerInteractPedestal(APedestalInteract* PedestalInteract);
+
+	UFUNCTION(Server, Reliable)
+	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
+
+
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);
@@ -112,7 +123,9 @@ protected:
 	void MulticastInteractSelf(bool bIsLit);*/
 	
 
-
+	//Carried artefacts - 0 = red, 1 = green, 2 = blue, 3 = yellow - make an array of falses
+	UPROPERTY(Replicated, VisibleAnywhere)
+	TArray<bool> ArtefactsCarried = {false, false, false, false};
 
 	
 	
