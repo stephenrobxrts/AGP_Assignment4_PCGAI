@@ -20,15 +20,31 @@ void AArtefactPickup::AttemptPickUp(ABaseCharacter* BaseCharacter)
 	}
 }
 
+int AArtefactPickup::GetArtefactID()
+{
+	return ArtefactID;
+}
+
+void AArtefactPickup::SetArtefactID(int ID)
+{
+	ArtefactID = ID;
+}
+
 void AArtefactPickup::OnPickedUp(ABaseCharacter* BaseCharacter)
 {
-	//BaseCharacter->PickupArtifact();
+	BaseCharacter->PickupArtefact(ArtefactID);
 	this->Destroy();
+}
+
+void AArtefactPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AArtefactPickup,ArtefactID);
 }
 
 
 void AArtefactPickup::OnPickupOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-								   UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                      UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 }
 

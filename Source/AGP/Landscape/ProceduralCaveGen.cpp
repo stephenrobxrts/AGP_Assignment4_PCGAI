@@ -13,6 +13,7 @@
 #include "PhysicsAssetRenderUtils.h"
 #include "Components/PointLightComponent.h"
 #include "NiagaraComponent.h"
+#include "../Pickups/ArtefactPickup.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
 #include "../Pickups/TorchPickup.h"
@@ -518,14 +519,18 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		{
 		case 0:
 			SpawnOffset.X += Box.Size.X / 2 - 30.0f;
+			SpawnOffset.Y += Box.Size.Y / 2 - 30.0f;
 			break;
 		case 1:
-			SpawnOffset.Y += Box.Size.Y / 2 - 30.0f;
+			SpawnOffset.X += Box.Size.X / 2 - 30.0f;
+			SpawnOffset.Y -= Box.Size.Y / 2 - 30.0f;
 			break;
 		case 2:
 			SpawnOffset.X -= Box.Size.X / 2 - 30.0f;
+			SpawnOffset.Y += Box.Size.Y / 2 - 30.0f;
 			break;
 		case 3:
+			SpawnOffset.X -= Box.Size.X / 2 - 30.0f;
 			SpawnOffset.Y -= Box.Size.Y / 2 - 30.0f;
 			break;
 		default:
@@ -555,8 +560,17 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 
 			UE_LOG(LogTemp, Warning, TEXT("Torch Lit is %s"), Box.Torch->bIsLit ? TEXT("True") : TEXT("False"));
 		}
+		// If start room or end room set torch lit and spawn artefacts temp
 		else
 		{
+			//DEBUG - SPAWN ARTERFACTS IN START ROOM
+			//Spawn Artefact
+			FVector ArtefactSpawnPos = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - 0.5 * Box.Size.Z + 100.0f);
+			ArtefactSpawnPos.Y += Box.Size.Y / 2 - 50.0f;
+			for (int i = 0 ; i < 4 ; i++)
+			{
+				//AArtefactPickup* ArtefactPickup = World->SpawnActor<AArtefactPickup>(ArtefactBP, SpawnPos, SpawnRot);
+			}
 			Box.Torch->SetTorchLit(true);
 		}
 	}

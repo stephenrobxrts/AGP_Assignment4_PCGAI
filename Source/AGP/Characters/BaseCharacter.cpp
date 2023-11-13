@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 
 #include "../Pickups/WeaponPickup.h"
+#include "AGP/Pickups/ArtefactPickup.h"
 #include "AGP/Pickups/TorchPickup.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -54,12 +55,14 @@ bool ABaseCharacter::IsPlayerMoving()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	ArtefactsCarried = {false, false, false, false};
 }
 
 void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABaseCharacter, WeaponComponent);
+	DOREPLIFETIME(ABaseCharacter, ArtefactsCarried);
 }
 
 bool ABaseCharacter::HasWeapon()
@@ -201,6 +204,19 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 	}
 }
 
+void ABaseCharacter::PickupArtefact(int ID)
+{
+	ArtefactsCarried[ID] = true;
+}
+
+void ABaseCharacter::ServerPickupArtefact_Implementation(AArtefactPickup* ArtefactPickup)
+{
+	if (ArtefactPickup)
+	{
+		ArtefactPickup->AttemptPickUp(this);
+	}
+}
+
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
 	if (HasWeapon())
@@ -295,13 +311,19 @@ bool ABaseCharacter::Pickup()
 
 	if (bIsHit)
 	{
-		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
+		if (ATorchPickup* TorchPickup = Cast<ATorchPickup>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is picking up torch: %s"), *this->GetActorLabel());
 			// Call a method on the pickup object to handle being picked up
-			ServerEquipTorch(PickupObject);
-			//PickupObject->AttemptPickUp(this);
-			//EquipTorch(true, PickupObject->bIsLit);
+			ServerEquipTorch(TorchPickup);
+		}
+		//if it is AArtefactPickup
+		else if (AArtefactPickup* ArtefactPickup = Cast<AArtefactPickup>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is picking up artefact: %s"), *this->GetActorLabel());
+			// Call a method on the pickup object to handle being picked up
+			ServerPickupArtefact(ArtefactPickup);
+			
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);

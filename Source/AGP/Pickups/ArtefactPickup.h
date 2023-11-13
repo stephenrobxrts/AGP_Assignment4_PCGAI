@@ -20,7 +20,9 @@ public:
 	AArtefactPickup();
 
 	void AttemptPickUp(ABaseCharacter* BaseCharacter);
-	
+
+	int GetArtefactID();
+	void SetArtefactID(int ID);
 
 protected:
 
@@ -30,5 +32,11 @@ protected:
 
 
 	void OnPickedUp(ABaseCharacter* BaseCharacter);
+
+	//Int between 1 and 4 for ArtefactID
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	int ArtefactID = 1;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 };

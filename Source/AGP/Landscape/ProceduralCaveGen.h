@@ -290,6 +290,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ATorchPickup> TorchBP;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ATorchPickup> ArtefactBP;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
