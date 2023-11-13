@@ -9,8 +9,10 @@
   <component name="ChangeListManager">
     <list default="true" id="98ec29fe-db7f-4ec2-8f15-90e2ac68b6f6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/BP_Pedestals.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.h" afterDir="false" />
     </list>
@@ -157,7 +159,7 @@
       <workItem from="1699833354444" duration="415000" />
       <workItem from="1699843417657" duration="2938000" />
       <workItem from="1699850570089" duration="12797000" />
-      <workItem from="1699868090356" duration="1704000" />
+      <workItem from="1699868090356" duration="3847000" />
     </task>
     <servers />
   </component>

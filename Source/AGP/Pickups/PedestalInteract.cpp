@@ -23,9 +23,17 @@ void APedestalInteract::BeginPlay()
 	
 }
 
-void APedestalInteract::PlaceArtefact(int ArtefactID)
+void APedestalInteract::PlaceArtefacts(TArray<bool> NewArtefacts)
 {
-	ArtefactsPlaced[ArtefactID] = true;
+	// If the artefact is not placed, place it
+	for (int i = 0 ; i < NewArtefacts.Num() ; i++)
+	{
+		if (ArtefactsPlaced[i] == false)
+		{
+			ArtefactsPlaced[i] = NewArtefacts[i];
+		}
+	}
+	UpdateVisibility();
 }
 
 bool APedestalInteract::HasAllArtefacts()

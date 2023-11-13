@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AGP/Pickups/ArtefactPickup.h"
+#include "AGP/Pickups/PedestalInteract.h"
 #include "AGP/Pickups/TorchPickup.h"
 #include "AGP/Pickups/WeaponPickup.h"
 #include "Components/HealthComponent.h"
@@ -105,11 +106,16 @@ protected:
 	void ServerInteractTorch(ATorchPickup* TorchPickup);
 
 	UFUNCTION(Server, Reliable)
+	void ServerInteractPedestal(APedestalInteract* PedestalInteract);
+
+	UFUNCTION(Server, Reliable)
 	void ServerInteractSelf();
 
 	UFUNCTION(Server, Reliable)
 	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
-	
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastInteractPedestal(APedestalInteract* PedestalInteract);
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);

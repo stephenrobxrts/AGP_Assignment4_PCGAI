@@ -15,11 +15,13 @@ public:
 	// Sets default values for this actor's properties
 	APedestalInteract();
 
+	void PlaceArtefacts(TArray<bool> NewArtefacts);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void PlaceArtefact(int ArtefactID);
+
 
 	bool HasAllArtefacts();
 	

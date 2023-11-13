@@ -218,6 +218,22 @@ void ABaseCharacter::ServerPickupArtefact_Implementation(AArtefactPickup* Artefa
 	}
 }
 
+void ABaseCharacter::ServerInteractPedestal_Implementation(APedestalInteract* PedestalInteract)
+{
+	if (PedestalInteract)
+	{
+		PedestalInteract->PlaceArtefacts(ArtefactsCarried);
+	}
+}
+
+void ABaseCharacter::MulticastInteractPedestal_Implementation(APedestalInteract* PedestalInteract)
+{
+	if (PedestalInteract)
+	{
+		PedestalInteract->PlaceArtefacts(ArtefactsCarried);
+	}
+}
+
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
 	if (HasWeapon())
@@ -283,7 +299,7 @@ bool ABaseCharacter::Interact()
 		if (APedestalInteract* PedestalObject = Cast<APedestalInteract>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with Pedestal: %s"), *GetName());
-			//ServerInteractPedestal(PedestalInteract);
+			MulticastInteractPedestal(PedestalObject);
 		}
 	}
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
