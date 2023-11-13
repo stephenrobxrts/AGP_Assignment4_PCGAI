@@ -563,15 +563,22 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		// If start room or end room set torch lit and spawn artefacts temp
 		else
 		{
+			Box.Torch->SetTorchLit(true);
+		}
+
+		if (Box.Type == EBoxType::Start)
+		{
 			//DEBUG - SPAWN ARTERFACTS IN START ROOM
 			//Spawn Artefact
 			FVector ArtefactSpawnPos = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - 0.5 * Box.Size.Z + 100.0f);
 			ArtefactSpawnPos.Y += Box.Size.Y / 2 - 50.0f;
 			for (int i = 0 ; i < 4 ; i++)
 			{
-				//AArtefactPickup* ArtefactPickup = World->SpawnActor<AArtefactPickup>(ArtefactBP, SpawnPos, SpawnRot);
+				AArtefactPickup* ArtefactPickup = World->SpawnActor<AArtefactPickup>(ArtefactBP, ArtefactSpawnPos, FRotator::ZeroRotator);
+				ArtefactSpawnPos.X += 100.0f;
+				ArtefactPickup->SetArtefactID(i);
+				Artefacts.Add(ArtefactPickup);
 			}
-			Box.Torch->SetTorchLit(true);
 		}
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
@@ -875,6 +882,7 @@ void AProceduralCaveGen::ClearMap()
 	AllObjects.Empty();
 	RoomNodes.Empty();
 	WalkNodes.Empty();
+	Artefacts.Empty();
 	if (!Paths.IsEmpty())
 	{
 		for (FInnerArray& Path : Paths)
@@ -909,6 +917,14 @@ void AProceduralCaveGen::ClearMap()
 	}
 
 	for (TActorIterator<ATorchPickup> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
+			(*It)->Destroy();
+		}
+	}
+
+	for (TActorIterator<AArtefactPickup> It(GetWorld()); It; ++It)
 	{
 		if (*It)
 		{
