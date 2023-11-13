@@ -41,6 +41,12 @@ bool APedestalInteract::HasAllArtefacts()
 	return true;
 }
 
+TArray<bool> APedestalInteract::GetArtefactsPlaced()
+{
+	return ArtefactsPlaced;
+}
+
+
 // Called every frame
 void APedestalInteract::Tick(float DeltaTime)
 {

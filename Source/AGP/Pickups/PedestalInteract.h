@@ -22,9 +22,21 @@ protected:
 	void PlaceArtefact(int ArtefactID);
 
 	bool HasAllArtefacts();
-
+	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	TArray<bool> ArtefactsPlaced;
+	TArray<bool> ArtefactsPlaced = {false, false, false, false};
+
+	UFUNCTION(BlueprintCallable)
+	TArray<bool> GetArtefactsPlaced();
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsHeld = false;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateVisibility();
+
+	TSubclassOf<APickupBase>* PickupActor;
 
 	/*UFUNCTION(BlueprintCallable)
 	void SetGoldenEgg(bool bCompleteSet);*/
