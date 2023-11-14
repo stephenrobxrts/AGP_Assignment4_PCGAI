@@ -92,6 +92,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipWeapon(bool bEquipWeapon, EWeaponRarity WeaponRarity = EWeaponRarity::Common);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateHUD();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipTorchGraphical(bool bEquipTorch, bool bIsLit);

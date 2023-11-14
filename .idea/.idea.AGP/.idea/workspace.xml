@@ -9,19 +9,12 @@
   <component name="ChangeListManager">
     <list default="true" id="98ec29fe-db7f-4ec2-8f15-90e2ac68b6f6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_ArtefactPickup.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_ArtefactPickup.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Levels/AmbushMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/AmbushMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/FirstPersonContent/FirstPersonArms/Animations/FP_Unarmed_Run_Fwd.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FirstPersonContent/FirstPersonArms/Animations/FP_Unarmed_Run_Fwd.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Materials/M_Quinn1.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Materials/M_Quinn1.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Materials/M_Quinn2.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Materials/M_Quinn2.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Materials/Pickups/ArtefactPickups/Artefact0.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Materials/Pickups/ArtefactPickups/Artefact0.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/UI/BP_PlayerUI.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/UI/BP_PlayerUI.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Animations/Locomotion/Unarmed/MF_Unarmed_Jog_Fwd.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Animations/Locomotion/Unarmed/MF_Unarmed_Jog_Fwd.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Materials/CaveFloor.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Materials/CaveFloor.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,14 +25,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/AGP/Pickups/ArtefactPickup.cpp" root0="FORCE_HIGHLIGHTING" />
