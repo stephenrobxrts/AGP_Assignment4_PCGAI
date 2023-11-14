@@ -10,13 +10,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
 #include "EngineUtils.h"
-#include "PhysicsAssetRenderUtils.h"
-#include "Components/PointLightComponent.h"
-#include "NiagaraComponent.h"
 #include "../Pickups/ArtefactPickup.h"
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
 #include "../Pickups/TorchPickup.h"
+#include "AGP/Pickups/PedestalInteract.h"
 
 // Sets default values
 AProceduralCaveGen::AProceduralCaveGen()
@@ -59,7 +57,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		ClearMap();
 
 		//Level Generation
-		Boxes = GenerateLadderPathBoxes();
+		RoomBoxes = GenerateLadderPathBoxes();
 		GenerateInterconnects();
 
 		//Add All generated items to an array for chunk check
@@ -72,7 +70,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 	}
 
 	//Debug to visualize boxes
-	if (!Boxes.IsEmpty() && bDebugView)
+	if (!RoomBoxes.IsEmpty() && bDebugView)
 	{
 		DebugShow();
 	}
@@ -189,11 +187,11 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 
 			// Constrain the vertical movement
 			float MaxVerticalOffset = 200.0f; // Set this to the max vertical difference you want between rooms
-			float verticalComponent = FMath::Clamp(RandomDirection.Z, -MaxVerticalOffset, MaxVerticalOffset);
+			float verticalComponent = FMath::Clamp(RandomDirection.Z, static_cast<double>(-MaxVerticalOffset), static_cast<double>(MaxVerticalOffset));
 			RandomDirection.Z = verticalComponent;
 
-			FVector newPosition = LastPosition + RandomDirection * FMath::RandRange(
-				0.5f * AvgConnectionDistance, AvgConnectionDistance);
+			FVector newPosition = LastPosition + RandomDirection * StaticCast<double>(FMath::RandRange(
+				0.5f * AvgConnectionDistance, AvgConnectionDistance));
 			box.Position = newPosition;
 			box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
 			                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
@@ -284,6 +282,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 		EBoxType::End
 	};
 	boxes.Add(EndBox);
+	GenerateEndPedestal(EndBox);
 	CreateBox(EndBox);
 
 	//Find average tunnel length by dividing distance by number of boxes per path
@@ -310,7 +309,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 		for (int j = 0; j < NumBoxesPerPath; j++)
 		{
 			FLevelBox Box;
-			Box.Position = PathStart + PathDirection * AvgTunnelLength * (j + 1);
+			Box.Position = PathStart + PathDirection * StaticCast<double>(AvgTunnelLength) * (j + 1);
 			Box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
 			                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
 			                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
@@ -331,39 +330,41 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 		FLevelBox lastBox = Paths[i].Path[Paths[i].Path.Num() - 1];
 		CreateTunnel(lastBox, EndBox);
 	}
-	/*//Travel along that angle to place first box in that path
-	FVector FirstBoxPosition = Start + Direction.RotateAngleAxis(FMath::RadiansToDegrees(Angle), FVector::UpVector) * AvgTunnelLength;
-	
-	//Create boxes on that path going forward in X with each successive box
-	//being avgTunnelLength away from the previous box
-	for (int i = 0; i < NumBoxesPerPath; i++)
-	{
-		FLevelBox box;
-		box.Position = FirstBoxPosition + FVector(AvgTunnelLength * i, 0, 0);
-		box.Size = FVector(FMath::RandRange(MinBoxSize.X, MaxBoxSize.X),
-		                   FMath::RandRange(MinBoxSize.Y, MaxBoxSize.Y),
-		                   FMath::RandRange(MinBoxSize.Z, MaxBoxSize.Z));
-		box.Type = EBoxType::Normal;
 
-		FLevelBox lastBox = (i == 0) ? StartBox : boxes[boxes.Num() - 1];
-
-		//If box doesn't collide with any other boxes AND Gradient not too steep
-		//Add it to the list of boxes	
-		if (BoxPositionValid(box, boxes) && FMath::Abs(CalculateGradient(box, lastBox)) <= 0.3)
-		{
-			boxes.Add(box);
-			CreateBox(box);
-
-			CreateTunnel(lastBox, box);
-		}
-		else
-		{
-			i--;
-		}
-	}*/
+	GenerateLevelItems(boxes);
 
 	return boxes;
 }
+
+void AProceduralCaveGen::GenerateLevelItems(TArray<FLevelBox>& Rooms)
+{
+	for (int i = 0 ; i < NumArtefactsToPlace ; i++)
+	{
+		int rngRoom = FMath::RandRange(0, Rooms.Num() - 1);
+		if (Rooms[rngRoom].Artefact != nullptr || Rooms[rngRoom].Type != EBoxType::Normal)
+		{
+			i--;
+		}
+		else
+		{
+			FVector ArtefactLocation = FVector(Rooms[rngRoom].Position.X, Rooms[rngRoom].Position.Y, Rooms[rngRoom].Position.Z - Rooms[rngRoom].Size.Z / 2);
+			ArtefactLocation.Z += 100.0f;
+			AArtefactPickup* Artefact = GetWorld()->SpawnActor<AArtefactPickup>(ArtefactBP, ArtefactLocation, FRotator::ZeroRotator);
+			Artefact->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+			Artefact->SetArtefactID(i);
+			Rooms[rngRoom].Artefact = Artefact;
+		}
+	}
+}
+
+void AProceduralCaveGen::GenerateEndPedestal(FLevelBox& Room)
+{
+	FVector PedestalLocation = FVector(Room.Position.X, Room.Position.Y, Room.Position.Z - Room.Size.Z / 2);
+	APedestalInteract* Pedestal = GetWorld()->SpawnActor<APedestalInteract>(PedestalBP, PedestalLocation, FVector(0, 1, 0).ToOrientationRotator());
+	Pedestal->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	Room.Pedestal = Pedestal;
+}
+
 
 /**
  * @brief Generate Mesh using MarchingChunkTerrain
@@ -419,7 +420,7 @@ void AProceduralCaveGen::GenerateMesh()
 						Chunk->bUpdateMesh = bUpdateMesh;
 
 						Chunk->LevelSize = static_cast<int>(LevelSize);
-						Chunk->Boxes = Boxes;
+						Chunk->Boxes = RoomBoxes;
 						Chunk->Tunnels = Tunnels;
 						Chunk->Material = Material;
 
@@ -565,21 +566,6 @@ void AProceduralCaveGen::CreateBox(FLevelBox& Box)
 		{
 			Box.Torch->SetTorchLit(true);
 		}
-
-		if (Box.Type == EBoxType::Start)
-		{
-			//DEBUG - SPAWN ARTERFACTS IN START ROOM
-			//Spawn Artefact
-			FVector ArtefactSpawnPos = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - 0.5 * Box.Size.Z + 100.0f);
-			ArtefactSpawnPos.Y += Box.Size.Y / 2 - 50.0f;
-			for (int i = 0 ; i < 4 ; i++)
-			{
-				AArtefactPickup* ArtefactPickup = World->SpawnActor<AArtefactPickup>(ArtefactBP, ArtefactSpawnPos, FRotator::ZeroRotator);
-				ArtefactSpawnPos.X += 100.0f;
-				ArtefactPickup->SetArtefactID(i);
-				Artefacts.Add(ArtefactPickup);
-			}
-		}
 	}
 	if (ANavigationNode* RoomNode = GetWorld()->SpawnActor<ANavigationNode>(
 		ANavigationNode::StaticClass(), Box.Position, FRotator::ZeroRotator))
@@ -606,7 +592,6 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 
 	//Place the rect centered on the box
 	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z / 2.0f + ShrinkAmount);
-	FVector size3d = FVector(RectSize.X / 2.0f, RectSize.Y / 2.0f, 5.0f);
 
 	//DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
 
@@ -698,7 +683,7 @@ FVector AProceduralCaveGen::CalculateBoxOffset(const FLevelBox& Box, const FVect
 	return Offset;
 }
 
-/*
+/**
  * @brief Creates a tunnel and adds it to the tunnel array
  * @param StartBox 
  * @param TargetBox 
@@ -809,7 +794,7 @@ void AProceduralCaveGen::MeshRoomNodes(ANavigationNode* JoiningNode, FLevelBox& 
  */
 void AProceduralCaveGen::AddAllObjects()
 {
-	AllObjects.Append(Boxes);
+	AllObjects.Append(RoomBoxes);
 
 	//ToDo Overlap Checks for rotated boxes
 	for (FTunnel Tunnel : Tunnels)
@@ -877,7 +862,7 @@ bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<
  */
 void AProceduralCaveGen::ClearMap()
 {
-	Boxes.Empty();
+	RoomBoxes.Empty();
 	Tunnels.Empty();
 	AllObjects.Empty();
 	RoomNodes.Empty();
@@ -925,6 +910,13 @@ void AProceduralCaveGen::ClearMap()
 	}
 
 	for (TActorIterator<AArtefactPickup> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
+			(*It)->Destroy();
+		}
+	}
+	for (TActorIterator<APedestalInteract> It(GetWorld()); It; ++It)
 	{
 		if (*It)
 		{
@@ -984,7 +976,7 @@ void AProceduralCaveGen::AddPlayerStartAtLocation(const FVector& Location)
 
 void AProceduralCaveGen::AttachTorchToWalls()
 {
-	for (FLevelBox& Box : Boxes)
+	for (FLevelBox& Box : RoomBoxes)
 	{
 		if (Box.Torch)
 		{
@@ -1025,7 +1017,7 @@ void AProceduralCaveGen::AttachTorchToWalls()
  */
 void AProceduralCaveGen::DebugShow()
 {
-	for (const FLevelBox& box : Boxes)
+	for (const FLevelBox& box : RoomBoxes)
 	{
 		// Box center
 		FVector center = box.Position;
@@ -1085,7 +1077,7 @@ TArray<FVector> CalculateBoxCorners(const FBoxBase& Box)
 	TArray<FVector> Corners;
 
 	// Half sizes for each dimension
-	FVector HalfSize = Box.Size * 0.5f;
+	FVector HalfSize = Box.Size * StaticCast<double>(0.5f);
 
 	// Calculate the local position of each corner as if the box were axis-aligned
 	Corners.Add(FVector(-HalfSize.X, -HalfSize.Y, -HalfSize.Z));

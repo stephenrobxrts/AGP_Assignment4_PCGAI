@@ -95,7 +95,6 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void EquipTorchGraphical(bool bEquipTorch, bool bIsLit);
-	void EquipTorchImplementation(bool bEquipTorch, bool bIsLit);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEquipTorch(bool bEquipTorch, bool bIsLit);
 	UFUNCTION(Server, Reliable)

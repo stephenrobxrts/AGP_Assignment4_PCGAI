@@ -101,20 +101,13 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 
 void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 {
-	//EquipTorchImplementation(bEquipTorch, bIsLit);
-	//if locally controlled
+	//if has authority
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		//EquipTorchGraphical(bEquipTorch, bIsLit);
 		MulticastEquipTorch(bEquipTorch, bIsLit);
 	}
 	
-}
-
-
-void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
-{
-	//EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
 void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)

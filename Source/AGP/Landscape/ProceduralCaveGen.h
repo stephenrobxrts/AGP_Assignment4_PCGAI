@@ -10,6 +10,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "ProceduralCaveGen.generated.h"
 
+class APedestalInteract;
 class ATorchPickup;
 /**
  * @brief Box type enum
@@ -49,6 +50,10 @@ public:
 	ANavigationNode* RoomNode = nullptr;
 	UPROPERTY(EditInstanceOnly)
 	ATorchPickup* Torch = nullptr;
+	UPROPERTY(EditInstanceOnly)
+	AArtefactPickup* Artefact = nullptr;
+	UPROPERTY(EditInstanceOnly)
+	APedestalInteract* Pedestal = nullptr;
 };
 
 /**
@@ -64,8 +69,6 @@ public:
 	const FLevelBox* EndBox;
 	UPROPERTY(EditInstanceOnly)
 	ANavigationNode* TunnelNode = nullptr;
-	//UPROPERTY(EditInstanceOnly)
-	//ANavigationNode* TunnelNode = nullptr;
 };
 
 /**
@@ -151,6 +154,8 @@ protected:
 	//Box placement logic
 	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
 	TArray<FLevelBox> GenerateLadderPathBoxes();
+	void GenerateLevelItems(TArray<FLevelBox>& Rooms);
+	void GenerateEndPedestal(FLevelBox& Room);
 	void GenerateInterconnects();
 	void CreateBox(FLevelBox& Box);
 
@@ -231,7 +236,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool bDebugOnly1Chunk = true;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
-	TArray<FLevelBox> Boxes;
+	TArray<FLevelBox> RoomBoxes;
 	UPROPERTY(VisibleAnywhere, Category="Level Layout")
 	TArray<FTunnel> Tunnels;
 	UPROPERTY()
@@ -293,9 +298,14 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AArtefactPickup> ArtefactBP;
-
 	UPROPERTY()
 	TArray<AArtefactPickup*> Artefacts;
+	int NumArtefactsToPlace = 4;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<APedestalInteract> PedestalBP;
+	UPROPERTY()
+	TArray<APedestalInteract*> PedestalInteracts;
 
 public:
 	// Called every frame
