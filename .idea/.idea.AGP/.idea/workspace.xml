@@ -10,10 +10,10 @@
     <list default="true" id="98ec29fe-db7f-4ec2-8f15-90e2ac68b6f6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Audio/Torch/TorchCue.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Audio/Torch/TorchCue.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_TestTorch.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_TestTorch.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Torch.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Torch.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

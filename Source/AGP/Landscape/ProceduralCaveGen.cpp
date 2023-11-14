@@ -57,7 +57,15 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		ClearMap();
 
 		//Level Generation
-		RoomBoxes = GenerateLadderPathBoxes();
+		if (Mode == EGenerationMode::GridBased)
+		{
+			RoomBoxes = GenGridBasedLevel();
+		}
+		else
+		{
+			RoomBoxes = GenRandomTraversalLevel();
+		}
+		
 		GenerateInterconnects();
 
 		//Add All generated items to an array for chunk check
@@ -108,7 +116,7 @@ float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
  * @brief Creates the boxes (Rooms and tunnels) for the world
  * @return The array of boxes created
  */
-TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
+TArray<FLevelBox> AProceduralCaveGen::GenRandomTraversalLevel()
 {
 	//Start and End Locations
 	FVector Start = FVector(GetActorLocation());
@@ -228,6 +236,7 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 	);
 	EndBox.Type = EBoxType::End;
 	CreateBox(EndBox);
+	GenerateEndPedestal(EndBox);
 	boxes.Add(EndBox);
 
 	//Join Paths to end box
@@ -237,10 +246,12 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateGuaranteedPathBoxes()
 		CreateTunnel(lastBox, EndBox);
 	}
 
+
+	GenerateLevelItems(boxes);
 	return boxes;
 }
 
-TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
+TArray<FLevelBox> AProceduralCaveGen::GenGridBasedLevel()
 {
 	//create start room
 	FVector Start = FVector(GetActorLocation());
@@ -316,6 +327,12 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 			Box.Type = EBoxType::Normal;
 			FLevelBox lastBox = (j == 0) ? StartBox : Paths[i].Path[j - 1];
 
+			//Shift the box by up to 1/3 of AvgTunnelPath +/- in X and Y
+			Box.Position.X += FMath::RandRange(-AvgTunnelLength / 3, AvgTunnelLength / 3);
+			Box.Position.Y += FMath::RandRange(-AvgTunnelLength / 3, AvgTunnelLength / 3);
+			//Shift the height of the box by up to 10% of AvgTunnelPath +/- in Z
+			Box.Position.Z += FMath::RandRange(-AvgTunnelLength / 10, AvgTunnelLength / 10);
+			
 			boxes.Add(Box);
 			CreateBox(Box);
 
@@ -332,7 +349,6 @@ TArray<FLevelBox> AProceduralCaveGen::GenerateLadderPathBoxes()
 	}
 
 	GenerateLevelItems(boxes);
-
 	return boxes;
 }
 
@@ -592,7 +608,7 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 
 	//Place the rect centered on the box
 	FVector RectCenter = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z - Box.Size.Z / 2.0f + ShrinkAmount);
-
+	
 	//DrawDebugBox(GetWorld(), RectCenter, size3d, Box.Rotation, FColor::White, false, 10.0f);
 
 	int RectY = StaticCast<int>(RectSizeInNodes.Y);
@@ -604,8 +620,8 @@ void AProceduralCaveGen::GenerateWalkableNodes(FBoxBase& Box)
 		for (int X = 0; X < RectX; X++)
 		{
 			// Calculate local position within the rectangle
-			FVector NodePositionLocal = FVector(X * NodeDensity, Y * NodeDensity, 0.0f) - FVector(
-				RectSize.X / 2.0f, RectSize.Y / 2.0f, 0.0f);
+			FVector NodePositionLocal = FVector(X * NodeDensity + ShrinkAmount, Y * NodeDensity + ShrinkAmount, 0.0f) - FVector(
+				RectSize.X  / 2.0f, RectSize.Y  / 2.0f, 0.0f);
 
 			// Convert local position to world space, taking into account the rotation and the true center of the box
 			FVector NodePositionWorld = Box.Rotation.RotateVector(NodePositionLocal) + RectCenter;

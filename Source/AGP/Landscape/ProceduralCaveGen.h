@@ -105,6 +105,15 @@ enum class ENoiseType : uint8
 	NoiseType_Value
 };
 
+
+UENUM(BlueprintType)
+enum class EGenerationMode : uint8
+{
+	GridBased,
+	RandomTraversal
+};
+
+
 USTRUCT()
 struct FNoiseParams
 {
@@ -152,8 +161,8 @@ protected:
 
 
 	//Box placement logic
-	TArray<FLevelBox> GenerateGuaranteedPathBoxes();
-	TArray<FLevelBox> GenerateLadderPathBoxes();
+	TArray<FLevelBox> GenRandomTraversalLevel();
+	TArray<FLevelBox> GenGridBasedLevel();
 	void GenerateLevelItems(TArray<FLevelBox>& Rooms);
 	void GenerateEndPedestal(FLevelBox& Room);
 	void GenerateInterconnects();
@@ -191,6 +200,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	bool bUpdateMesh = true;
 
+	UPROPERTY(EditAnywhere)
+	EGenerationMode Mode = EGenerationMode::GridBased;
+
+	//Level Layout
 	UPROPERTY(EditAnywhere)
 	int NumPaths = 2;
 	UPROPERTY(EditAnywhere)
