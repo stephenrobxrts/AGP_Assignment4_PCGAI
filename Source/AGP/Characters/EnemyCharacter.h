@@ -35,10 +35,20 @@ class AGP_API AEnemyCharacter : public ABaseCharacter
 public:
 	// Sets default values for this character's properties
 	AEnemyCharacter();
+	
+	UPROPERTY(EditAnywhere, Category = "Target")
+	int32 DefaultTargetIndex = 0;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void FindPlayerCharacter();
+	void SetInitialTarget();
+	void UpdatePlayersArray();
+	void SwitchTarget();
+
+	UPROPERTY()
+	FTimerHandle TimerHandle;
 
 	UPROPERTY()
 	UPathfindingSubsystem* PathfindingSubsystem;
@@ -48,7 +58,7 @@ protected:
 	UPawnSensingComponent* PawnSensingComponent;
 
 	UPROPERTY()
-	APlayerCharacter* Player;
+	APlayerCharacter* TargetPlayer;
 	UPROPERTY(VisibleAnywhere)
 	APlayerCharacter* SensedCharacter = nullptr;
 	UPROPERTY(VisibleAnywhere)
@@ -68,7 +78,17 @@ protected:
 	UFUNCTION()
 	virtual void OnSensedPawn(APawn* Pawn);
 
+	// Array to hold references to players
+	TArray<APlayerCharacter*> PlayersArray;
+	// Field to determine which player to target (0 or 1)
+	int32 TargetPlayerIndex = 0;
+
 	void UpdateSight();
+
+	UPROPERTY()
+	TArray<ANavigationNode*> WalkableNodes;
+	UPROPERTY() 
+	TArray<ANavigationNode*> RoomNodes;
 
 public:
 	// Called every frame

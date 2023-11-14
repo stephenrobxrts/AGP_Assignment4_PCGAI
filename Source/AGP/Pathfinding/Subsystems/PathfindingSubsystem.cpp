@@ -14,35 +14,35 @@ void UPathfindingSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	PopulateNodes();
 }
 
-TArray<FVector> UPathfindingSubsystem::GetRandomPath(const FVector& StartLocation)
+TArray<FVector> UPathfindingSubsystem::GetRandomPath(const FVector& StartLocation, const TArray<ANavigationNode*>& NodeArray)
 {
-	ANavigationNode* StartNode = FindNearestNode(StartLocation);
-	ANavigationNode* EndNode = GetRandomNode();
+	ANavigationNode* StartNode = FindNearestNode(StartLocation, NodeArray);
+	ANavigationNode* EndNode = GetRandomNode(NodeArray);
 	if (StartNode && EndNode)
 	{
-		return GetPath(StartNode, EndNode);
+		return GetPath(StartNode, EndNode, NodeArray);
 	}
 	return TArray<FVector>();
 }
 
-TArray<FVector> UPathfindingSubsystem::GetPath(const FVector& StartLocation, const FVector& TargetLocation)
+TArray<FVector> UPathfindingSubsystem::GetPath(const FVector& StartLocation, const FVector& TargetLocation, const TArray<ANavigationNode*>& NodeArray)
 {
-	ANavigationNode* StartNode = FindNearestNode(StartLocation);
-	ANavigationNode* EndNode = FindNearestNode(TargetLocation);
+	ANavigationNode* StartNode = FindNearestNode(StartLocation, NodeArray);
+	ANavigationNode* EndNode = FindNearestNode(TargetLocation, NodeArray);
 	if (StartNode && EndNode)
 	{
-		return GetPath(StartNode, EndNode);
+		return GetPath(StartNode, EndNode, NodeArray);
 	}
 	return TArray<FVector>();
 }
 
-TArray<FVector> UPathfindingSubsystem::GetPathAway(const FVector& StartLocation, const FVector& TargetLocation)
+TArray<FVector> UPathfindingSubsystem::GetPathAway(const FVector& StartLocation, const FVector& TargetLocation, const TArray<ANavigationNode*>& NodeArray)
 {
-	ANavigationNode* StartNode = FindNearestNode(StartLocation);
-	ANavigationNode* EndNode = FindFurthestNode(TargetLocation);
+	ANavigationNode* StartNode = FindNearestNode(StartLocation, NodeArray);
+	ANavigationNode* EndNode = FindFurthestNode(TargetLocation, NodeArray);
 	if (StartNode && EndNode)
 	{
-		return GetPath(StartNode, EndNode);
+		return GetPath(StartNode, EndNode, NodeArray);
 	}
 	return TArray<FVector>();
 }
@@ -78,52 +78,52 @@ void UPathfindingSubsystem::PopulateNodes()
 	}
 }
 
-ANavigationNode* UPathfindingSubsystem::GetRandomNode()
+ANavigationNode* UPathfindingSubsystem::GetRandomNode(const TArray<ANavigationNode*>& NodeArray)
 {
-	if (WalkableNodes.Num() > 0)
+	if (NodeArray.Num() > 0)
 	{
-		int RandomIndex = FMath::RandRange(0, WalkableNodes.Num() - 1);
-		return WalkableNodes[RandomIndex];
+		int RandomIndex = FMath::RandRange(0, NodeArray.Num() - 1);
+		return NodeArray[RandomIndex];
 	}
 	return nullptr;
 }
 
-ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLocation)
+ANavigationNode* UPathfindingSubsystem::FindNearestNode(const FVector& TargetLocation, const TArray<ANavigationNode*>& NodeArray)
 {
 	//Loop through nodes, get node with minimum distance from target
 	float MinDistance = UE_MAX_FLT;
 	ANavigationNode* NearestNode = nullptr;
-	for (int i = 0; i < WalkableNodes.Num(); i++)
+	for (int i = 0; i < NodeArray.Num(); i++)
 	{
-		FVector NodeLocation = WalkableNodes[i]->GetActorLocation();
+		FVector NodeLocation = NodeArray[i]->GetActorLocation();
 		float Distance = FVector::Dist(TargetLocation, NodeLocation);
 		if (Distance < MinDistance)
 		{
 			MinDistance = Distance;
-			NearestNode = WalkableNodes[i];
+			NearestNode = NodeArray[i];
 		}
 	}
 	return NearestNode;
 }
 
-ANavigationNode* UPathfindingSubsystem::FindFurthestNode(const FVector& TargetLocation)
+ANavigationNode* UPathfindingSubsystem::FindFurthestNode(const FVector& TargetLocation, const TArray<ANavigationNode*>& NodeArray)
 {
 	//Loop through nodes, get node with minimum distance from target
 	float MaxDistance = 0.0f;
 	ANavigationNode* FurthestNode = nullptr;
-	for (int i = 0; i < WalkableNodes.Num(); i++)
+	for (int i = 0; i < NodeArray.Num(); i++)
 	{
-		float Distance = FVector::Dist(TargetLocation, WalkableNodes[i]->GetActorLocation());
+		float Distance = FVector::Dist(TargetLocation, NodeArray[i]->GetActorLocation());
 		if (Distance > MaxDistance)
 		{
 			MaxDistance = Distance;
-			FurthestNode = WalkableNodes[i];
+			FurthestNode = NodeArray[i];
 		}
 	}
 	return FurthestNode;
 }
 
-TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode)
+TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavigationNode* EndNode, const TArray<ANavigationNode*>& NodeArray)
 {
 	//Use A* to find path
 	TArray<ANavigationNode*> OpenSet;
@@ -131,20 +131,20 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
 
 	TArray<FVector> Path;
 	// Set all Gscores to infinity and the HScores to correct heuristic
-	for (int i = 0; i < WalkableNodes.Num(); i++)
+	for (int i = 0; i < NodeArray.Num(); i++)
 	{
-		WalkableNodes[i]->GScore = UE_MAX_FLT - 1;
-		WalkableNodes[i]->HScore = FVector::Dist(WalkableNodes[i]->GetActorLocation(), EndNode->GetActorLocation());
-		WalkableNodes[i]->FScore = WalkableNodes[i]->GScore + WalkableNodes[i]->HScore;
+		NodeArray[i]->GScore = UE_MAX_FLT - 1;
+		NodeArray[i]->HScore = FVector::Dist(NodeArray[i]->GetActorLocation(), EndNode->GetActorLocation());
+		NodeArray[i]->FScore = NodeArray[i]->GScore + NodeArray[i]->HScore;
 	}
 
 	//Set the startNode GScore to 0
-	for (int i = 0; i < WalkableNodes.Num(); i++)
+	for (int i = 0; i < NodeArray.Num(); i++)
 	{
-		if (WalkableNodes[i] == StartNode)
+		if (NodeArray[i] == StartNode)
 		{
-			WalkableNodes[i]->GScore = 0;
-			WalkableNodes[i]->FScore = WalkableNodes[i]->GScore + WalkableNodes[i]->HScore;
+			NodeArray[i]->GScore = 0;
+			NodeArray[i]->FScore = NodeArray[i]->GScore + NodeArray[i]->HScore;
 		}
 	}
 
@@ -204,10 +204,9 @@ TArray<FVector> UPathfindingSubsystem::GetPath(ANavigationNode* StartNode, ANavi
  * @param TargetLocation 
  * @return float num of nodes in path - not currently distance between each node on path
  */
-float UPathfindingSubsystem::GetPathLength(const FVector& StartLocation, const FVector& TargetLocation)
+float UPathfindingSubsystem::GetPathLength(const FVector& StartLocation, const FVector& TargetLocation, const TArray<ANavigationNode*>& NodeArray)
 {
-	return GetPath(FindNearestNode(StartLocation), FindNearestNode(TargetLocation)).Num();
-
+	return GetPath(FindNearestNode(StartLocation, NodeArray), FindNearestNode(TargetLocation, NodeArray), NodeArray).Num();
 }
 
 TArray<FVector> UPathfindingSubsystem::ReconstructPath(const ANavigationNode* StartNode, ANavigationNode* EndNode)
@@ -223,4 +222,14 @@ TArray<FVector> UPathfindingSubsystem::ReconstructPath(const ANavigationNode* St
 	}
 
 	return Path;
+}
+
+TArray<ANavigationNode*>& UPathfindingSubsystem::GetWalkableNodes()
+{
+	return WalkableNodes;
+}
+
+TArray<ANavigationNode*>& UPathfindingSubsystem::GetRoomNodes()
+{
+	return RoomNodes;
 }

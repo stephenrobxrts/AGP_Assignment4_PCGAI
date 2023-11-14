@@ -3,9 +3,6 @@
 
 #include "ProceduralCaveGen.h"
 
-#include <wrl/internal.h>
-
-
 #include "Algo/RandomShuffle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Voxels/MarchingChunkTerrain.h"
@@ -77,7 +74,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		DebugShow();
 	}
 
-	if (!RoomNodes.IsEmpty() || !WalkNodes.IsEmpty() && bDebugNavNodes)
+	if ((!RoomNodes.IsEmpty() || !WalkNodes.IsEmpty()) && bDebugNavNodes)
 	{
 		DebugShowNavNodes();
 	}
@@ -745,6 +742,7 @@ void AProceduralCaveGen::CreateTunnel(FLevelBox& StartBox, FLevelBox& TargetBox)
 	{
 		Tunnel.TunnelNode = TunnelNode;
 		TunnelNode->IsWalkable = false;
+		RoomNodes.Add(TunnelNode);
 		TunnelNode->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	}
 
