@@ -58,6 +58,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnGetSkull();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateArtefacts(const TArray<bool>& ArtefactsArray);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<bool> GetArtefacts();
 
 protected:
 	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type

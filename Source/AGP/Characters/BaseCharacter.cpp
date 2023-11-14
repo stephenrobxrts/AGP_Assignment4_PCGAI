@@ -138,6 +138,11 @@ void ABaseCharacter::InteractWithSelf()
 	ServerInteractSelf();
 }
 
+TArray<bool> ABaseCharacter::GetArtefacts()
+{
+	return ArtefactsCarried;
+}
+
 void ABaseCharacter::EquipWeaponImplementation(bool bEquipWeapon, const FWeaponStats& WeaponStats,
                                                const EWeaponRarity WeaponRarity)
 {
@@ -198,6 +203,7 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 void ABaseCharacter::PickupArtefact(int ID)
 {
 	ArtefactsCarried[ID] = true;
+	UpdateArtefacts(ArtefactsCarried);
 }
 
 void ABaseCharacter::ServerPickupArtefact_Implementation(AArtefactPickup* ArtefactPickup)
