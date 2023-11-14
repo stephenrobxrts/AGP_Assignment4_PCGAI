@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "PickupBase.h"
-
 #include "TorchPickup.generated.h"
 
 

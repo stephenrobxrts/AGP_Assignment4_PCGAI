@@ -119,7 +119,7 @@ void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
 
 void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
 {
-	if (TorchPickup)
+	if (TorchPickup && bHasTorch == false)
 	{
 		TorchPickup->AttemptPickUp(this);
 		bHasTorch = true;
@@ -198,12 +198,9 @@ void ABaseCharacter::ServerInteractSelf_Implementation()
 
 void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
 {
-	//Toggle torch pickup is lit
+	//Toggle torch pickup is lit and character doesn't already have a torch
 	if (TorchPickup)
 	{
-		bool IsHeld = TorchPickup->bIsHeld;
-		//Log whether the torch is held
-		UE_LOG(LogTemp, Display, TEXT("Torch is held: %s"), IsHeld ? TEXT("True") : TEXT("False"));
 		TorchPickup->SetTorchLit(!TorchPickup->bIsLit);
 	}
 }

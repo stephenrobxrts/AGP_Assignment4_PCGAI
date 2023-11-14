@@ -3,14 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AGP/Pickups/ArtefactPickup.h"
-#include "AGP/Pickups/PedestalInteract.h"
-#include "AGP/Pickups/TorchPickup.h"
 #include "AGP/Pickups/WeaponPickup.h"
 #include "Components/HealthComponent.h"
 #include "Components/WeaponComponent.h"
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
+
+
+class APedestalInteract;
+class AArtefactPickup;
 
 UCLASS()
 class AGP_API ABaseCharacter : public ACharacter
@@ -113,8 +114,6 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
-
-
 	
 	/*UFUNCTION(BlueprintImplementableEvent)
 	void InteractSelfGraphical(bool bIsLit);
