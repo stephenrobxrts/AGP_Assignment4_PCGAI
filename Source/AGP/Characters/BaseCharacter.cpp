@@ -107,7 +107,6 @@ void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 		//EquipTorchGraphical(bEquipTorch, bIsLit);
 		MulticastEquipTorch(bEquipTorch, bIsLit);
 	}
-	
 }
 
 void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
@@ -118,6 +117,7 @@ void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
 		bHasTorch = true;
 	}
 }
+
 void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
 {
 	if (GetLocalRole() != ROLE_Authority)
@@ -179,13 +179,10 @@ void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWea
 }
 
 
-
 void ABaseCharacter::ServerInteractSelf_Implementation()
 {
-
 	//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
 	ToggleOwnTorch();
-
 }
 
 
