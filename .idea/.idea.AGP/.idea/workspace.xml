@@ -9,11 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="98ec29fe-db7f-4ec2-8f15-90e2ac68b6f6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Pathfinding/Subsystems/PathfindingSubsystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Pathfinding/Subsystems/PathfindingSubsystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Pathfinding/Subsystems/PathfindingSubsystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Pathfinding/Subsystems/PathfindingSubsystem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -239,7 +235,7 @@
       <workItem from="1699697112287" duration="1584000" />
       <workItem from="1699738532538" duration="28993000" />
       <workItem from="1699864611409" duration="17128000" />
-      <workItem from="1699922774410" duration="17852000" />
+      <workItem from="1699922774410" duration="19065000" />
     </task>
     <servers />
   </component>
@@ -256,36 +252,6 @@
           <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
           <line>36</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
-          <line>303</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
-          <line>306</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
-          <line>312</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
-          <line>313</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
-          <line>316</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp</url>
-          <line>315</line>
-          <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Source/AGP/Pathfinding/Subsystems/PathfindingSubsystem.cpp</url>
