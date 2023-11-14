@@ -21,7 +21,7 @@ void UPickupManagerSubsystem::SpawnWeaponPickup()
 	//If PossibleSpawnLocations is empty, log an error and return.
 	if (PossibleSpawnLocations.IsEmpty())
 	{
-		UE_LOG(LogTemp, Error, TEXT("Unable to spawn weapon pickup."))
+		//UE_LOG(LogTemp, Error, TEXT("Unable to spawn weapon pickup."))
 		return;
 	}
 	//Otherwise, get a reference to the AGPGameInstance and spawn a weapon 

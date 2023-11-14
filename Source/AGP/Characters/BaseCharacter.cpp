@@ -224,6 +224,17 @@ void ABaseCharacter::ServerInteractPedestal_Implementation(APedestalInteract* Pe
 }
 
 
+void ABaseCharacter::ServerPickupSkull_Implementation(APedestalInteract* PedestalObject)
+{
+	PedestalObject->AttemptPickUp(this);
+	bHasTorch = true;
+}
+
+void ABaseCharacter::OnGetSkull()
+{
+	bHasSkull = true;
+}
+
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
 	if (HasWeapon())
@@ -332,6 +343,12 @@ bool ABaseCharacter::Pickup()
 			UE_LOG(LogTemp, Display, TEXT("Player is picking up artefact: %s"), *this->GetActorLabel());
 			// Call a method on the pickup object to handle being picked up
 			ServerPickupArtefact(ArtefactPickup);
+		}
+		else if (APedestalInteract* PedestalObject= Cast<APedestalInteract>(HitResult.GetActor()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("Player is picking up from pedestal: %s"), *PedestalObject->GetActorLabel());
+			// Call a method on the pickup object to handle being picked up
+			ServerPickupSkull(PedestalObject);
 		}
 	}
 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
