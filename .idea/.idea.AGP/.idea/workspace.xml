@@ -8,12 +8,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="98ec29fe-db7f-4ec2-8f15-90e2ac68b6f6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/AGP/Pickups/ASkullPickup.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/AGP/Pickups/ASkullPickup.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/AnimBP_Mannequin.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/AnimBP_Mannequin.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/BP_MPGameMode.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/BP_MPGameMode.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Torch.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Torch.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Landscape/ProceduralCaveGen.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Animations/Locomotion/Unarmed/MF_Unarmed_Walk_Fwd.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Animations/Locomotion/Unarmed/MF_Unarmed_Walk_Fwd.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/EnemyCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Pickups/PedestalInteract.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

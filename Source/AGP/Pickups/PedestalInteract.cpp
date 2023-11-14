@@ -37,8 +37,6 @@ void APedestalInteract::PlaceArtefacts(TArray<bool> NewArtefacts)
 		}
 		UpdateVisibility();
 	}
-
-	
 }
 
 bool APedestalInteract::HasAllArtefacts()
@@ -81,5 +79,6 @@ void APedestalInteract::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(APedestalInteract, ArtefactsPlaced);
+	DOREPLIFETIME(APedestalInteract, bHasAllArtefacts);
 }
 

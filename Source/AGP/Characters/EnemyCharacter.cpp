@@ -462,7 +462,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 
 		//// DEBUG LOGS ////
-		UE_LOG(LogTemp, Display, TEXT("Enemy State is currently: %s"), *UEnum::GetValueAsString(CurrentState));
+		/*UE_LOG(LogTemp, Display, TEXT("Enemy State is currently: %s"), *UEnum::GetValueAsString(CurrentState));
 		UE_LOG(LogTemp, Display, TEXT("Player and enemy node distance:        %f"), PathfindingSubsystem->GetPathLength(GetActorLocation(), TargetPlayer->GetActorLocation(), RoomNodes))
 		UE_LOG(LogTemp, Display, TEXT("Enemy to end room node distance:       %f"), PathfindingSubsystem->GetPathLength(GetActorLocation(), EndNode->GetActorLocation(), RoomNodes))
 		UE_LOG(LogTemp, Display, TEXT("Player to end room node distance:      %f"), PathfindingSubsystem->GetPathLength(TargetPlayer->GetActorLocation(), EndNode->GetActorLocation(), RoomNodes))
@@ -476,7 +476,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		}
 
 		UE_LOG(LogTemp, Display, TEXT("Room Node Count      %d"), RoomNodes.Num());
-		UE_LOG(LogTemp, Display, TEXT("Walkable Node Count      %d"), WalkableNodes.Num());
+		UE_LOG(LogTemp, Display, TEXT("Walkable Node Count      %d"), WalkableNodes.Num());*/
 	}
 }
 

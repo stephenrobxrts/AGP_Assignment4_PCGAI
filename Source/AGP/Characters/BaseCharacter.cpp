@@ -290,7 +290,6 @@ bool ABaseCharacter::Interact()
 	return true;
 }
 
-
 bool ABaseCharacter::Pickup()
 {
 	FVector CameraPosition;

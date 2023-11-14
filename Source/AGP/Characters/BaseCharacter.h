@@ -55,6 +55,9 @@ public:
 
 	void InteractWithSelf();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnGetSkull();
+
 
 protected:
 	// NOTE: If you wanted to have multiple different types of weapons, you might want to specify the weapon type
@@ -116,18 +119,11 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
 	
-	/*UFUNCTION(BlueprintImplementableEvent)
-	void InteractSelfGraphical(bool bIsLit);
-	void InteractSelfImplementation(bool bIsLit);
-	UFUNCTION(BlueprintImplementableEvent)
-	void MulticastInteractSelf(bool bIsLit);*/
-	
-
 	//Carried artefacts - 0 = red, 1 = green, 2 = blue, 3 = yellow - make an array of falses
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<bool> ArtefactsCarried = {false, false, false, false};
 
-	
+
 	
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();

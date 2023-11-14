@@ -21,8 +21,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
-
+	UFUNCTION(BlueprintCallable)
 	bool HasAllArtefacts();
 
 	UFUNCTION()
@@ -31,11 +30,14 @@ protected:
 	UPROPERTY(ReplicatedUsing=OnRep_UpdateArtefacts, EditAnywhere, BlueprintReadWrite)
 	TArray<bool> ArtefactsPlaced = {false, false, false, false};
 
+	
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	bool bHasAllArtefacts = false;
+
+	
 	UFUNCTION(BlueprintCallable)
 	TArray<bool> GetArtefactsPlaced();
-
-
-
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -44,6 +46,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateVisibility();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void RevealSkull();
+
 	TSubclassOf<APickupBase>* PickupActor;
 
 
@@ -51,8 +56,7 @@ protected:
 						 UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep,
 						 const FHitResult& SweepResult) override;
 	
-	/*UFUNCTION(BlueprintCallable)
-	void SetGoldenEgg(bool bCompleteSet);*/
+
 	
 public:
 	// Called every frame
