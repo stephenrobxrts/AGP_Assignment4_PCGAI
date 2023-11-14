@@ -42,10 +42,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void FindPlayerCharacter();
-	void SetInitialTarget();
-	void UpdatePlayersArray();
-	void SwitchTarget();
+	void FindPlayerCharacters();
+	int32 OtherTargetPlayerIndex();
 
 	UPROPERTY()
 	FTimerHandle TimerHandle;
@@ -79,9 +77,11 @@ protected:
 	virtual void OnSensedPawn(APawn* Pawn);
 
 	// Array to hold references to players
+	UPROPERTY()
 	TArray<APlayerCharacter*> PlayersArray;
 	// Field to determine which player to target (0 or 1)
-	int32 TargetPlayerIndex = 0;
+	UPROPERTY()
+	int32 TargetPlayerIndex;
 
 	void UpdateSight();
 

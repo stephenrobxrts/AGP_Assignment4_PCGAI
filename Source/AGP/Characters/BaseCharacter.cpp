@@ -18,7 +18,7 @@ ABaseCharacter::ABaseCharacter()
 	BulletStartPosition = CreateDefaultSubobject<USceneComponent>(TEXT("BulletStartPosition"));
 	BulletStartPosition->SetupAttachment(GetRootComponent());
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
 }
 
 void ABaseCharacter::SetCurrentRoom(AActor* NewRoom)

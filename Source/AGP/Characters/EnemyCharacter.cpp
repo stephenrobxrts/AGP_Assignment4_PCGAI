@@ -21,9 +21,7 @@ void AEnemyCharacter::BeginPlay()
 	
 	// Do nothing if not on the server
 	if (GetLocalRole() != ROLE_Authority) return;
-
-	//TArray<ANavigationNode*> WalkableNodes = TArray<ANavigationNode*>();
-	//TArray<ANavigationNode*> RoomNodes = TArray<ANavigationNode*>();
+	
 	
 	FVector Location = GetActorLocation();
 	PathfindingSubsystem = GetWorld()->GetSubsystem<UPathfindingSubsystem>();
@@ -42,51 +40,37 @@ void AEnemyCharacter::BeginPlay()
 	}	
 
 	// Delay before finding the player character
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyCharacter::FindPlayerCharacter, 1.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyCharacter::FindPlayerCharacters, 1.0f, false);
 }
 
-void AEnemyCharacter::FindPlayerCharacter()
+void AEnemyCharacter::FindPlayerCharacters()
 {
-	// Get a reference to the player character
+	// Find all the players in the game and add them to the players array
 	for (TActorIterator<APlayerCharacter> It(GetWorld()); It; ++It)
 	{
-		TargetPlayer = *It;
-		if (TargetPlayer)
-		{
-			// Found player and player location
-			UE_LOG(LogTemp, Display, TEXT("Finally found the player"));
-			break;
-		}
-	}
-	if (!TargetPlayer)
-	{
-		// Player not found, retry after some delay
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyCharacter::FindPlayerCharacter, 1.0f, false);
-	}
-}
-
-void AEnemyCharacter::SetInitialTarget()
-{
-	TargetPlayerIndex = DefaultTargetIndex;
-}
-
-void AEnemyCharacter::UpdatePlayersArray()
-{
-	// Clear the array
-	PlayersArray.Empty();
-
-	// Find all the players in the game and add them to the array
-	for (TActorIterator<APlayerCharacter> It(GetWorld()); It; ++It)
-	{
+		UE_LOG(LogTemp, Display, TEXT("Found player %d"), PlayersArray.Num() + 1);
 		PlayersArray.Add(*It);
 	}
-}
-void AEnemyCharacter::SwitchTarget()
-{
-	// Toggle between targeting Player 1 and Player 2 (0 to 1, 1 to 0)
-	TargetPlayerIndex = (TargetPlayerIndex + 1) % PlayersArray.Num();
+	if (PlayersArray.Num() == 0) // HARDCODE TO 2 LATER JUST IN CASE ONLY 1 PLAYER IS FOUND AND IT SKIPS 2ND
+	{
+		// Clear the array if 0 or only 1 player has been found (rare edge case)
+		PlayersArray.Empty();
+		// Players not found, retry after some delay
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyCharacter::FindPlayerCharacters, 1.0f, false);
+	}
+	else
+	{
+		// Set target player to the first player in the players array
+		TargetPlayerIndex = 0;
+		TargetPlayer = PlayersArray[TargetPlayerIndex];
+	}
 }
 
+int32 AEnemyCharacter::OtherTargetPlayerIndex()
+{
+	// Return index to other targeted Player (0 to 1, 1 to 0)
+	return (TargetPlayerIndex + 1) % PlayersArray.Num();
+}
 
 void AEnemyCharacter::TickPatrol()
 {
@@ -106,16 +90,18 @@ void AEnemyCharacter::TickEngage()
 	// If current path is empty
 	if (CurrentPath.IsEmpty())
 	{
-		if (SensedCharacter == TargetPlayer)
+		if (SensedCharacter)
 		{
+			// If sensed character is not the target player -> switch target player
+			if (SensedCharacter != TargetPlayer)
+			{
+				TargetPlayerIndex = OtherTargetPlayerIndex();
+				UE_LOG(LogTemp, Display, TEXT("Switching Target Player to Player Number %d"), OtherTargetPlayerIndex() + 1);
+				TargetPlayer = PlayersArray[TargetPlayerIndex];
+			}
+			// Generate path to target player
 			CurrentPath = PathfindingSubsystem->GetPath(PathfindingSubsystem->FindNearestNode(GetActorLocation(), WalkableNodes),
-			                                            PathfindingSubsystem->FindNearestNode(SensedCharacter->GetActorLocation(), WalkableNodes), WalkableNodes);
-		}
-		else
-		{
-			// SWITCH TARGET
-			UE_LOG(LogTemp, Display, TEXT("IM SENSING THE OTHER PLAYER I NEED TO SWITCH TARGET!!!!"));
-			
+				PathfindingSubsystem->FindNearestNode(SensedCharacter->GetActorLocation(), WalkableNodes), WalkableNodes);
 		}
 	}
 	// Move enemy player along path
@@ -297,6 +283,16 @@ void AEnemyCharacter::Tick(float DeltaTime)
     // If target player has been found after server and clients have loaded
 	if (TargetPlayer)
 	{
+		// If non-target player is closer to enemy than target player and non-target player is currently moving ("creating sound")
+		if (PathfindingSubsystem->GetPathLength(PlayersArray[OtherTargetPlayerIndex()]->GetActorLocation(), GetActorLocation(), WalkableNodes)
+				< PathfindingSubsystem->GetPathLength(TargetPlayer->GetActorLocation(), GetActorLocation(), WalkableNodes)
+				&& PlayersArray[OtherTargetPlayerIndex()]->IsPlayerMoving())
+		{
+			// Switch target player
+			TargetPlayerIndex = OtherTargetPlayerIndex();
+			UE_LOG(LogTemp, Display, TEXT("Switching Target Player to Player Number %d"), OtherTargetPlayerIndex() + 1);
+			TargetPlayer = PlayersArray[TargetPlayerIndex];
+		}
 		UpdateSight();
 		switch (CurrentState)
 		{
@@ -477,6 +473,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 		UE_LOG(LogTemp, Display, TEXT("Room Node Count      %d"), RoomNodes.Num());
 		UE_LOG(LogTemp, Display, TEXT("Walkable Node Count      %d"), WalkableNodes.Num());
+		UE_LOG(LogTemp, Display, TEXT("Player Count:     %d"), PlayersArray.Num());
 	}
 }
 
