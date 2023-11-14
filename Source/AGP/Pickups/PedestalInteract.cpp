@@ -39,6 +39,8 @@ void APedestalInteract::PlaceArtefacts(TArray<bool> NewArtefacts)
 	}
 }
 
+
+//TODO Implement as part of update visibility
 bool APedestalInteract::HasAllArtefacts()
 {
 	//If artefactsPlaced is all trues, return true
