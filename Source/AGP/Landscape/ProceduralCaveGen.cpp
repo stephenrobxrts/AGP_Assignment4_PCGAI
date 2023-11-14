@@ -108,10 +108,10 @@ float CalculateGradient(const FLevelBox& BoxA, const FLevelBox& BoxB)
 	return deltaY / deltaX;
 }
 
-//ToDo: LevelBoxes as a class - Move repetitive code to CreateBox / internal code
 /**
- * @brief Creates the boxes (Rooms and tunnels) for the world
- * @return The array of boxes created
+ * @brief Generate the level by randomly walking towards the end node with inaccuracy built in \n
+ * This makes the level more interesting but can easily break AI or make rooms inaccessible
+ * @return Array of Room Boxes
  */
 TArray<FLevelBox> AProceduralCaveGen::GenRandomTraversalLevel()
 {
@@ -248,7 +248,11 @@ TArray<FLevelBox> AProceduralCaveGen::GenRandomTraversalLevel()
 	return boxes;
 }
 
-TArray<FLevelBox> AProceduralCaveGen::GenGridBasedLevel()
+/**
+ * @brief Generate the level based on a grid - with rooms then displaced randomly \n
+ * This is the default mode - works well with AI and is more predictable
+ * @return Array of all room Boxes
+ */TArray<FLevelBox> AProceduralCaveGen::GenGridBasedLevel()
 {
 	//create start room
 	FVector Start = FVector(GetActorLocation());
@@ -349,6 +353,11 @@ TArray<FLevelBox> AProceduralCaveGen::GenGridBasedLevel()
 	return boxes;
 }
 
+/**
+ * @brief Places 4 artefacts around the level, each one in a random room \n
+ * Does not place artefact in start/end rooms
+ * @param Rooms Room Box Objects
+ */
 void AProceduralCaveGen::GenerateLevelItems(TArray<FLevelBox>& Rooms)
 {
 	for (int i = 0 ; i < NumArtefactsToPlace ; i++)
@@ -370,6 +379,10 @@ void AProceduralCaveGen::GenerateLevelItems(TArray<FLevelBox>& Rooms)
 	}
 }
 
+/**
+ * @brief Generates the pedestal for the end room
+ * @param Room The end Room FLevelBox
+ */
 void AProceduralCaveGen::GenerateEndPedestal(FLevelBox& Room)
 {
 	FVector PedestalLocation = FVector(Room.Position.X, Room.Position.Y, Room.Position.Z - Room.Size.Z / 2);
