@@ -9,12 +9,11 @@
   <component name="ChangeListManager">
     <list default="true" id="98ec29fe-db7f-4ec2-8f15-90e2ac68b6f6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AGP/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Audio/Torch/TorchCue.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Audio/Torch/TorchCue.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Character/BP_PlayerCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_Pedestals.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/FirstPersonContent/FirstPersonArms/Animations/FP_Unarmed_Run_Fwd.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/FirstPersonContent/FirstPersonArms/Animations/FP_Unarmed_Run_Fwd.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_TestTorch.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Pickups/BP_TestTorch.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Levels/SamTests/ProceduralMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Animations/Locomotion/Unarmed/MF_Unarmed_Jog_Fwd.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/LyraContent/Mannequin/Animations/Locomotion/Unarmed/MF_Unarmed_Jog_Fwd.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Materials/CaveFloor.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Materials/CaveFloor.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/AGP/Characters/BaseCharacter.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

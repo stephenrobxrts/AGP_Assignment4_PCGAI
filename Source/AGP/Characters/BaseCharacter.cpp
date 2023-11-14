@@ -289,7 +289,7 @@ bool ABaseCharacter::Interact()
 			ServerInteractPedestal(PedestalObject);
 		}
 	}
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
 
@@ -332,7 +332,7 @@ bool ABaseCharacter::Pickup()
 			ServerPickupArtefact(ArtefactPickup);
 		}
 	}
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
 
