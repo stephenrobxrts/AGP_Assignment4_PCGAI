@@ -39,6 +39,17 @@ void APedestalInteract::PlaceArtefacts(TArray<bool> NewArtefacts)
 	}
 }
 
+void APedestalInteract::AttemptPickUp(ABaseCharacter* BaseCharacter)
+{
+	if (HasAuthority() && HasAllArtefacts())
+	{
+		GrabSkull();
+		bHasAllArtefacts = false;
+		ArtefactsPlaced = {false, false, false, false};
+		
+	}
+}
+
 
 //TODO Implement as part of update visibility
 bool APedestalInteract::HasAllArtefacts()

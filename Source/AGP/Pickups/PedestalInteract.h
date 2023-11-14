@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "PickupBase.h"
+#include "../Characters/BaseCharacter.h"
+
 #include "PedestalInteract.generated.h"
 
 UCLASS()
@@ -16,6 +18,7 @@ public:
 	APedestalInteract();
 
 	void PlaceArtefacts(TArray<bool> NewArtefacts);
+	void AttemptPickUp(ABaseCharacter* BaseCharacter);
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,9 +34,8 @@ protected:
 	TArray<bool> ArtefactsPlaced = {false, false, false, false};
 
 	
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(ReplicatedUsing=OnRep_UpdateArtefacts, EditAnywhere, BlueprintReadWrite)
 	bool bHasAllArtefacts = false;
-
 	
 	UFUNCTION(BlueprintCallable)
 	TArray<bool> GetArtefactsPlaced();
@@ -47,7 +49,7 @@ protected:
 	void UpdateVisibility();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void RevealSkull();
+	void GrabSkull();
 
 	TSubclassOf<APickupBase>* PickupActor;
 

@@ -55,7 +55,6 @@ public:
 
 	void InteractWithSelf();
 
-	UFUNCTION(BlueprintImplementableEvent)
 	void OnGetSkull();
 
 
@@ -118,12 +117,15 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerPickupArtefact(AArtefactPickup* ArtefactPickup);
-	
+
+	UFUNCTION(Server, Reliable)
+	void ServerPickupSkull(APedestalInteract* PedestalObject);
+
+
 	//Carried artefacts - 0 = red, 1 = green, 2 = blue, 3 = yellow - make an array of falses
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<bool> ArtefactsCarried = {false, false, false, false};
-
-
+	
 	
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();
@@ -131,6 +133,8 @@ protected:
 	float TimeSinceReload;
 
 	bool bHasTorch = false;
+	UPROPERTY(Replicated, VisibleAnywhere)
+	bool bHasSkull = false;
 
 	bool Interact();
 
