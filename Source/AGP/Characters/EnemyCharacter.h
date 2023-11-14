@@ -85,6 +85,11 @@ protected:
 
 	void UpdateSight();
 
+	UPROPERTY()
+	TArray<ANavigationNode*> WalkableNodes;
+	UPROPERTY() 
+	TArray<ANavigationNode*> RoomNodes;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
