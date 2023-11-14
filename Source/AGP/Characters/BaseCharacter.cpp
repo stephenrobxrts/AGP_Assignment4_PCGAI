@@ -101,30 +101,23 @@ void ABaseCharacter::EquipWeapon(bool bEquipWeapon, const FWeaponStats WeaponSta
 
 void ABaseCharacter::EquipTorch(bool bEquipTorch, bool bIsLit)
 {
-	//EquipTorchImplementation(bEquipTorch, bIsLit);
-	//if locally controlled
+	//if has authority
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		//EquipTorchGraphical(bEquipTorch, bIsLit);
 		MulticastEquipTorch(bEquipTorch, bIsLit);
 	}
-	
-}
-
-
-void ABaseCharacter::EquipTorchImplementation(bool bEquipTorch, bool bIsLit)
-{
-	//EquipTorchGraphical(bEquipTorch, bIsLit);
 }
 
 void ABaseCharacter::ServerEquipTorch_Implementation(ATorchPickup* TorchPickup)
 {
-	if (TorchPickup)
+	if (TorchPickup && bHasTorch == false)
 	{
 		TorchPickup->AttemptPickUp(this);
 		bHasTorch = true;
 	}
 }
+
 void ABaseCharacter::MulticastEquipTorch_Implementation(bool bEquipTorch, bool bIsLit)
 {
 	if (GetLocalRole() != ROLE_Authority)
@@ -186,24 +179,18 @@ void ABaseCharacter::MulticastEquipWeapon_Implementation(bool bEquipWeapon, EWea
 }
 
 
-
 void ABaseCharacter::ServerInteractSelf_Implementation()
 {
-
 	//UE_LOG(LogTemp, Display, TEXT("Player is toggling torch: %s"), *GetName());
 	ToggleOwnTorch();
-
 }
 
 
 void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPickup)
 {
-	//Toggle torch pickup is lit
+	//Toggle torch pickup is lit and character doesn't already have a torch
 	if (TorchPickup)
 	{
-		bool IsHeld = TorchPickup->bIsHeld;
-		//Log whether the torch is held
-		UE_LOG(LogTemp, Display, TEXT("Torch is held: %s"), IsHeld ? TEXT("True") : TEXT("False"));
 		TorchPickup->SetTorchLit(!TorchPickup->bIsLit);
 	}
 }
@@ -299,7 +286,7 @@ bool ABaseCharacter::Interact()
 			ServerInteractPedestal(PedestalObject);
 		}
 	}
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
 
@@ -342,7 +329,7 @@ bool ABaseCharacter::Pickup()
 			ServerPickupArtefact(ArtefactPickup);
 		}
 	}
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 1.0f);
 	return true;
 }
 
