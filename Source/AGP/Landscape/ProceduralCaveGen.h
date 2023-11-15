@@ -12,6 +12,7 @@
 
 class APedestalInteract;
 class ATorchPickup;
+class AEnemyCharacter;
 /**
  * @brief Box type enum
  */
@@ -158,13 +159,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-
+	
 	//Box placement logic
 	TArray<FLevelBox> GenRandomTraversalLevel();
 	TArray<FLevelBox> GenGridBasedLevel();
-	void GenerateLevelItems(TArray<FLevelBox>& Rooms);
-	void GenerateEndPedestal(FLevelBox& Room);
 	void GenerateInterconnects();
 	void CreateBox(FLevelBox& Box);
 
@@ -174,16 +172,18 @@ protected:
 
 	//Create array of all objects for chunks
 	void AddAllObjects();
-
+	
 	//Creation Logic
 	void ClearMap();
 	void GenerateMesh();
+	void GenerateLevelItems(TArray<FLevelBox>& Rooms);
+    void GenerateEndPedestal(FLevelBox& Room);
+	void SpawnEnemy();
 
 	//NavigationNodes
 	void GenerateWalkableNodes(FBoxBase& Box);
 	void InsertNode(ANavigationNode* Node, FBoxBase& Box);
 	void MeshRoomNodes(ANavigationNode* JoiningNode, FLevelBox& Box);
-
 
 	//Helper Functions
 	bool BoxPositionValid(const FLevelBox& NewBox, const TArray<FLevelBox>& Boxes);
@@ -308,6 +308,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ATorchPickup> TorchBP;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AEnemyCharacter> EnemyBP;
+
+	UPROPERTY()
+	TSubclassOf<AEnemyCharacter> SpawnedEnemy;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AArtefactPickup> ArtefactBP;

@@ -11,6 +11,7 @@
 #include "Engine/PointLight.h"
 #include "Engine/DirectionalLight.h"
 #include "../Pickups/TorchPickup.h"
+#include "AGP/Characters/EnemyCharacter.h"
 #include "AGP/Pickups/PedestalInteract.h"
 
 // Sets default values
@@ -70,7 +71,7 @@ void AProceduralCaveGen::Tick(float DeltaTime)
 		//Spawn Meshes
 		GenerateMesh();
 		bShouldRegenerate = false;
-
+		SpawnEnemy();
 		AttachTorchToWalls();
 	}
 
@@ -350,6 +351,8 @@ TArray<FLevelBox> AProceduralCaveGen::GenRandomTraversalLevel()
 	}
 
 	GenerateLevelItems(boxes);
+
+	
 	return boxes;
 }
 
@@ -830,6 +833,22 @@ void AProceduralCaveGen::AddAllObjects()
 	}
 }
 
+void AProceduralCaveGen::SpawnEnemy()
+{
+	TArray<FLevelBox> PotentialSpawnBoxes;
+	for (FInnerArray Path : Paths)
+	{
+		PotentialSpawnBoxes.Add(Path.Path[NumBoxesPerPath - 1]);
+	}
+	//Pick a random box from the last box of each path
+	const int rngBox = FMath::RandRange(0, PotentialSpawnBoxes.Num() - 1);
+	FLevelBox Box = PotentialSpawnBoxes[rngBox];
+	//Spawn an enemy in the last box on the path
+	const FVector EnemyLocation = FVector(Box.Position.X, Box.Position.Y, Box.Position.Z);
+	AEnemyCharacter* Enemy = GetWorld()->SpawnActor<AEnemyCharacter>(EnemyBP, EnemyLocation, FRotator::ZeroRotator);
+	
+}
+
 /**
  * @brief Check if two boxes intersect from topdown (XY only) NOT INCLUDING ROTATION
  * @param BoxA FLevelBox to check
@@ -882,7 +901,6 @@ bool AProceduralCaveGen::BoxPositionValid(const FLevelBox& NewBox, const TArray<
 	return true;
 }
 
-
 /**
  * @brief Empties Boxes,Tunnels, Paths, Associated objects /n
  * and clears the mesh
@@ -895,6 +913,7 @@ void AProceduralCaveGen::ClearMap()
 	RoomNodes.Empty();
 	WalkNodes.Empty();
 	Artefacts.Empty();
+
 	if (!Paths.IsEmpty())
 	{
 		for (FInnerArray& Path : Paths)
@@ -950,6 +969,14 @@ void AProceduralCaveGen::ClearMap()
 			(*It)->Destroy();
 		}
 	}
+	for (TActorIterator<AEnemyCharacter> It(GetWorld()); It; ++It)
+	{
+		if (*It)
+		{
+			(*It)->Destroy();
+		}
+	}
+
 
 	//Iterate through all APickupBase actors in the world and destroy them
 	for (TActorIterator<ANavigationNode> It(GetWorld()); It; ++It)

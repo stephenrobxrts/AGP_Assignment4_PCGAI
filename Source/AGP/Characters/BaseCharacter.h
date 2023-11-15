@@ -58,7 +58,7 @@ public:
 	void OnGetSkull();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateArtefacts(const TArray<bool>& ArtefactsArray);
+	void UpdateArtefacts(int ArtefactID);
 
 	UFUNCTION(BlueprintCallable)
 	TArray<bool> GetArtefacts();

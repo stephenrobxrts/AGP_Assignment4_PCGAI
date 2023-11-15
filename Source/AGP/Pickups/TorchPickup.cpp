@@ -80,7 +80,6 @@ void ATorchPickup::OnInteract()
 		return;
 	}
 	bIsLit ? bIsLit = false : bIsLit = true;
-	
 }
 
 

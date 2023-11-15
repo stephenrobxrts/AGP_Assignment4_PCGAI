@@ -203,7 +203,7 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 void ABaseCharacter::PickupArtefact(int ID)
 {
 	ArtefactsCarried[ID] = true;
-	UpdateArtefacts(ArtefactsCarried);
+	UpdateArtefacts(ID);
 }
 
 void ABaseCharacter::ServerPickupArtefact_Implementation(AArtefactPickup* ArtefactPickup)
@@ -277,8 +277,7 @@ bool ABaseCharacter::Interact()
 	FVector Start = GetActorLocation() + (GetActorUpVector() * 50.0f);
 	FVector ForwardVector = GetActorForwardVector();
 	const FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector End = ((CameraForward * 200.f) + Start); // Change 1000.f to your desired distance
-
+	FVector End = ((CameraForward * 200.f) + Start); 
 	FHitResult HitResult;
 
 	// Setup the query parameters
@@ -291,11 +290,11 @@ bool ABaseCharacter::Interact()
 
 	if (bIsHit)
 	{
-		if (ATorchPickup* PickupObject = Cast<ATorchPickup>(HitResult.GetActor()))
+		if (ATorchPickup* InteractObject = Cast<ATorchPickup>(HitResult.GetActor()))
 		{
 			UE_LOG(LogTemp, Display, TEXT("Player is Interacting with torch: %s"), *GetName());
 			// Call a method on the InteractionObject to handle being interacted with
-			ServerInteractTorch(PickupObject);
+			ServerInteractTorch(InteractObject);
 		}
 		if (APedestalInteract* PedestalObject = Cast<APedestalInteract>(HitResult.GetActor()))
 		{
