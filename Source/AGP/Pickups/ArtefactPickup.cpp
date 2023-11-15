@@ -49,8 +49,6 @@ void AArtefactPickup::OnPickedUp(ABaseCharacter* BaseCharacter)
 	UE_LOG(LogTemp, Warning, TEXT("ArtefactPickup: %s"), *this->GetName());
 	this->Destroy();
 	ServerDestroyArtefact(this);
-	bool valid = IsValid(this);
-	UE_LOG(LogTemp, Warning, TEXT("ArtefactPickup: %s"), valid ? TEXT("True") : TEXT("False"));
 }
 
 void AArtefactPickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

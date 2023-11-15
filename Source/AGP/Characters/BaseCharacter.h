@@ -57,8 +57,6 @@ public:
 
 	void OnGetSkull();
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateArtefacts(int ArtefactID);
 
 	UFUNCTION(BlueprintCallable)
 	TArray<bool> GetArtefacts();
@@ -128,9 +126,14 @@ protected:
 
 
 	//Carried artefacts - 0 = red, 1 = green, 2 = blue, 3 = yellow - make an array of falses
-	UPROPERTY(Replicated, VisibleAnywhere)
+	//Replicated OWNER ONLY and updates hud when values change
+	UPROPERTY(ReplicatedUsing = OnRep_UpdateArtefactsFromInventory, VisibleAnywhere)
 	TArray<bool> ArtefactsCarried = {false, false, false, false};
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRep_UpdateArtefactsFromInventory();
+	
+
 	
 	bool Fire(const FVector& FireAtLocation);
 	bool Reload();

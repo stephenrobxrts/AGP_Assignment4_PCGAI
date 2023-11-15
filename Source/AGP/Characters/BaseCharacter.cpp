@@ -63,7 +63,7 @@ void ABaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABaseCharacter, WeaponComponent);
-	DOREPLIFETIME(ABaseCharacter, ArtefactsCarried);
+	DOREPLIFETIME_CONDITION(ABaseCharacter, ArtefactsCarried, COND_OwnerOnly)
 }
 
 bool ABaseCharacter::HasWeapon()
@@ -203,7 +203,7 @@ void ABaseCharacter::ServerInteractTorch_Implementation(ATorchPickup* TorchPicku
 void ABaseCharacter::PickupArtefact(int ID)
 {
 	ArtefactsCarried[ID] = true;
-	UpdateArtefacts(ID);
+	
 }
 
 void ABaseCharacter::ServerPickupArtefact_Implementation(AArtefactPickup* ArtefactPickup)
@@ -234,6 +234,8 @@ void ABaseCharacter::OnGetSkull()
 {
 	bHasSkull = true;
 }
+
+
 
 bool ABaseCharacter::Fire(const FVector& FireAtLocation)
 {
