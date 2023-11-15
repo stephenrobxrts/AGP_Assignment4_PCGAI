@@ -366,3 +366,6 @@ And... well after taking the idol at the end of the level generating a run area 
 * [ ] Handle player behaviour
 * [ ] Basic Sounds for testing
 
+## A4 Objectives
+
+[Will be updated soon]
